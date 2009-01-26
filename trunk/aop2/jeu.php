@@ -84,42 +84,6 @@ if ($_GET["a"]=="m") {//on renvoie où le joueur k a joué et quoi
 	die();
 }
 
-//il ne reste que la requete de jeu en x,y
-//renvoyer <reponse><action autorisee="oui"/"non"/></reponse>
-
-function pasAutorisee(){//arrete le script si l'action n'est pas autorisée
-	header('Content-Type: text/xml');
-	$chaineReponse = XMLHeader."<reponse><action autorisee=\"non\" traitee=\"non\" /></reponse>";
-	echo $chaineReponse;
-	die();
-}
-
-function case2chateau($entier){//regarde si sur une case il y a un chateau
-	return ($entier>=10000);
-}
-
-function case2cellules($entier){//retourne le nombre de cellules dans la case
-	return ($entier-(floor($entier/100)*100));
-}
-
-function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, même désertée
-	/*if (case2cellules($entier) == 0)
-		return 0; //renvoie 0 si aucune cellule*/
-	return floor(($entier-(case2chateau($entier)?10000:0))/100);
-}
-
-function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
-	return ($avant<=$puis) && ($puis<=$ensuite);
-}
-
-function mettreEntre($nombre,$base){//fonction permettant le modulo
-	while($nombre < 0)
-		$nombre+=$base;
-	while($nombre >= $base)
-		$nombre-=$base;
-	return $nombre;
-}
-
 /************ lecture des paramètres du jeu *********/
 	$options = array(); $nombreDOptions = 5; $indice=2+2*$nbJoueurs;
 	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivés profondeur bordbloqués diagonale tempspasreel
@@ -179,6 +143,42 @@ $tableauDesMax = array();//calcule le maximum de cellules dans les cases
 	}
 	
 /************* Le joueur joue ! *****************/
+
+//il ne reste que la requete de jeu en x,y
+//renvoyer <reponse><action autorisee="oui"/"non"/></reponse>
+
+function pasAutorisee(){//arrete le script si l'action n'est pas autorisée
+	header('Content-Type: text/xml');
+	$chaineReponse = XMLHeader."<reponse><action autorisee=\"non\" traitee=\"non\" /></reponse>";
+	echo $chaineReponse;
+	die();
+}
+
+function case2chateau($entier){//regarde si sur une case il y a un chateau
+	return ($entier>=10000);
+}
+
+function case2cellules($entier){//retourne le nombre de cellules dans la case
+	return ($entier-(floor($entier/100)*100));
+}
+
+function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, même désertée
+	/*if (case2cellules($entier) == 0)
+		return 0; //renvoie 0 si aucune cellule*/
+	return floor(($entier-(case2chateau($entier)?10000:0))/100);
+}
+
+function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
+	return ($avant<=$puis) && ($puis<=$ensuite);
+}
+
+function mettreEntre($nombre,$base){//fonction permettant le modulo
+	while($nombre < 0)
+		$nombre+=$base;
+	while($nombre >= $base)
+		$nombre-=$base;
+	return $nombre;
+}
 
 	$x = (int) $_GET["x"];
 	$y = (int) $_GET["y"];

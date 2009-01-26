@@ -20,10 +20,10 @@ function addSelectOption($arrayOptions) {
     switch($key) {
     case "text": $text = $value; break;
     case "idname": $idname = $value; break;
-    case "options": $options = $value; break;
-    case "callback": $callback = $value; break;
+    case "options": $options = $value; break;//tableau
+    case "callback": $callback = $value; break;//fonction
     case "default": $default = $value; break;
-    case "color": $color = $value; break;
+    case "color": $color = $value; break;//booleen
     }
   }
   echo $text.' : <select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'."\n";
@@ -60,7 +60,7 @@ function addCheckOption($arrayOptions) {
   if($default) {
     echo ' checked';
   }
-  echo '><br>'."\n";
+  echo ' /><br />'."\n";
 
 }
 
@@ -128,8 +128,9 @@ foreach($array_count as $i) {
   echo "<div id=divname".$i.">\n";
   echo "<table border=1><tr><td>";
   echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus=""><br>';
-  echo ' Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')">';
-  echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value=""></div>';
+  echo ' intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
+  echo ' Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
+  echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value="" /></div>';
   echo "<br>";
   addSelectOption(
   array("text" => " Couleur",
@@ -144,7 +145,7 @@ foreach($array_count as $i) {
 }
 ?>
 <h3>Options </h3>
-<?
+<?php
 // Script to list the files named aopMMMMMM.lvl
 /*if ($handle = opendir('.')) {
     while (false !== ($file = readdir($handle))) {
@@ -157,9 +158,9 @@ foreach($array_count as $i) {
 ?>
 
 Taille :
-<input type=text id="x" name="x" value="10" style="width:30px">
+<input type=text id="x" name="x" value="7" style="width:30px">
 x
-<input type=text id="y" name="y" value="10" style="width:30px">
+<input type=text id="y" name="y" value="7" style="width:30px">
 
 <br>
 <?php
@@ -198,9 +199,9 @@ array("text" => "Explosions ",
       "default" => 1
 ));
 ?>
-Profondeur de jeu : <input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px"><br>
+Profondeur de jeu : <input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" /><br />
 
-<input type="submit" name="Envoi" value="Créer une partie !"> 
+<input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 </form>
 
 <h3>Parties en cours</h3>

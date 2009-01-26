@@ -1,4 +1,6 @@
 <?php
+header("Cache-Control: no-cache, must-revalidate");
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 /*
 creajeu.php : crée un jeu
 	Dans les noms des joueurs, les espaces et les \n sont remplacés par _
@@ -22,6 +24,13 @@ creajeu.php : crée un jeu
 	Tableau de décor - 0 rien 1 glace 2 chaud 3 obstacle
 	Tableau de jeu - +10000 : chateau  +N00 : case au joueur N +XX : nombre de cellules
 */
+?>
+<html>
+<head>
+<title>Age of Paramecia II création de partie</title>
+</head>
+<body>
+<?php
 
 $nbJoueurs=0;
 $joueurs=array();
@@ -43,6 +52,7 @@ function loadParameters() {
       $indice=substr($key,9); 
       if((int)$indice <= $nbJoueurs and (int)$indice >= 1) {
         $si_mdp = isset($_POST["si_mdp".$indice]);
+        $is_ia = isset($_POST["is_ia".$indice]);
         if(!isset($_POST["mdp".$indice])) return "mdp".$indice." is not available";
         if(!isset($_POST["couleur".$indice])) return "couleur".$indice." is not available";
         $mdp = $_POST["mdp".$indice];
@@ -50,6 +60,7 @@ function loadParameters() {
         $joueurs[$indice] = array("nom" => $nom,
                                   "couleur" => $couleur,
                                   "si_mdp" => $si_mdp,
+                                  "is_ia" => $is_ia,
                                   "mdp" => $mdp);
       }
     }
@@ -111,12 +122,15 @@ foreach($joueurs as $key => $value) {
   fwrite($fh, $value["nom"]."\t".$value["couleur"]);
   if($value["si_mdp"]) {
     fwrite($fh, "\t".$value["mdp"]);
-  }
+	} else {
+		fwrite($fh, "\t0");
+	}
+	fwrite($fh, "\t".($value["is_ia"]?1:0));
   fwrite($fh, "\n");
 }
 //0	Dernière action joueur 1 : a x y tour
 foreach($joueurs as $key => $value) {
-  fwrite($fh, "n 0 0 0\n");
+  fwrite($fh, "n\t0\t0\t0\n");
 }
 
 //	Options : chateaux activés ? 1/0
@@ -214,7 +228,7 @@ for($i = 1; $i <= $x; $i++) {
   }
 }
 for($i = 1; $i <= $nbJoueurs; $i++) {
-  $final_grid[$pos[$i][0]][$pos[$i][1]] = ($i+1)*100+1;
+  $final_grid[$pos[$i][0]][$pos[$i][1]] = $i*100+1;
 }
 
 //	Tableau de jeu - +10000 : chateau  +N00 : case au joueur N +XX : nombre de cellules
@@ -230,13 +244,10 @@ fwrite($fh, "1\n");
 
 fclose($fh);
 ?>
-<html>
-<head>
-<title>Age of Paramecia II partie créée</title>
-</head>
-<body>
-Partie <? echo $numero_partie;?> créée !<br>
-<?
+
+Partie <?php echo $numero_partie;?> créée !<br />
+Partie <?=$numero_partie;?> créée !<br />
+<?php
 for($i = 1; $i <= $nbJoueurs; $i++) {
   $url = "jeu.html?j=".$i."&p=".$numero_partie;
   If($joueurs[$i]["si_mdp"]) {
@@ -247,7 +258,7 @@ for($i = 1; $i <= $nbJoueurs; $i++) {
 ?>
 </body>
 </html>
-<?
+<?php
 /*
 	Nombre de joueurs
 	N°Joueur en cours entre 1 et NbJoueurs

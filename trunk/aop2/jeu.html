@@ -240,7 +240,7 @@ function purifie(){with(this){//renvoie true s'il y a eu un changement, false si
 		return changement;
 }}
 
-var enCoursDeTraitement = false;
+var enCoursDeTraitement = false;//pour ne pas accepter deux fois la même réponse
 function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purifier totalement et afficher
 	enCoursDeTraitement = true;
 	var profondeur = (profondeur == undefined?0:profondeur);
