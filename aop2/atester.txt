@@ -1,0 +1,6 @@
+cassage
+	bord suivant options[2]
+	conquete case
+	cassage chateau non fini
+	cassage chateau construit
+	

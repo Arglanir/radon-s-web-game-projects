@@ -1,0 +1,264 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<html>
+<head>
+<title>Grille utilisable</title>
+<script language="Javascript">
+var tailleX = 100;
+var tailleY = 50;
+var nbiles = 15;
+var nbfrontieresmin = 4;
+
+function lettre(numero) {
+	if (numero<26)
+		return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(numero);
+	num = Math.floor(numero / 26);
+	let = numero % 26;
+	return num + lettre(let);
+}
+
+function getCase(ligne,colonne) {
+	return eval("document.getElementById('c"+lettre(ligne)+lettre(colonne)+"')");
+}
+
+function changercouleur(ligne,colonne,couleur) {
+	getCase(ligne,colonne).style.background=couleur;
+}
+
+//création des iles
+var ile = new Array();
+var cases = new Array();
+var frontieres = new Array();
+var ponts = new Array();	//indique la case du pont entre deux iles
+
+function inoccupe(x,y,noile){
+	if (x == tailleX-1 || y == tailleY-1 || x <= 0 || y <= 0)
+		return 0;
+	return (!((cases[x][y] != noile && cases[x][y] >= 0)||
+			(cases[x+1][y] != noile && cases[x+1][y] >= 0)||
+			(cases[x-1][y] != noile && cases[x-1][y] >= 0)||
+			(cases[x][y+1] != noile && cases[x][y+1] >= 0)||
+			(cases[x][y-1] != noile && cases[x][y-1] >= 0)))
+			&& (cases[x+1][y] == noile || cases[x-1][y] == noile || cases[x][y+1] == noile || cases[x][y-1] == noile)&&(Math.random()>0.33);
+}
+function verificationinoccupe(x,y,noile){ //verification de l'inoccupation pour un nouveau 
+	if (x == tailleX-1 || y == tailleY-1 || x <= 0 || y <= 0)
+		return 0;
+	return (!((cases[x][y] != noile && cases[x][y] >= 0)||
+			(cases[x+1][y] != noile && cases[x+1][y] >= 0)||
+			(cases[x-1][y] != noile && cases[x-1][y] >= 0)||
+			(cases[x][y+1] != noile && cases[x][y+1] >= 0)||
+			(cases[x][y-1] != noile && cases[x][y-1] >= 0)));
+}
+function frontiere(x,y,noile) {//renvoie un tableau contenant les frontières trouvées
+	var k = 0;
+	var t = new Array();
+	if (x >= 2) 		if (cases[x-2][y] != noile && cases[x-2][y] >= 0) t[k++] = cases[x-2][y];
+	if (x < tailleX-2)	if (cases[x+2][y] != noile && cases[x+2][y] >= 0) t[k++] = cases[x+2][y];
+	if (y >= 2)		if (cases[x][y-2] != noile && cases[x][y-2] >= 0) t[k++] = cases[x][y-2];
+	if (y < tailleY-2)	if (cases[x][y+2] != noile && cases[x][y+2] >= 0) t[k++] = cases[x][y+2];
+	for (var i_f = 0; i_f < t.length; i_f++){
+		frontieres[noile][t[i_f]] = 1;
+		frontieres[t[i_f]][noile] = 1;
+	}	
+	return t;
+}
+function nbfrontieres(noile){
+	var k = 0;
+	for (var i_nf = 0; i_nf < frontieres.length; i_nf++)
+		k += (frontieres[noile][i_nf]?1:0);
+	return k;
+}
+
+function creerIles(){
+	for (var i = 0; i < tailleX; i++){
+		cases[i] = new Array();////Initialisation des cases
+		for (var j = 0; j < tailleY; j++)
+			cases[i][j] = -1;////La valeur initiale vaut -1 (océan)
+	}
+	
+	//création du départ
+	for (var i = 0; i < nbiles; i++){
+		ile[i] = new Array();
+		do {
+			ile[i]["xdep"] = Math.floor(40*Math.random())+30;
+			ile[i]["ydep"] = Math.floor(20*Math.random())+15;
+			//message.innerHTML += (i+"c : "+ile[i]["xdep"]+","+ile[i]["ydep"])+"<br />";
+		} while(!verificationinoccupe(ile[i]["xdep"],ile[i]["ydep"],i));
+		cases[ile[i]["xdep"]][ile[i]["ydep"]] = i;
+		setTimeout('changercouleur('+ile[i]["ydep"]+','+ile[i]["xdep"]+',\'#00FF00\');',10000);//',\'#00FF00\');',10000);
+		ile[i]["xcou"] = ile[i]["xdep"];
+		ile[i]["ycou"] = ile[i]["ydep"];
+	}
+	//création des iles par augmentation jusqu'à 3 frontières min
+	
+	for (var i = 0; i < nbiles; i++) {
+		frontieres[i] = new Array();
+		for (j = 0; j < nbiles; j++)
+			frontieres[i][j] = 0;
+	}
+	
+	var nbilesok = 0; var nbcaseschangees = 10;
+	while (nbilesok < nbiles && nbcaseschangees > 0) {
+		nbilesok = 0;nbcaseschangees = 0;
+		for (var i = 0; i < nbiles; i++){
+			if (nbfrontieres(i) >= /*Math.floor(Math.random()*2)+*/nbfrontieresmin) {
+				nbilesok++;continue;
+			}
+			var cases2 = new Array();
+			for (var x = 0; x < tailleX; x++) {
+				cases2[x] = new Array();
+				for (var y = 0; y < tailleY; y++){
+					cases2[x][y] = -1;
+					if (inoccupe(x,y,i)) {
+						if (cases[x][y] != i) {
+							nbcaseschangees++;
+							setTimeout("changercouleur("+y+","+x+",'');",15000);
+							cases2[x][y] = i;
+							frontiere(x,y,i);
+						}
+					}
+				}
+			}
+			for (var x = 0; x < tailleX; x++)
+				for (var y = 0; y < tailleY; y++)
+					if (cases2[x][y] >= 0)
+						cases[x][y] = cases2[x][y];
+		}
+	}
+	for (var i = 0; i < nbiles; i++)
+		document.getElementById("message").innerHTML += (frontieres[i])+" -> "+nbfrontieres(i)+"<br />";
+	window.status = "Iles créées";
+	setTimeout("trouvePonts()",20000);
+	
+	//on enlève les terrains en trop ?
+}
+
+//on trouve les ponts et les zones d'attachement, et on crée le chemin court entre les zones de chaque île
+var nouvellesCases = new Array();
+function trouvePonts(){
+	//on initialise le tableau de nouvelles cases
+	for (var i = 0; i < tailleX; i++) {
+		nouvellesCases[i] = new Array();
+		for (var j = 0; j < tailleY; j++)
+			nouvellesCases[i][j] = new Array();	//une taille vide
+	}
+
+	//on range les îles par ordre de croissance des frontières, pour ne pas pénaliser les plus faibles
+	var ilesPetites = new Array();
+	var ilesPrises = new Array();
+	var casesgardees = new Array();
+	for (var j = 0; j < nbiles; j++){
+		ilesPrises[j] = 0;casesgardees[j] = new Array();
+	}
+	for (var j = 0; j < nbiles; j++) {
+		var minile = 15; var ilemin = -1;
+		for (var i = 0; i < nbiles; i++) {
+			if (ilesPrises[i])	continue;
+			if (nbfrontieres(i) < minile) {
+				minile = nbfrontieres(i); ilemin = i;}
+		}
+		ilesPrises[ilemin] = 1;
+		ilesPetites[j] = ilemin;
+	}
+	
+	
+	//on boucle sur les frontières de chaque île voisine, pour trouver la frontière la plus au milieu -> on garde le pont
+	for (var i = 0; i < nbiles; i++){
+		var ilecourante = ilesPetites[i];
+		for (var j = 0; j < nbiles; j++) {
+			if (frontieres[ilecourante][j] != 1) continue;//on ne cherche pas de pont s'il existe déjà tableau), ou s'il n'y a aucune frontière(0)
+			var tabfrontieres = new Array();
+			//on fait la liste des frontières -> new Array(x1,y1,xpont,ypont,x2,y2)
+			for (var x = 1; x < tailleX-1; x++)
+				for (var y = 1; y < tailleY-1; y++)
+					if (cases[x][y] == -1) {
+						var t = new Array(x,y+1,x,y,x,y-1);
+						if (cases[t[0]][t[1]] == ilecourante && cases[t[4]][t[5]] == j)
+							tabfrontieres.push(t);
+						t = new Array(x-1,y,x,y,x+1,y);
+						if (cases[t[0]][t[1]] == ilecourante && cases[t[4]][t[5]] == j)
+							tabfrontieres.push(t);
+						t = new Array(x+1,y,x,y,x-1,y);
+						if (cases[t[0]][t[1]] == ilecourante && cases[t[4]][t[5]] == j)
+							tabfrontieres.push(t);
+						t = new Array(x,y-1,x,y,x,y+1);
+						if (cases[t[0]][t[1]] == ilecourante && cases[t[4]][t[5]] == j)
+							tabfrontieres.push(t);
+					}
+			if (tabfrontieres.length == 0) {
+				document.getElementById("message").innerHTML += "frontières non trouvées entre "+ilecourante+" et "+j+"<br />";
+				frontieres[ilecourante][j] = 0;
+				frontieres[j][ilecourante] = 0;
+			} else {
+				var pont = tabfrontieres[Math.floor(tabfrontieres.length/2)];//on prend un pont (du milieu ?)
+				var pnt2 = new Array(pont[4],pont[5],pont[2],pont[3],pont[0],pont[1]);
+				setTimeout("changercouleur("+pont[1]+","+pont[0]+",'#FF0000');",15000);
+				setTimeout("changercouleur("+pont[3]+","+pont[2]+",'#FF8888');",15000);
+				cases[pont[2]][pont[3]] = 100;//on ne réutilise pas la case du pont
+				setTimeout("changercouleur("+pont[5]+","+pont[4]+",'#FF0000');",15000);
+				frontieres[ilecourante][j] = pont;
+				casesgardees[ilecourante].push(new Array(pont[0],pont[1])); //on ajoute les cases gardées pour chaque ile
+				casesgardees[j].push(new Array(pont[4],pont[5]));
+				frontieres[j][ilecourante] = pnt2;
+				casesgardees[ilecourante].push(new Array(pont[0],pont[1]));
+				casesgardees[j].push(new Array(pont[4],pont[5]));
+			}
+		}
+		//les cases à garder de l'île sont dans casesgardees[ilecourante]
+		// on crée un chemin entre les cases gardées, à l'intérieur de l'île
+		
+		
+	}
+	
+	//affichage du nombre de ponts
+	var nbponts = 0;
+	for (var i = 0;i < nbiles; i++)
+		nbponts += nbfrontieres(i);
+	document.getElementById("message").innerHTML += (nbponts/2)+" ponts créés<br />";
+}
+
+function resetTableau(){
+	for (var x = 0; x < tailleX; x++)
+		for (var y = 0; y < tailleY; y++)
+			setTimeout("changercouleur("+y+","+x+",'#0055FF');",20);
+}
+
+//la case doit être (carrée) -> n-2 x n
+</script>
+<style>
+table.grille {
+	border:0;
+}
+td.case {
+	height: 8px;
+	width: 6px;
+	font-size:1px;
+	border:0;
+	text-align: center;
+	background-color: #0055FF;
+}
+
+tr.case {
+	font-size:6px;
+}
+
+</style>
+</head>
+<body onload="setTimeout('creerIles()',50);">
+<table background="b_raan.jpg" class=grille CELLSPACING=0>
+<script language="Javascript">
+<!--
+for (var li = 0; li < tailleY; li++) {
+	document.write("<tr class=case>");
+	for (var col = 0; col < tailleX; col++)
+		document.write("<td class=case id=c"+lettre(li)+lettre(col)+" "+
+			"onclick=\"changercouleur("+li+","+col+",'#00BB00')\" "+
+			"onmouseover=\"window.status='"+col+" "+li+" c"+lettre(li)+lettre(col)+"'\" "+
+			"ondblclick=\"var temp=cases["+col+"]["+li+"];alert(temp+' '+nbfrontieres(temp));\">&nbsp;</td>");
+	document.write("</tr>");
+}
+</script>
+</table>
+<div id="message"></div>
+</body>
+</html>
