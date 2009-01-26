@@ -87,7 +87,6 @@ function loadParameters() {
     $opt_explosion_joueur = (int)$_POST["opt_explosion_joueur"];
   if(isset($_POST["opt_profondeur_jeu"]))
     $opt_profondeur_jeu = (int)$_POST["opt_profondeur_jeu"];
-  echo "|".$_POST["opt_profondeur_jeu"]."| => ".$opt_profondeur_jeu."<br />";
   return "";
 }
 
