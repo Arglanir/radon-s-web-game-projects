@@ -181,7 +181,7 @@ array("text" => "Type bordure",
       "idname" => "opt_type_bords",
       "options" => array("Bloqués" => 1,
                          "Non bloquants" => 0,
-                         "Monde rond." => 2),
+                         "Monde torrique" => 2),
       "default" => 1
 ));
 addSelectOption(
