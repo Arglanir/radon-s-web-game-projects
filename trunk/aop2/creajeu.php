@@ -43,7 +43,7 @@ $opt_explosion_joueur=0;
 $opt_profondeur_jeu=0;
 
 function loadParameters() {
-  Global $nbJoueurs, $joueurs, $x, $y, $opt_chateaux_actifs, $opt_type_bords, $opt_ajout_diagonale, $opt_explosion_joueur;
+  Global $nbJoueurs, $joueurs, $x, $y, $opt_chateaux_actifs, $opt_type_bords, $opt_ajout_diagonale, $opt_explosion_joueur,$opt_profondeur_jeu;
   if(isset($_POST["nbJoueurs"])) {
     $nbJoueurs = (int)$_POST["nbJoueurs"];
   } else return "Erreur : Nombre de joueurs indéterminé";
@@ -87,6 +87,7 @@ function loadParameters() {
     $opt_explosion_joueur = (int)$_POST["opt_explosion_joueur"];
   if(isset($_POST["opt_profondeur_jeu"]))
     $opt_profondeur_jeu = (int)$_POST["opt_profondeur_jeu"];
+  echo "|".$_POST["opt_profondeur_jeu"]."| => ".$opt_profondeur_jeu."<br />";
   return "";
 }
 
@@ -246,7 +247,6 @@ fclose($fh);
 ?>
 
 Partie <?php echo $numero_partie;?> créée !<br />
-Partie <?=$numero_partie;?> créée !<br />
 <?php
 for($i = 1; $i <= $nbJoueurs; $i++) {
   $url = "jeu.html?j=".$i."&p=".$numero_partie;
@@ -255,6 +255,17 @@ for($i = 1; $i <= $nbJoueurs; $i++) {
   }
   echo '<a href="'.$url.'">Le jeu pour '.$joueurs[$i]["nom"].'</a><br>';
 }
+?>
+<?php
+//écriture du fichier lespartiesencours.xml
+/*	<parties>
+		<partie numero=numero cachee=0/1 nbjoueurs=N>
+			<joueur numero=1 nom=nom1 />
+			<joueur numero=2 nom=nom2 />
+		</partie>
+		...
+	</parties>*/
+
 ?>
 </body>
 </html>
