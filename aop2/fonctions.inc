@@ -1,0 +1,142 @@
+<?php
+/*
+Fichier: fonction.inc
+Date: 27/01/2009
+Auteur: Mikaël Mayer / Cédric Mayer
+But: Fonctions communes à plusieurs fichiers
+*/
+
+$fichier_parties = "lespartiesencours.xml";
+
+function getUrlJoueur($numero_partie, $numero_joueur, $si_mot_de_passe=false, $mot_de_passe="") {
+  $url = "jeu.html?j=".$numero_joueur."&p=".$numero_partie;
+  If($si_mot_de_passe) {
+    $url = $url."&pw=".$mot_de_passe;
+  }
+  return $url;
+}
+
+//DOM-way of doing that
+function ajouterPartie($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_array) {
+  $xml_parties = new DOMDocument();
+  $file_exists = file_exists($fichier_parties);
+  if($file_exists) {
+    $xml_parties->load( $fichier_parties );
+  }
+  $doc->formatOutput = true;
+  
+  $parties_array = $xml_parties->getElementsByTagName( "parties" );
+  if($file_exists) {
+    $parties = $parties_array->item(0);
+  } else {
+    $parties = $xml_parties->createElement( "parties" );
+    $xml_parties->appendChild($parties);
+  }
+  $partie = $xml_parties->createElement("partie");
+  $partie->setAttribute("numero", $numero);
+  $partie->setAttribute("cachee", $cachee);
+  $partie->setAttribute("nbJoueurs", $nbJoueurs);
+  $parties->appendChild($partie);
+  
+  foreach($joueur_array as $index => $joueur) {
+    $joueur_xml = $xml_parties->createElement("joueur");
+    $joueur_xml->setAttribute("numero", $index);
+    $joueur_xml->setAttribute("nom", $joueur["nom"]);
+    $partie->appendChild($joueur_xml);
+  }
+  
+  $fh = fopen($fichier_parties, 'wb');
+  fwrite($fh, $xml_parties->saveXML());
+  fclose($fh);
+}
+
+//SimpleXml-way of doing that (requires PHP5)
+function ajouterPartieSimpleXml($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_array) {
+
+  if(!file_exists($fichier_parties)) {
+    $content = '<?xml version="1.0" encoding="UTF-8"?><root></root>';
+  } else {
+    $content = file_get_contents($fichier_parties);
+  }
+  $xml_parties = new SimpleXMLElement($content);
+
+  // Ajoute la partie
+  if(!isset($xml_parties->parties)) {
+    $parties = $xml_parties->addChild('parties');
+  } else {
+    $parties = $xml_parties->parties;
+  }
+  $partie = $parties->addChild('partie');
+  $partie->addAttribute("numero", $numero);
+  $partie->addAttribute("cachee", $cachee);
+  $partie->addAttribute("nbJoueurs", $nbJoueurs);
+  
+  foreach($joueur_array as $index => $joueur) {
+    $joueur_xml = $partie->addChild("joueur");
+    $joueur_xml->addAttribute("numero", $index);
+    $joueur_xml->addAttribute("nom", $joueur["nom"]);
+  }
+  $fh = fopen($fichier_parties, 'wb');
+  fwrite($fh, $xml_parties->asXML());
+  fclose($fh);
+}
+
+$no_party = "<tr><td>Aucune</tr></td></table>";
+function afficherParties($fichier_parties) {
+  echo "<table>";
+  if(!file_exists($fichier_parties)) {
+    echo $no_party;
+  } else {
+    $xml_parties = new DOMDocument();
+    $xml_parties->load($fichier_parties);
+
+    $parties = $xml_parties->getElementsByTagName("partie");
+    foreach ($parties as $partie) {
+      if($partie->getAttribute("cachee") == "1") continue;
+      echo "<tr>";
+      echo "<td>";
+      $numero_partie = $partie->getAttribute("numero");
+      echo "Partie ".$numero_partie;
+      echo " : </td>";
+      foreach ($partie->getElementsByTagName("joueur") as $joueur) {
+        echo "<td>";
+        $url = getUrlJoueur($numero_partie, $joueur->getAttribute("numero"));
+        echo '<a href="'.$url.'">'.$joueur->getAttribute("nom").'</a>';
+        echo "</td>";
+      }
+      echo "</tr>\n";
+    }
+  }
+  echo "</table>";
+}
+
+function afficherPartiesSimpleXml($fichier_parties) {
+  echo "<table>";
+  if(!file_exists($fichier_parties)) {
+    echo $no_party;
+  } else {
+    $xml_parties = new SimpleXMLElement(file_get_contents($fichier_parties));
+    if(!isset($xml_parties->parties)) {
+      echo $no_party;
+      return;
+    }
+    $parties = $xml_parties->parties;
+    foreach ($parties->children() as $partie) {
+      if($partie["cachee"]=="1") continue;
+      echo "<tr>";
+      echo "<td>";
+      echo "Partie ".$partie["numero"];
+      echo " : </td>";
+      foreach ($partie->children() as $joueur) {
+        echo "<td>";
+        $url = getUrlJoueur($partie["numero"], $joueur["numero"]);
+        echo '<a href="'.$url.'">'.$joueur["nom"].'</a>';
+        echo "</td>";
+      }
+      echo "</tr>\n";
+    }
+  }
+  echo "</table>";
+}
+
+?>
