@@ -104,6 +104,8 @@ parties sous le nom aopNNNNNNbacteries.par, délimiteurs : \t et \n
 	Tableau de décor - 0 rien 1 glace 2 chaud 3 obstacle
 	Tableau de jeu - +10000 : chateau  +N00 : case au joueur N +XX : nombre de cellules
 0	n° du tour
+autre versions :
+<!DOCTYPE partie PUBLIC 'aop2jeu.dtd'>
 
 
 

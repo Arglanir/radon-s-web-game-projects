@@ -698,7 +698,7 @@ function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrê
 					alert("Action refusée par le serveur !");
 				}
 				if (fonctionALancer != undefined)
-					fonctionALancer(xhr.responseXML,xhr.responseText);
+					fonctionALancer(xhr);
 			} else {
 				document.getElementById("comm").innerHTML = "Information non reçue.<br />";
 				document.getElementById("comm").innerHTML += "Info envoyée :" + chaineDAppel;
