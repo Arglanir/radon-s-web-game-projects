@@ -1,0 +1,9 @@
+Mikaël (est aussi correcteur):
+
+- Eviter les boîtes de dialogue pour dire que c'est pas à nous de jouer
+- Problème: L'affichage est synchronisé, mais une boîte de dialogue nous disant que ce n'est pas encore à nous de jouer est encore potentiellement active 1 seconde après la synchronisation.
+- Un moyen visuel de déterminer de quelle couleur je suis
+- Un moyen visuel plus avancé pour voir à qui est le tour (mieux que mode: ajout de cellule)
+- Un moyen visuel plus avancé pour voir dans combien de temps je joue (un peu comme le démineur), voire mettre une option pour en être alerté.
+- Virer les tooltip "true"/"false" sur les cases
+
