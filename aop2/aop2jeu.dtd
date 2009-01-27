@@ -1,0 +1,37 @@
+<!ELEMENT partie (joueurs, options, tableaudejeu) >
+<!ATTLIST partie 
+		nombredejoueurs NMTOKEN #REQUIRED
+		joueurencours NMTOKEN #REQUIRED>
+<!ELEMENT joueurs (joueur*) >
+<!ELEMENT joueur  (action) >
+<!ATTLIST joueur 
+		numero NMTOKEN #REQUIRED
+		nom CDATA #REQUIRED
+		couleur CDATA #REQUIRED
+		estia (oui | non)  #REQUIRED
+		estnet (oui | non) "0"
+		mdp CDATA "0">
+<!ELEMENT action EMPTY>
+<!ATTLIST action 
+		type (n|c) #REQUIRED
+		x NMTOKEN #REQUIRED
+		y NMTOKEN  #REQUIRED
+		notour NMTOKEN #REQUIRED>
+<!ELEMENT options (option*) >
+<!ELEMENT option EMPTY >
+<!ATTLIST option 
+		type (chateaux_actifs | type_bords | ajout_diagonale | explosion_joueur | profondeur_jeu) #REQUIRED
+		valeur NMTOKEN #REQUIRED>
+<!ELEMENT tableaudejeu (ligne*)>
+<!ELEMENT ligne (case*)>
+<!ATTLIST ligne 
+		y NMTOKEN #REQUIRED>
+<!ELEMENT case  EMPTY >
+<!ATTLIST case 
+		x NMTOKEN #REQUIRED
+		y NMTOKEN #REQUIRED
+		decor (0 | 1 | 2 | 3) "0"
+		joueur NMTOKEN  "0"
+		cellules NMTOKEN  "0"
+		max NMTOKEN  "4"
+		chateau (0 | 1) "0">
