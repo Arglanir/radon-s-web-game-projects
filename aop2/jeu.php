@@ -11,6 +11,8 @@ if (!file_exists($fichierCourant)){
 
 define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
 $contenuFichier = file($fichierCourant,FILE_IGNORE_NEW_LINES);
+foreach ($contenuFichier as $line => $contenu)
+	$contenuFichier[$line] = trim($contenu);
 $nbJoueurs = 0 + $contenuFichier[0];
 $joueurEnCours = 0 + $contenuFichier[1];
 $tailleX = 0 + $contenuFichier[7+2*$nbJoueurs];
