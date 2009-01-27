@@ -1,7 +1,12 @@
 <?php
 /*
-index.php : accueil du jeu, montre les parties en cours et a le formulaire pour la création d'une partie
+Fichier: index.php
+Date: 27/01/2009
+Auteur: Mikaël Mayer / Cédric Mayer
+But: Accueil du jeu, montre les parties en cours et a le formulaire pour la création d'une partie
 */
+include("fonctions.inc");
+
 $max_joueurs = 9;
 $array_count = array();
 
@@ -15,6 +20,7 @@ function addSelectOption($arrayOptions) {
   $options = "";
   $callback = "";
   $default = 1;
+  $table = False;
   $color = False;
   foreach($arrayOptions as $key => $value) {
     switch($key) {
@@ -24,9 +30,13 @@ function addSelectOption($arrayOptions) {
     case "callback": $callback = $value; break;//fonction
     case "default": $default = $value; break;
     case "color": $color = $value; break;//booleen
+    case "table": $table = $value; break;//booleen
     }
   }
-  echo $text.' : <select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'."\n";
+  if($table) echo "<tr><td>";
+  echo $text.' : ';
+  if($table) echo "</td><td>";
+  echo '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'."\n";
   $i = 1;
   foreach($options as $value => $text) {
     if(isset($value)) {
@@ -40,7 +50,9 @@ function addSelectOption($arrayOptions) {
     }
     $i += 1;
   }
-  echo '</select><br/>';
+  echo '</select>';
+  if($table) echo "</td></tr>";
+  else echo '<br/>';
 }
 
 function addCheckOption($arrayOptions) {
@@ -115,7 +127,10 @@ function changecolor(n) {
 </head>
 <body onload="bodyOnLoad()">
 <form action="creajeu.php" method=POST name=cre>
-<h1>Création d'une partie : <?php echo $game_name; ?></h1><br>
+<h1>Création d'une partie : <?php echo $game_name; ?></h1>
+<i>Jeu développé par Cédric Mayer et Mikaël Mayer</i>
+<br>
+<br>
 <?php
 addSelectOption(
 array("text" => "Nombre de joueurs",
@@ -156,13 +171,14 @@ foreach($array_count as $i) {
     closedir($handle);
 }*/
 ?>
-
-Taille :
+<table>
+<tr><td>
+Taille : </td><td>
 <input type=text id="x" name="x" value="7" style="width:30px">
 x
 <input type=text id="y" name="y" value="7" style="width:30px">
+</tr>
 
-<br>
 <?php
 //addCheckOption(
 //array("text" => "Châteaux actifs",
@@ -173,7 +189,8 @@ array("text" => "Châteaux",
       "idname" => "opt_chateaux_actifs",
       "options" => array("Activés" => 1,
                          "Non activés" => 0),
-      "default" => 1
+      "default" => 1,
+      "table"=>true
 ));
 
 addSelectOption(
@@ -182,31 +199,38 @@ array("text" => "Type bordure",
       "options" => array("Bloqués" => 1,
                          "Non bloquants" => 0,
                          "Monde torrique" => 2),
-      "default" => 1
+      "default" => 1,
+      "table"=>true
 ));
 addSelectOption(
 array("text" => "Ajout diagonale ",
       "idname" => "opt_ajout_diagonale",
       "options" => array("On peut cliquer en diagonale" => 1,
                          "Uniquement sur les côtés du carré" => 0),
-      "default" => 1
+      "default" => 1,
+      "table"=>true
 ));
 addSelectOption(
 array("text" => "Explosions ",
       "idname" => "opt_explosion_joueur",
       "options" => array("Seulement pour le joueur en cours" => 1,
                          "Tous les joueurs sont affectés" => 0),
-      "default" => 1
+      "default" => 1,
+      "table"=>true
 ));
 ?>
-Profondeur de jeu : <input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" /><br />
+<tr><td>
+Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
+</td></tr>
+</table>
 
 <input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 </form>
 
 <h3>Parties en cours</h3>
 
-
-
+<?php
+afficherParties($fichier_parties);
+?>
 </body>
 </html>

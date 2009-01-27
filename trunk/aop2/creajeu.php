@@ -2,7 +2,10 @@
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 /*
-creajeu.php : crée un jeu
+Fichier: creajeu.php
+Date: 27/01/2009
+Auteurs: Mikaël Mayer / Cédric Mayer
+But : crée un jeu
 	Dans les noms des joueurs, les espaces et les \n sont remplacés par _
 	crée une partie de rien, avec des paramètre envoyés en POST
 	crée une partie à partir d'une grille de base
@@ -31,6 +34,7 @@ creajeu.php : crée un jeu
 </head>
 <body>
 <?php
+include ("fonctions.inc");
 
 $nbJoueurs=0;
 $joueurs=array();
@@ -241,17 +245,14 @@ for($i = 1; $i <= $x; $i++) {
 }
 //0	n° du tour
 fwrite($fh, "1\n");
-
 fclose($fh);
-?>
 
+ajouterPartie($fichier_parties, $numero_partie, 0, $nbJoueurs, $joueurs);
+?>
 Partie <?php echo $numero_partie;?> créée !<br />
 <?php
 for($i = 1; $i <= $nbJoueurs; $i++) {
-  $url = "jeu.html?j=".$i."&p=".$numero_partie;
-  If($joueurs[$i]["si_mdp"]) {
-    $url = $url."&pw=".$joueurs[$i]["mdp"];
-  }
+  $url = getUrlJoueur($numero_partie, $i, $joueurs[$i]["si_mdp"], $joueurs[$i]["mdp"]);
   echo '<a href="'.$url.'">Le jeu pour '.$joueurs[$i]["nom"].'</a><br>';
 }
 ?>
