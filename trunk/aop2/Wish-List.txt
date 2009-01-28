@@ -5,8 +5,12 @@ Bugs:
 
 Wish:
 - Eviter les boîtes de dialogue pour dire que c'est pas à nous de jouer
+	c'est utilse pour faire pause, non ?
 - Un moyen visuel de déterminer de quelle couleur je suis
+	Ben ton nom est de cette couleur(et tu es en gras)
 - Un moyen visuel plus avancé pour voir à qui est le tour (mieux que mode: ajout de cellule)
+	et un > montre à qui c'est de jouer pour le moment dans ce client. Quelle idée proposes-tu ?
 - Un moyen visuel plus avancé pour voir dans combien de temps je joue (un peu comme le démineur), voire mettre une option pour en être alerté.
 - Virer les tooltip "true"/"false" sur les cases
+	c'est juste un title, ça peut être pratique pour les débutants
 - Replay button pour voir les dernières actions
