@@ -41,7 +41,7 @@ function ajouterPartie($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_a
   foreach($joueur_array as $index => $joueur) {
     $joueur_xml = $xml_parties->createElement("joueur");
     $joueur_xml->setAttribute("numero", $index);
-    $joueur_xml->setAttribute("nom", $joueur["nom"]);
+    $joueur_xml->setAttribute("nom", utf8_encode($joueur["nom"]));
     $partie->appendChild($joueur_xml);
   }
   
@@ -83,6 +83,7 @@ function ajouterPartieSimpleXml($fichier_parties, $numero, $cachee, $nbJoueurs, 
 
 $no_party = "<tr><td>Aucune</tr></td></table>";
 function afficherParties($fichier_parties) {
+	global $no_party;
   echo "<table>";
   if(!file_exists($fichier_parties)) {
     echo $no_party;
