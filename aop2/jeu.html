@@ -661,7 +661,7 @@ function mettreEntre(nombre,base){//fonction permettant le modulo
 function getJeu(){//demande au serveur le jeu 
 	var a="g";
 	var xhr = createXHR();
-	var chaineDAppel = "jeu.php?a=g&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	var chaineDAppel = "jeu.php?a=g&p="+tableauArguments["p"]+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
@@ -669,7 +669,6 @@ function getJeu(){//demande au serveur le jeu
 				traiterJeu(xhr.responseText); 
 			} else {
 				document.getElementById("jeu").innerHTML = "Jeu non reçu, partie ou joueur inconnu ou mot de passe incorrect.";
-				document.getElementById("comm").innerHTML = "Info envoyée : " + chaineDAppel;
 			}
          }
     }; 
@@ -689,7 +688,7 @@ function traiterJeu(leJeuChaine){//fonction de traitement après getJeu()
 function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrête le jeu si contraire au serveur
 	var a=(chateau?"c":"n");
 	var xhr = createXHR();
-	var chaineDAppel = "jeu.php?a="+a+"&x="+x+"&y="+y+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	var chaineDAppel = "jeu.php?a="+a+"&x="+x+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&y="+y+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
@@ -714,7 +713,7 @@ function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrê
 
 function ouJoue(noJoueur, fonctionALancer){//demande au serveur qu'a joué le joueur no
 	var xhr = createXHR();
-	var chaineDAppel = "jeu.php?a=m&k="+noJoueur+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	var chaineDAppel = "jeu.php?a=m&k="+noJoueur+"&p="+tableauArguments["p"]+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
@@ -742,9 +741,9 @@ function traiterOuJoue(noJoueur,reponse,fonctionALancer){//fonction de traitemen
 		fonctionALancer(tabReponse);
 }
 
-function quiJoue(fonctionALancer){
+function quiJoue(fonctionALancer){// demande au serveur qui est en train de jouer
 	var xhr = createXHR();
-	var chaineDAppel = "jeu.php?a=m&k=0&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	var chaineDAppel = "jeu.php?a=m&k=0&p="+tableauArguments["p"]+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
@@ -773,6 +772,27 @@ function traiterQuiJoue(reponse,fonctionALancer){//fonction de traitement après 
 		fonctionALancer(tabReponse);
 }
 
+function changeMP(){//demande au serveur de changer le mot de passe
+	var xhr = createXHR();
+	var chaineDAppel = "jeu.php?a=nvp"+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&k="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	xhr.onreadystatechange  = function(){ 
+		if(xhr.readyState  == 4){
+			if(xhr.status  == 200) {
+				window.location.replace("jeu.html?p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&pw="+escape(document.mdp.motdepasse.value));
+			} else {
+				alert("Mot de passe non changé");
+			}
+         }
+    }; 
+	document.getElementById("comm").innerHTML = "Attente du serveur...";
+	
+	xhr.open("GET", chaineDAppel,  true); 
+	xhr.send(null);
+	
+}
+function chargeMP(){
+	window.location.replace("jeu.php?pw="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]);
+}
 
 /*** fonction principale ***/
 var unJeu;
@@ -798,12 +818,13 @@ function charge(){//charge les images
 <body onload="main()">
 <div name="Joueurs" id="joueurs">
 <!--input type="button" onclick="main()" value="Démarrer" title="Cliquer" /-->
-<input type="button" onclick="document.getElementById('jeu').innerHTML = unJeu.toString().split('\n').join('<br/>');" value="Afficher la chaine" title="Cliquer" />
-<input type="button" onclick="getJeu()" value="Charger le Jeu" title="Cliquer" />
+<!--input type="button" onclick="document.getElementById('jeu').innerHTML = unJeu.toString().split('\n').join('<br/>');" value="Afficher la chaine" title="Cliquer" /-->
+<!--input type="button" onclick="getJeu()" value="Recharger le Jeu" title="Cliquer" />
 <input type="button" onclick="ouJoue(1)" value="Où joue 1 ?"  title="Cliquer" />
 <input type="button" onclick="ouJoue(2)" value="Où joue 2 ?"  title="Cliquer" />
 <input type="button" onclick="quiJoue()" value="Qui joue ?"  title="Cliquer" />
-<input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" />
+<input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" /-->
+<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> </form>
 </div>
 
 <div name="Jeu" id="jeu">
