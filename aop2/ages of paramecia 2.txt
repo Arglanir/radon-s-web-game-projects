@@ -28,7 +28,7 @@ jeu.php : interface avec le fichier de jeu
 			si a=nvp k=nouveau mot de passe
 	renvoie une chaîne xml
 		si a=nvp et k=nouveau mot de passe
-			<reponse><action traitee="oui"/"non" /></reponse>
+			<reponse><action traitee="oui"/"non" nouveaumotdepasse="lenouveau" /></reponse>
 		si a=n ou a=c
 			requête possible ?, traitée ?
 			<reponse><action autorisee="oui"/"non" traitee="oui"/"non"/></reponse>

@@ -140,9 +140,14 @@ $tableauDesMax = array();//calcule le maximum de cellules dans les cases
 		}
 	}
 
-	if ($_GET["a"]=="nvp"){ //changement de mot de passe
-		//à faire
-	}
+if ($_GET["a"]=="nvp"){ //changement de mot de passe
+	$joueurs[$joueurAppelant][2] = $_GET["k"];
+	enregistrerPartie();
+	header('Content-Type: text/xml');
+	$chaineReponse = XMLHeader."<reponse><action traitee=\"oui\" nouveaumotdepasse=\"".$_GET["k"]."\" /></reponse>";
+	echo $chaineReponse;
+	die();
+}
 	
 /************* Le joueur joue ! *****************/
 
