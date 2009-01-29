@@ -125,7 +125,7 @@ fwrite($fh, rand(1, (int)$nbJoueurs)."\n");
 foreach($joueurs as $key => $value) {
   fwrite($fh, $value["nom"]."\t".$value["couleur"]);
   if($value["si_mdp"]) {
-    fwrite($fh, "\t".$value["mdp"]);
+    fwrite($fh, "\t".md5($value["mdp"]));
 	} else {
 		fwrite($fh, "\t0");
 	}

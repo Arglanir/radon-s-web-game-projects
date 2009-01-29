@@ -1,17 +1,23 @@
 <?php
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+include_once("fonctions.inc");
+define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
+
+
 if (!array_key_exists("p",$_GET) || !array_key_exists("j",$_GET) || !array_key_exists("a",$_GET)){
 	header("HTTP/1.0 404 Not found",true,404);die();
 }
 $fichierCourant = "aop".$_GET["p"]."bacteries.par";
 if (!file_exists($fichierCourant)){
+	if ($_GET["a"] == "s"){//on traite la suppression de partie
+		$camarche = supprimerPartie($_GET["p"],"lespartiesencours.xml",true);
+		header('Content-Type: text/xml');
+		echo XMLHeader."<reponse><action traitee=\"".$camarche."\" partiesupprimee=\"".$_GET["p"]."\" /></reponse>";
+		die();//pas besoin d'aller plus loin
+	}
 	header("HTTP/1.0 404 Not found",true,404);die();
 }
-
-define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
-
-include_once("fonctions.inc");
 
 $contenuFichier = file($fichierCourant,FILE_IGNORE_NEW_LINES);
 foreach ($contenuFichier as $line => $contenu)
@@ -46,6 +52,8 @@ $joueurAppelant = 0;
 if (strlen($_GET["j"])>=3){//on cherche le n° du joueur avec son nom
 	if ($_GET["j"] == "observateur")
 		$joueurAppelant=256;
+	else if ($_GET["j"] == "admin")
+		$joueurAppelant=3000;
 	else
 		for ($i = 1; $i <= $nbJoueurs; $i++)
 			if ($joueurs[$i][0]==$_GET["j"]){
@@ -55,12 +63,21 @@ if (strlen($_GET["j"])>=3){//on cherche le n° du joueur avec son nom
 } else {
 	$joueurAppelant = 0+$_GET["j"];
 }
-if (($joueurAppelant <= 0 || $joueurAppelant > $nbJoueurs)&&$joueurAppelant!=256){
+if (($joueurAppelant <= 0 || $joueurAppelant > $nbJoueurs)&&($joueurAppelant!=256 && $joueurAppelant!=3000)){
 	header("HTTP/1.0 404 Not found",true,404);die();
 }
-if ($joueurAppelant!=256) if (strlen($joueurs[$joueurAppelant][2])>1){//on peut traiter le mot de passe
+if ($joueurAppelant<256) if (strlen($joueurs[$joueurAppelant][2])>1){//on peut traiter le mot de passe
 	if (array_key_exists("pw",$_GET)){
-		if ($_GET["pw"]!=$joueurs[$joueurAppelant][2]){
+		if (md5($_GET["pw"])!=$joueurs[$joueurAppelant][2]){
+			header("HTTP/1.0 404 Not found",true,404);die();
+		}
+	} else {
+		header("HTTP/1.0 404 Not found",true,404);die();
+	}
+}
+if ($joueurAppelant==3000){//on peut traiter le mot de passe administrateur
+	if (array_key_exists("pw",$_GET)){
+		if (md5($_GET["pw"])!=$mdpadminmd5){
 			header("HTTP/1.0 404 Not found",true,404);die();
 		}
 	} else {
@@ -152,7 +169,7 @@ $tableauDesMax = array();//calcule le maximum de cellules dans les cases
 	}
 
 if ($_GET["a"]=="nvp"){ //changement de mot de passe
-	$joueurs[$joueurAppelant][2] = $_GET["k"];
+	$joueurs[$joueurAppelant][2] = md5($_GET["k"]);
 	enregistrerPartie();
 	header('Content-Type: text/xml');
 	$chaineReponse = XMLHeader."<reponse><action traitee=\"oui\" nouveaumotdepasse=\"".$_GET["k"]."\" /></reponse>";

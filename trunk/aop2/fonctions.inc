@@ -6,6 +6,8 @@ Auteur: Mikaël Mayer / Cédric Mayer
 But: Fonctions communes à plusieurs fichiers
 */
 
+$mdpadminmd5 = md5("meuhmeuh");
+
 $fichier_parties = "lespartiesencours.xml";
 
 function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
@@ -119,8 +121,7 @@ if (floatval(phpversion())>=5){
   $parties_array = $xml_parties->getElementsByTagName( "parties" );
   $parties = $parties_array->item(0);
 
-  $parties = $xml_parties->getElementsByTagName("partie");
-  foreach ($parties as $partie) {
+  foreach ($parties->getElementsByTagName( "partie" ) as $partie) {
     if($partie->getAttribute("numero") != $numero) continue;
 	$parties->removeChild($partie);
 	$changement = true;
@@ -137,8 +138,7 @@ if (floatval(phpversion())>=5){
   $parties_array = $xml_parties->getElementsByTagName( "parties" );
   $parties = $parties_array[0];
 
-  $parties = $xml_parties->get_elements_by_tagname("partie");
-  foreach ($parties as $partie) {
+  foreach ($parties->get_elements_by_tagname("partie") as $partie) {
     if($partie->get_attribute("numero") != $numero) continue;
 	$parties->remove_child($partie);
 	$changement = true;
@@ -184,7 +184,7 @@ function ajouterPartieSimpleXml($fichier_parties, $numero, $cachee, $nbJoueurs, 
 }
 
 $no_party = "<tr><td>Aucune</tr></td></table>";
-function afficherParties($fichier_parties) {
+function afficherParties($fichier_parties,$admin=false) {
 	global $no_party;
   echo "<table>";
   if(!file_exists($fichier_parties)) {
@@ -197,7 +197,7 @@ function afficherParties($fichier_parties) {
 
     $parties = $xml_parties->getElementsByTagName("partie");
     foreach ($parties as $partie) {
-      if($partie->getAttribute("cachee") == "1") continue;
+      if($partie->getAttribute("cachee") == "1" && !$admin) continue;
       echo "<tr>";
       echo "<td>";
       $numero_partie = $partie->getAttribute("numero");
@@ -209,6 +209,11 @@ function afficherParties($fichier_parties) {
         echo '<a href="'.$url.'">'.$joueur->getAttribute("nom").'</a>';
         echo "</td>";
       }
+	  if ($admin){
+		  echo "<td>";
+		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
+		  echo "</td>";
+	  }
       echo "</tr>\n";
     }
   } else {//ancienne version de DOM
@@ -217,7 +222,7 @@ function afficherParties($fichier_parties) {
 
     $parties = $xml_parties->get_elements_by_tagname("partie");
     foreach ($parties as $partie) {
-      if($partie->get_attribute("cachee") == "1") continue;
+      if($partie->get_attribute("cachee") == "1" && !$admin) continue;
       echo "<tr>";
       echo "<td>";
       $numero_partie = $partie->get_attribute("numero");
@@ -229,6 +234,11 @@ function afficherParties($fichier_parties) {
         echo '<a href="'.$url.'">'.$joueur->get_attribute("nom").'</a>';
         echo "</td>";
       }
+	  if ($admin){
+		  echo "<td>";
+		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
+		  echo "</td>";
+	  }
       echo "</tr>\n";
     }
   }
