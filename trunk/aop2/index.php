@@ -232,5 +232,7 @@ Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_
 <?php
 afficherParties($fichier_parties);
 ?>
+	
+<form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form>
 </body>
 </html>
