@@ -437,7 +437,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			if (decor == 2)
 				leStyle += "font-style: italic;";
 			//chaineHTML += leStyle;
-			chaineHTML += "\"><input title=\""+this.jouable(x,y)+"\" type=\"button\" style=\"";
+			chaineHTML += "\"><input id=\"c"+x+"_"+y+"\" title=\""+this.jouable(x,y)+"\" type=\"button\" style=\"";
 			chaineHTML += "align:center;height:30px;width:30px;background-color:"+couleur+";";
 			chaineHTML += leStyle + "\" ";
 			chaineHTML += "value=\""+cellules+"\" ";
@@ -514,6 +514,11 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	}
 		
 	document.getElementById("jeu").innerHTML = chaineHTML;
+	
+	//traitement des dernières actions
+	for (j=1; j<= this.nbJoueurs; j++)
+		document.getElementById("c"+this.derniereAction[j][1]+"_"+this.derniereAction[j][2]).style.textDecoration = "underline";
+	
 }}
 
 function toString(){with(this){//recrée une string de jeu
