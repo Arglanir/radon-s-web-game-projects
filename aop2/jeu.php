@@ -68,6 +68,14 @@ if ($joueurAppelant!=256) if (strlen($joueurs[$joueurAppelant][2])>1){//on peut 
 	}
 }
 
+if ($_GET["a"] == "s"){//on traite la suppression de partie
+	$camarche = supprimerPartie($_GET["p"],"lespartiesencours.xml",true);
+	header('Content-Type: text/xml');
+	echo XMLHeader."<reponse><action traitee=\"".$camarche."\" partiesupprimee=\"".$_GET["p"]."\" /></reponse>";
+	die();//pas besoin d'aller plus loin
+}
+
+
 if ($_GET["a"]=="g") {//on peut traiter l'envoi du fichier actuel
 	for ($i = 1; $i <= $nbJoueurs; $i++){
 		if ($i != $joueurAppelant)

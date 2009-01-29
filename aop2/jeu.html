@@ -502,6 +502,9 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			break;
 		case 255:
 			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[nGagnant][1]+"' value='"+this.joueurs[nGagnant][0]+" a gagné !' onclick=\"alert('Bravo !')\" title='' />";
+			if (nGagnant == tableauArguments["j"]){
+				setTimeout("document.getElementById(\"comm\").innerHTML = \"<input type=\\\"button\\\" onclick=\\\"supprimerPartie()\\\" value=\\\"Supprimer la partie\\\" />\";",10000);
+			}
 			break;
 		case 254:
 			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
@@ -795,6 +798,24 @@ function changeMP(){//demande au serveur de changer le mot de passe
 function chargeMP(){
 	window.location.replace("jeu.html?pw="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]);
 }
+
+function supprimerPartie(){
+	var xhr = createXHR();
+	var chaineDAppel = "jeu.php?a=s"+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
+	xhr.onreadystatechange  = function(){ 
+		if(xhr.readyState  == 4){
+			if(xhr.status  == 200) {
+				document.getElementById("options").innerHTML = "Partie supprimée.<br />";
+			} else {
+			}
+         }
+    }; 
+	document.getElementById("comm").innerHTML = "Attente du serveur...";
+	
+	xhr.open("GET", chaineDAppel, true); 
+	xhr.send(null);
+}
+
 
 /*** fonction principale ***/
 var unJeu;

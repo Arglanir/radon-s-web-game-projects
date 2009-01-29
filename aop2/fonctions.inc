@@ -95,6 +95,63 @@ if (floatval(phpversion())>=5){
 }
 }
 
+//DOM-way of doing that
+function supprimerPartie($numero, $fichier_parties="lespartiesencours.xml", $force=false) {//$force continue sur le XML même si la partie n'existe pas en fichier
+$fichier="aop".$numero."bacteries.par";
+if (file_exists($fichier)){
+	if (!unlink($fichier))
+		return false;
+} else {
+	if (!$force) return false;
+}
+
+//traitement du XML
+  $file_exists = file_exists($fichier_parties);
+  if(!$file_exists) {
+	return true;
+  }
+  $changement=false;
+if (floatval(phpversion())>=5){
+  $xml_parties = new DOMDocument();
+  $xml_parties->load( $fichier_parties );
+  $xml_parties->formatOutput = true;
+  
+  $parties_array = $xml_parties->getElementsByTagName( "parties" );
+  $parties = $parties_array->item(0);
+
+  $parties = $xml_parties->getElementsByTagName("partie");
+  foreach ($parties as $partie) {
+    if($partie->getAttribute("numero") != $numero) continue;
+	$parties->removeChild($partie);
+	$changement = true;
+	break;
+  }
+  if ($changement) {
+	$fh = fopen($fichier_parties, 'wb');
+	fwrite($fh, $xml_parties->saveXML());
+	fclose($fh);
+  }
+} else {
+  $xml_parties = domxml_open_file( $fichier_parties );
+  
+  $parties_array = $xml_parties->getElementsByTagName( "parties" );
+  $parties = $parties_array[0];
+
+  $parties = $xml_parties->get_elements_by_tagname("partie");
+  foreach ($parties as $partie) {
+    if($partie->get_attribute("numero") != $numero) continue;
+	$parties->remove_child($partie);
+	$changement = true;
+	break;
+    }
+  
+  if ($changement) {
+	$xml_parties->dump_file($fichier_parties, false, true);
+  }
+}
+return true;
+}
+
 //SimpleXml-way of doing that (requires PHP5)
 function ajouterPartieSimpleXml($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_array) {
 
@@ -154,7 +211,7 @@ function afficherParties($fichier_parties) {
       }
       echo "</tr>\n";
     }
-  } else {//ancienne version de dom
+  } else {//ancienne version de DOM
 	
     $xml_parties = @domxml_open_file( $fichier_parties );
 
