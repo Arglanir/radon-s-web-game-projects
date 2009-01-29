@@ -40,6 +40,7 @@ function supprimerPartie(numero){
 </script>
 </head>
 <body>
+<a href="index.php">Retour à l'accueil</a>
 <h3>Fichier XML :</h3>
 <?php
 afficherParties("lespartiesencours.xml",true);
