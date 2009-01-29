@@ -10,6 +10,9 @@ if (!file_exists($fichierCourant)){
 }
 
 define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
+
+include_once("fonctions.inc");
+
 $contenuFichier = file($fichierCourant,FILE_IGNORE_NEW_LINES);
 foreach ($contenuFichier as $line => $contenu)
 	$contenuFichier[$line] = trim($contenu);
@@ -175,17 +178,7 @@ function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, mê
 	return floor(($entier-(case2chateau($entier)?10000:0))/100);
 }
 
-function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
-	return ($avant<=$puis) && ($puis<=$ensuite);
-}
 
-function mettreEntre($nombre,$base){//fonction permettant le modulo
-	while($nombre < 0)
-		$nombre+=$base;
-	while($nombre >= $base)
-		$nombre-=$base;
-	return $nombre;
-}
 
 	$x = (int) $_GET["x"];
 	$y = (int) $_GET["y"];
