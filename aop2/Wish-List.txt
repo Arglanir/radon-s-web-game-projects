@@ -1,9 +1,10 @@
 Mikaël (est aussi correcteur):
 
 Bugs:
-- Problème: L'affichage est synchronisé, mais une boîte de dialogue nous disant que ce n'est pas encore à nous de jouer est encore potentiellement active 1 seconde après la synchronisation.
 
 Wish:
+- Problème: L'affichage est synchronisé, mais une boîte de dialogue nous disant que ce n'est pas encore à nous de jouer est encore potentiellement active 1 seconde après la synchronisation.
+	C'est pas un bug, c'est parce que l'affichage est fait avant le test pour savoir s'il y a encore des changements
 - Eviter les boîtes de dialogue pour dire que c'est pas à nous de jouer
 	c'est utilse pour faire pause, non ?
 - Un moyen visuel de déterminer de quelle couleur je suis
@@ -11,7 +12,10 @@ Wish:
 - Un moyen visuel plus avancé pour voir à qui est le tour (mieux que mode: ajout de cellule)
 	et un > montre à qui c'est de jouer pour le moment dans ce client. Quelle idée proposes-tu ?
 - Un moyen visuel plus avancé pour voir dans combien de temps je joue (un peu comme le démineur), voire mettre une option pour en être alerté.
+	option mise, et aussi le titre change en fonction du joueur qui joue (pratique avec onglets)
 - Virer les tooltip "true"/"false" sur les cases
 	c'est juste un title, ça peut être pratique pour les débutants
+	ah et aussi firefox envoie un warning quand il n'y a pas de title... donc c'est mieux pour débugger dans la console
 - Replay button pour voir les dernières actions
 - mettre où le dernier joueur a joué en surbrillance
+	c'est fait : soulignement
