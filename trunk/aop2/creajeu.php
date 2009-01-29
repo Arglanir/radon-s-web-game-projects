@@ -45,9 +45,10 @@ $opt_type_bords=0;
 $opt_ajout_diagonale=0;
 $opt_explosion_joueur=0;
 $opt_profondeur_jeu=0;
+$opt_partie_cachee=0;
 
 function loadParameters() {
-  Global $nbJoueurs, $joueurs, $x, $y, $opt_chateaux_actifs, $opt_type_bords, $opt_ajout_diagonale, $opt_explosion_joueur,$opt_profondeur_jeu;
+  Global $nbJoueurs, $joueurs, $x, $y, $opt_chateaux_actifs, $opt_type_bords, $opt_ajout_diagonale, $opt_explosion_joueur,$opt_profondeur_jeu, $opt_partie_cachee;
   if(isset($_POST["nbJoueurs"])) {
     $nbJoueurs = (int)$_POST["nbJoueurs"];
   } else return "Erreur : Nombre de joueurs indéterminé";
@@ -91,6 +92,8 @@ function loadParameters() {
     $opt_explosion_joueur = (int)$_POST["opt_explosion_joueur"];
   if(isset($_POST["opt_profondeur_jeu"]))
     $opt_profondeur_jeu = (int)$_POST["opt_profondeur_jeu"];
+	if(isset($_POST["opt_partie_cachee"]))
+    $opt_partie_cachee = (int)$_POST["opt_partie_cachee"];
   return "";
 }
 
@@ -247,7 +250,7 @@ for($i = 1; $i <= $x; $i++) {
 fwrite($fh, "1\n");
 fclose($fh);
 
-ajouterPartie($fichier_parties, $numero_partie, 0, $nbJoueurs, $joueurs);
+ajouterPartie($fichier_parties, $numero_partie, $opt_partie_cachee, $nbJoueurs, $joueurs);
 ?>
 Partie <?php echo $numero_partie;?> créée !<br />
 <?php

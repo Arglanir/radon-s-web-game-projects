@@ -218,6 +218,14 @@ array("text" => "Explosions ",
       "default" => 1,
       "table"=>true
 ));
+addSelectOption(
+array("text" => "Visibilité de la partie ",
+      "idname" => "opt_partie_cachee",
+      "options" => array("Cachée" => 1,
+                         "Visible" => 0),
+      "default" => 0,
+      "table"=>true
+));
 ?>
 <tr><td>
 Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
