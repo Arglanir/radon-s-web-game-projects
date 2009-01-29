@@ -196,6 +196,9 @@ function afficherParties($fichier_parties,$admin=false) {
     $xml_parties->load($fichier_parties);
 
     $parties = $xml_parties->getElementsByTagName("partie");
+	echo "<tr><td colspan='3'>".count($parties)." parties</td></tr>";
+	if (count($parties) == 0)
+		echo $no_party;
     foreach ($parties as $partie) {
       if($partie->getAttribute("cachee") == "1" && !$admin) continue;
       echo "<tr>";
@@ -209,11 +212,11 @@ function afficherParties($fichier_parties,$admin=false) {
         echo '<a href="'.$url.'">'.$joueur->getAttribute("nom").'</a>';
         echo "</td>";
       }
-	  if ($admin){
 		  echo "<td>";
+	  if ($admin){
 		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
-		  echo "</td>";
 	  }
+		  echo "</td>";
       echo "</tr>\n";
     }
   } else {//ancienne version de DOM
@@ -221,6 +224,8 @@ function afficherParties($fichier_parties,$admin=false) {
     $xml_parties = @domxml_open_file( $fichier_parties );
 
     $parties = $xml_parties->get_elements_by_tagname("partie");
+	if (count($parties) == 0)
+		echo $no_party;
     foreach ($parties as $partie) {
       if($partie->get_attribute("cachee") == "1" && !$admin) continue;
       echo "<tr>";
@@ -234,11 +239,11 @@ function afficherParties($fichier_parties,$admin=false) {
         echo '<a href="'.$url.'">'.$joueur->get_attribute("nom").'</a>';
         echo "</td>";
       }
-	  if ($admin){
 		  echo "<td>";
+	  if ($admin){
 		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
-		  echo "</td>";
 	  }
+		  echo "</td>";
       echo "</tr>\n";
     }
   }

@@ -3,8 +3,10 @@
 
 include ("fonctions.inc");
 
-if (@md5($_GET["pw"]) != $mdpadminmd5)
+if (@md5($_GET["pw"]) != $mdpadminmd5){
+	header("HTTP/1.0 404 Not found",true,404);die();
 	die("Vous n'êtes pas autorisés à venir ici.");
+}
 ?>
 <html>
 <head>
@@ -38,9 +40,12 @@ function supprimerPartie(numero){
 </script>
 </head>
 <body>
+<h3>Fichier XML :</h3>
 <?php
 afficherParties("lespartiesencours.xml",true);
-
+?>
+<h3>Répertoire :</h3>
+<?php
 $dir = opendir('.');
 echo "<br /><table>";
 while (false !== ($file = readdir($dir))) {
