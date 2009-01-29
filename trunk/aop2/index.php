@@ -43,7 +43,7 @@ function addSelectOption($arrayOptions) {
       echo "<option";
       if(isset($value)) echo ' value="'.$text.'"';
       if($color) echo ' style="background-color:'.$text.'"';
-      if($i == $default) echo ' selected';
+      if($value == $default or $text == $default) echo ' selected';
       echo ">".$value."</option>\n";
     } else {
       echo "<option>".$text."</option>\n";
