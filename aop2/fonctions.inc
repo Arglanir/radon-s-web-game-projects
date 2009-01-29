@@ -31,12 +31,13 @@ function getUrlJoueur($numero_partie, $numero_joueur, $si_mot_de_passe=false, $m
 
 //DOM-way of doing that
 function ajouterPartie($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_array) {
+if (floatval(phpversion())>=5){
   $xml_parties = new DOMDocument();
   $file_exists = file_exists($fichier_parties);
   if($file_exists) {
     $xml_parties->load( $fichier_parties );
   }
-  $doc->formatOutput = true;
+  $xml_parties->formatOutput = true;
   
   $parties_array = $xml_parties->getElementsByTagName( "parties" );
   if($file_exists) {
@@ -61,6 +62,37 @@ function ajouterPartie($fichier_parties, $numero, $cachee, $nbJoueurs, $joueur_a
   $fh = fopen($fichier_parties, 'wb');
   fwrite($fh, $xml_parties->saveXML());
   fclose($fh);
+} else {
+  $file_exists = file_exists($fichier_parties);
+  if($file_exists) {
+    $xml_parties = domxml_open_file( $fichier_parties );
+  } else {
+	$xml_parties = domxml_new_doc("1.0");
+  }
+  
+  $parties_array = $xml_parties->get_elements_by_tagname( "parties" );
+  if($file_exists) {
+    $parties = $parties_array[0];
+  } else {
+    $parties = $xml_parties->create_element( "parties" );
+    $xml_parties->append_child($parties);
+  }
+  $partie = $xml_parties->create_element("partie");
+  $partie->set_attribute("numero", $numero);
+  $partie->set_attribute("cachee", $cachee);
+  $partie->set_attribute("nbJoueurs", $nbJoueurs);
+  $parties->append_child($partie);
+  
+  foreach($joueur_array as $index => $joueur) {
+    $joueur_xml = $xml_parties->create_element("joueur");
+    $joueur_xml->set_attribute("numero", $index);
+    $joueur_xml->set_attribute("nom", utf8_encode($joueur["nom"]));
+    $partie->append_child($joueur_xml);
+  }
+  
+  $xml_parties->dump_file($fichier_parties, false, true);
+
+}
 }
 
 //SimpleXml-way of doing that (requires PHP5)
@@ -101,6 +133,8 @@ function afficherParties($fichier_parties) {
   if(!file_exists($fichier_parties)) {
     echo $no_party;
   } else {
+  if (floatval(phpversion())>=5){//dom change !
+
     $xml_parties = new DOMDocument();
     $xml_parties->load($fichier_parties);
 
@@ -120,6 +154,27 @@ function afficherParties($fichier_parties) {
       }
       echo "</tr>\n";
     }
+  } else {//ancienne version de dom
+	
+    $xml_parties = @domxml_open_file( $fichier_parties );
+
+    $parties = $xml_parties->get_elements_by_tagname("partie");
+    foreach ($parties as $partie) {
+      if($partie->get_attribute("cachee") == "1") continue;
+      echo "<tr>";
+      echo "<td>";
+      $numero_partie = $partie->get_attribute("numero");
+      echo "Partie ".$numero_partie;
+      echo " : </td>";
+      foreach ($partie->get_elements_by_tagname("joueur") as $joueur) {
+        echo "<td>";
+        $url = getUrlJoueur($numero_partie, $joueur->get_attribute("numero"));
+        echo '<a href="'.$url.'">'.$joueur->get_attribute("nom").'</a>';
+        echo "</td>";
+      }
+      echo "</tr>\n";
+    }
+  }
   }
   echo "</table>";
 }

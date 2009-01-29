@@ -262,8 +262,11 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 }}
 
 function faireJouerSuivant(){with(this){//fait jouer les joueurs sur internet
-	if (tableauArguments["offline"]==1 || this.joueurs[this.joueurEnCours][3] == 0)
+	document.title = "AOP2 - "+this.joueurs[this.joueurEnCours][0];
+	if (tableauArguments["offline"]==1 || this.joueurs[this.joueurEnCours][3] == 0){
+		if (document.mdp.prevenu.checked) alert("C'est ton tour de jouer !");
 		return;//c'est au joueur de jouer, on le laisse
+	}
 	document.getElementById("comm").innerHTML ="Demande de l'action du joueur "+this.joueurEnCours+" au serveur";
 	ouJoue(this.joueurEnCours, function(tabReponse){
 		if(tabReponse["n"] != unJeu.noTour){// && !enCoursDeTraitement)
@@ -824,7 +827,7 @@ function charge(){//charge les images
 <input type="button" onclick="ouJoue(2)" value="Où joue 2 ?"  title="Cliquer" />
 <input type="button" onclick="quiJoue()" value="Qui joue ?"  title="Cliquer" />
 <input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" /-->
-<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />  </form>
+<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" /> | <input type="checkbox" name="prevenu" /> Etre prévenu quand c'est notre tour </form>
 </div>
 
 <div name="Jeu" id="jeu">
