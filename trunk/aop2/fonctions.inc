@@ -8,6 +8,19 @@ But: Fonctions communes à plusieurs fichiers
 
 $fichier_parties = "lespartiesencours.xml";
 
+function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
+	return ($avant<=$puis) && ($puis<=$ensuite);
+}
+
+function mettreEntre($nombre,$base){//fonction permettant le modulo, met le nombre entre 0 et base-1 compris
+	while($nombre < 0)
+		$nombre+=$base;
+	while($nombre >= $base)
+		$nombre-=$base;
+	return $nombre;
+}
+
+//renvoie une chaine contenant l'URL du client pour le joueur
 function getUrlJoueur($numero_partie, $numero_joueur, $si_mot_de_passe=false, $mot_de_passe="") {
   $url = "jeu.html?j=".$numero_joueur."&p=".$numero_partie;
   If($si_mot_de_passe) {

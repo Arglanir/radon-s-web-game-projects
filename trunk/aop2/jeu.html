@@ -32,8 +32,6 @@ tableauArguments : tableau des arguments de la page
 		offline	arrêt des communications avec le serveur (peut être mis en route en cours de jeu) */
 var bouh = location.search.substring(1,location.search.length).split(unescape("%26"));//on enlève le ? et on sépare avec les &
 var tableauArguments = new Array();
-tableauArguments["p"] = "000001";
-tableauArguments["j"] = "1";
 tableauArguments["offline"] = 0;
 for (i=0;i<bouh.length;i++){
    var temp = bouh[i].split("=");
@@ -70,6 +68,7 @@ function CreerTableauJeu(chaineTexte){//constructeur d'un jeu
 	var indice = 0;
 this.nbJoueurs = parseInt(tabJeuT[0]);
 this.joueurEnCours = parseInt(tabJeuT[1]);
+if (!this.joueurEnCours) alert("Mauvais chargement du jeu");
 this.joueurs = new Array();
 	for(var i=0;i<this.nbJoueurs;i++)
 		this.joueurs[i+1] = tabJeuT[2+i].split("\t");//nom couleur motdepasse 1ia/2autreordi
@@ -791,12 +790,13 @@ function changeMP(){//demande au serveur de changer le mot de passe
 	
 }
 function chargeMP(){
-	window.location.replace("jeu.php?pw="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]);
+	window.location.replace("jeu.html?pw="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]);
 }
 
 /*** fonction principale ***/
 var unJeu;
 function main(){
+	if (!tableauArguments["p"]) return;//le jeu n'est pas chargé
 	getJeu();
 	if (tableauArguments["synchroserveur"])
 		setInterval("getJeu()",7000);
@@ -824,14 +824,18 @@ function charge(){//charge les images
 <input type="button" onclick="ouJoue(2)" value="Où joue 2 ?"  title="Cliquer" />
 <input type="button" onclick="quiJoue()" value="Qui joue ?"  title="Cliquer" />
 <input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" /-->
-<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> </form>
+<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />  </form>
 </div>
 
 <div name="Jeu" id="jeu">
 
 </div>
 <div name="Jeu" id="options">
-
+<form method="GET">
+Numéro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
+Numéro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
+<input type="submit" value="Chercher la partie" title="clique ici" />
+</form>
 </div>
 <div name="imagespréchargées" id="imgs" style="visibility:hidden;">
 cette section est invisible et sert à précharger les images
