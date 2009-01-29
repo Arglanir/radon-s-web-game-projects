@@ -14,3 +14,4 @@ Wish:
 - Virer les tooltip "true"/"false" sur les cases
 	c'est juste un title, ça peut être pratique pour les débutants
 - Replay button pour voir les dernières actions
+- mettre où le dernier joueur a joué en surbrillance
