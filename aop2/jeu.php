@@ -4,15 +4,15 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 include_once("fonctions.inc");
 define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
 
-
 if (!array_key_exists("p",$_GET) || !array_key_exists("j",$_GET) || !array_key_exists("a",$_GET)){
 	header("HTTP/1.0 404 Not found",true,404);die();
 }
+
 $fichierCourant = "aop".$_GET["p"]."bacteries.par";
 if (!file_exists($fichierCourant)){
 	if ($_GET["a"] == "s"){//on traite la suppression de partie
-		$camarche = supprimerPartie($_GET["p"],"lespartiesencours.xml",true);
 		header('Content-Type: text/xml');
+		$camarche = supprimerPartie($_GET["p"],"lespartiesencours.xml",true);
 		echo XMLHeader."<reponse><action traitee=\"".$camarche."\" partiesupprimee=\"".$_GET["p"]."\" /></reponse>";
 		die();//pas besoin d'aller plus loin
 	}

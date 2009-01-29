@@ -135,7 +135,7 @@ if (floatval(phpversion())>=5){
 } else {
   $xml_parties = domxml_open_file( $fichier_parties );
   
-  $parties_array = $xml_parties->getElementsByTagName( "parties" );
+  $parties_array = $xml_parties->get_elements_by_tagname( "parties" );
   $parties = $parties_array[0];
 
   foreach ($parties->get_elements_by_tagname("partie") as $partie) {
