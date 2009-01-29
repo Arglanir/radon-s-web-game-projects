@@ -19,7 +19,7 @@ jeu.php : interface avec le fichier de jeu
 		p	numéro de la partie
 		j	joueur envoyant la requête
 		pw	mot de passe du joueur
-		a	genre d'action (n normale, c chateau, g demande de grille, m mise à jour joueur, nvp nouveau mot de passe)
+		a	genre d'action (n normale, c chateau, g demande de grille, m mise à jour joueur, nvp nouveau mot de passe, s supprimer la partie)
 		x	abscisse de l'endroit joué
 		y	ordonnée de l'endroit joué
 		k	si a=m, joueur dont on veut connaître la dernière action
@@ -29,6 +29,8 @@ jeu.php : interface avec le fichier de jeu
 	renvoie une chaîne xml
 		si a=nvp et k=nouveau mot de passe
 			<reponse><action traitee="oui"/"non" nouveaumotdepasse="lenouveau" /></reponse>
+		si a=s
+			<reponse><action traitee="oui"/"non" partiesupprimee="numero" /></reponse>
 		si a=n ou a=c
 			requête possible ?, traitée ?
 			<reponse><action autorisee="oui"/"non" traitee="oui"/"non"/></reponse>
@@ -92,8 +94,8 @@ parties sous le nom aopNNNNNNbacteries.par, délimiteurs : \t et \n
 	N°Joueur en cours entre 1 et NbJoueurs
 	Nom joueur 1	couleur	option : motdepasse	
 	Nom joueur 2	couleur	option : motdepasse	option : estIA?
-0	Dernière action joueur 1 : a x y tour
-0	Dernière action joueur 2 : a x y tour
+	Dernière action joueur 1 : a x y tour
+	Dernière action joueur 2 : a x y tour
 	Options : chateaux activés ? 1/0
 		Profondeur de jeu
 		Bord bloqués ?	1/0/2:monde rond
@@ -103,7 +105,7 @@ parties sous le nom aopNNNNNNbacteries.par, délimiteurs : \t et \n
 	Taille y
 	Tableau de décor - 0 rien 1 glace 2 chaud 3 obstacle
 	Tableau de jeu - +10000 : chateau  +N00 : case au joueur N +XX : nombre de cellules
-0	n° du tour
+	n° du tour
 autre versions :
 <!DOCTYPE partie PUBLIC 'aop2jeu.dtd'>
 
