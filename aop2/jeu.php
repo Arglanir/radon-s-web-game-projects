@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Fichier: jeu.php
 Date: 27/01/2009
