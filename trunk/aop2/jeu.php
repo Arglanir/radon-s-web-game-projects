@@ -248,7 +248,7 @@ function CbonPeutJouer(){//continue de jouer
 		die();//on arrête le script
 	}
 	if (array_key_exists("k",$_GET)) if ($_GET["k"] == "0"){
-		header('Content-Type: text/xml');//si le client est bon, pas besoin d'aller beaucoup plus loin :-)
+		header('Content-Type: text/xml');//ne pas traiter la requete, c'était pour savoir
 		$chaineReponse = XMLHeader."<reponse><action autorisee=\"oui\" traitee=\"non\"/></reponse>";
 		echo $chaineReponse;
 		die();//on arrête le script
