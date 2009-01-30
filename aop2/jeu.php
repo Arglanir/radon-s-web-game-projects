@@ -1,4 +1,13 @@
 <?php
+/*
+Fichier: jeu.php
+Date: 27/01/2009
+Auteur: Cédric Mayer / Mikaël Mayer
+But: Interface avec le fichier de jeu
+	Reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
+	Reçoit la requête de mise à jour de son propre jeu
+	Reçoit la requête de plateau de jeu et le renvoie
+*/
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 include_once("fonctions.inc");
@@ -115,6 +124,12 @@ if ($_GET["a"]=="m") {//on renvoie où le joueur k a joué et quoi
 }
 
 /************ lecture des paramètres du jeu *********/
+	$N_OPT_CHATEAUX_ACTIFS = 0;
+	$N_OPT_PROFONDEUR = 1;
+	$N_OPT_BORDS_BLOQUES = 2;
+	$N_OPT_DIAGONALE = 3;
+	$N_OPT_TEMPS_PAS_REEL = 4;
+
 	$options = array(); $nombreDOptions = 5; $indice=2+2*$nbJoueurs;
 	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivés profondeur bordbloqués diagonale tempspasreel
 		$options[$i]=0+$contenuFichier[$indice+$i];
@@ -142,16 +157,16 @@ $tableauDesMax = array();//calcule le maximum de cellules dans les cases
 		$tableauDesMax[$i] = array();
 		for($j=0;$j<$tailleX;$j++){
 			$k = 4;
-			if ($options[2] == 1){//on compte les bords
+			if ($options[$N_OPT_BORDS_BLOQUES] == 1){//on compte les bords
 					if ($i==0 || $i==$tailleY-1)
 						$k--;
 					if ($j==0 || $j==$tailleX-1)
 						$k--;
 			}
-			for ($ii=-1;$ii<2;$ii++)//on regarde les obstacles
-				for($jj=-1;$jj<2;$jj++)
+			for ($ii=-1;$ii<=1;$ii++)//on regarde les obstacles
+				for($jj=-1;$jj<=1;$jj++)
 					if (abs($ii)+abs($jj)==1){//pas diagonale
-						switch($options[2]){
+						switch($options[$N_OPT_BORDS_BLOQUES]){
 						case 1: //on regarde pas après les bords
 						case 0:
 							if (entre(0,$ii+$i,$tailleY-1)&&entre(0,$jj+$j,$tailleX-1))
@@ -226,10 +241,10 @@ function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, mê
 		for($j=-1;$j<2;$j++){// 2 bordbloqués  3 diagonale
 			if ($i==0 && $j==0)
 				continue; // on a déjà testé la case centrale
-			if ($options[3] == 0 && abs($i)+abs($j)==2)
+			if ($options[$N_OPT_DIAGONALE] == 0 && abs($i)+abs($j)==2)
 				continue;//pas en diagonale
 			$nvx = $x+$i; $nvy = $y+$j;
-			if ($options[2] != 2 && (!entre(0,$nvx,$tailleX-1) || !entre(0,$nvy,$tailleY-1)))
+			if ($options[$N_OPT_BORDS_BLOQUES] != 2 && (!entre(0,$nvx,$tailleX-1) || !entre(0,$nvy,$tailleY-1)))
 				continue;//après le bord
 			$nvx = mettreEntre($nvx,$tailleX);//au cas où le monde est rond
 			$nvy = mettreEntre($nvy,$tailleY);
@@ -291,7 +306,7 @@ function purifier(){
 	}
 	for ($x=0;$x<$tailleX;$x++) for($y=0;$y<$tailleY;$y++){//traitement des explosions
 		  $nbSurCase = $tableauJeu[$y][$x];
-		  if (($options[4] == 1 && case2joueur($nbSurCase)==$joueurEnCours) || $options[4] == 0)
+		  if (($options[$N_OPT_TEMPS_PAS_REEL] == 1 && case2joueur($nbSurCase)==$joueurEnCours) || $options[$N_OPT_TEMPS_PAS_REEL] == 0)
 			if (case2cellules($nbSurCase) >= $tableauDesMax[$y][$x] && !case2chateau($nbSurCase)){//explosion !
 	$changement = true;
 	for ($ii=-1;$ii<2;$ii++)//va sur les cases d'à côté
@@ -299,7 +314,7 @@ function purifier(){
 			if (abs($ii)+abs($jj)==1){//pas diagonale
 				$nvx = $x+$jj; $nvy = $y+$ii;
 				$perteBord = false;
-				switch($options[2]){
+				switch($options[$N_OPT_BORDS_BLOQUES]){
 				  case 2: //on regarde après les bords
 					$nvx = mettreEntre($x+$jj,$tailleX); $nvy = mettreEntre($y+$ii,$tailleY);
 				  case 0: $perteBord=true; //on ne regarde pas au bord mais on perd une cellule
@@ -369,7 +384,7 @@ function purifier(){
 }
 function purifierTotalement($profondeur=0){
 	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
-	if ($profondeur>=$options[1]){
+	if ($profondeur>=$options[$N_OPT_PROFONDEUR]){
 		$joueurEnCours = mettreEntre($joueurEnCours,$nbJoueurs)+1;//on passe au suivant
 		if ($joueurEnCours == 1) $noTour++;//augmentation du n° du tour
 		while(!peutJouer()) true;//tant que 

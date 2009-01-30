@@ -1,3 +1,4 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <?php
 /*
 Fichier: index.php
@@ -19,7 +20,8 @@ function addSelectOption($arrayOptions) {
   $idname = "";
   $options = "";
   $callback = "";
-  $default = 1;
+  $default = -1;
+	$default_index = -1;
   $table = False;
   $color = False;
   foreach($arrayOptions as $key => $value) {
@@ -29,6 +31,7 @@ function addSelectOption($arrayOptions) {
     case "options": $options = $value; break;//tableau
     case "callback": $callback = $value; break;//fonction
     case "default": $default = $value; break;
+		case "default_index": $default_index = $value; break;
     case "color": $color = $value; break;//booleen
     case "table": $table = $value; break;//booleen
     }
@@ -43,7 +46,7 @@ function addSelectOption($arrayOptions) {
       echo "<option";
       if(isset($value)) echo ' value="'.$text.'"';
       if($color) echo ' style="background-color:'.$text.'"';
-      if($value == $default or $text == $default) echo ' selected';
+      if($value == $default or $text == $default or $i == $default_index) echo ' selected';
       echo ">".$value."</option>\n";
     } else {
       echo "<option>".$text."</option>\n";
@@ -77,16 +80,16 @@ function addCheckOption($arrayOptions) {
 }
 
 $color_array = (
-  array("bleu" => "#0000FF",
-        "rouge"  => "#FF0000",
-        "vert" => "#00FF00",
-        "jaune" => "#FFFF00",
-        "orange" => "#FF8000",
-        "cyan" => "#00FFFF",
-        "violet" => "#FF00FF",
-        "emeraude" => "#00FF80",
-        "noir" => "#000000",
-        "autre..." => "....."));
+  array("Bleu" => "#4040FF",
+        "Rouge"  => "#FF0000",
+        "Vert" => "#00FF00",
+        "Jaune" => "#FFFF00",
+        "Orange" => "#FF8000",
+        "Cyan" => "#00FFFF",
+        "Violet" => "#FF00FF",
+        "Emeraude" => "#00FF80",
+        "Gris" => "#808080",
+        "Autre..." => "....."));
         
 
 $game_name = "Age Of Paramecia II";
@@ -94,11 +97,14 @@ $game_name = "Age Of Paramecia II";
 
 <html>
 <head>
-<title></title>
+<title><?php echo $game_name;?></title>
 <script language="javascript">
 function bodyOnLoad() {
   document.cre.nbJoueurs.value = 2
   updateNumberPlayers()
+	for(var i = 1; i <= <?php echo $max_joueurs.""; ?>; i++) {
+		changecolor(i)
+	}
 }
 
 function updateNumberPlayers() {
@@ -120,7 +126,7 @@ function updateMotDePasse(n) {
 function changecolor(n) {
   var color = document.getElementById("couleur"+n).value;
   if(color.substr(0, 1)=="#") {
-    document.getElementById("couleur"+n).style = "background-color:"+color;
+    document.getElementById("no"+n).style.backgroundColor = color;
   }
 }
 </script>
@@ -142,8 +148,8 @@ array("text" => "Nombre de joueurs",
 foreach($array_count as $i) {
   echo "<div id=divname".$i.">\n";
   echo "<table border=1><tr><td>";
-  echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus=""><br>';
-  echo ' intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
+  echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="" style="background-color:#0000FF"><br>';
+  echo ' Intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
   echo ' Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
   echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value="" /></div>';
   echo "<br>";
@@ -152,7 +158,7 @@ foreach($array_count as $i) {
       "idname" => "couleur".$i,
       "options" => $color_array,
       "callback" => "changecolor(".$i.")",
-      "default" => $i,
+      "default_index" => $i,
       "color" => True
 ));
   echo "</td></tr></table>";
