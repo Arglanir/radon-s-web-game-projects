@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 /*
 Fichier: jeu.php
 Date: 27/01/2009
@@ -37,7 +37,7 @@ $tailleX = 0 + $contenuFichier[7+2*$nbJoueurs];
 $tailleY = 0 + $contenuFichier[8+2*$nbJoueurs];
 $noTour = 0 + $contenuFichier[9+2*$nbJoueurs+$tailleY*2];
 
-if ($_GET["a"]=="m"){//on peut traiter la mise à jour de connaissance du joueur en cours
+if ($_GET["a"]=="m"){//on peut traiter la mise Ã  jour de connaissance du joueur en cours
 	if (!array_key_exists("k",$_GET)){
 		header('Content-Type: text/xml');
 		echo XMLHeader."<reponse><k valeur=\"".$joueurEnCours."\" /><n valeur=\"".$noTour."\" /></reponse>";
@@ -58,7 +58,7 @@ for ($i = 1; $i <= $nbJoueurs; $i++)
 	$derniereAction[$i] = explode("\t",$contenuFichier[1+$nbJoueurs+$i]);
 
 $joueurAppelant = 0;
-if (strlen($_GET["j"])>=3){//on cherche le n° du joueur avec son nom
+if (strlen($_GET["j"])>=3){//on cherche le nÂ° du joueur avec son nom
 	if ($_GET["j"] == "observateur")
 		$joueurAppelant=256;
 	else if ($_GET["j"] == "admin")
@@ -113,8 +113,8 @@ if ($_GET["a"]=="g") {//on peut traiter l'envoi du fichier actuel
 	echo implode("\n",$contenuFichier);
 	die();
 }
-if ($_GET["a"]=="m") {//on renvoie où le joueur k a joué et quoi
-	$k = 0+$_GET["k"];//cas k == 0 ou absent traité
+if ($_GET["a"]=="m") {//on renvoie oÃ¹ le joueur k a jouÃ© et quoi
+	$k = 0+$_GET["k"];//cas k == 0 ou absent traitÃ©
 	if ($k<0 || $k>$nbJoueurs) {header("HTTP/1.0 404 Not found",true,404);die();}
 	$tabReponse = $derniereAction[$k];
 	header('Content-Type: text/xml');
@@ -123,7 +123,7 @@ if ($_GET["a"]=="m") {//on renvoie où le joueur k a joué et quoi
 	die();
 }
 
-/************ lecture des paramètres du jeu *********/
+/************ lecture des paramÃ¨tres du jeu *********/
 	$N_OPT_CHATEAUX_ACTIFS = 0;
 	$N_OPT_PROFONDEUR = 1;
 	$N_OPT_BORDS_BLOQUES = 2;
@@ -131,7 +131,7 @@ if ($_GET["a"]=="m") {//on renvoie où le joueur k a joué et quoi
 	$N_OPT_TEMPS_PAS_REEL = 4;
 
 	$options = array(); $nombreDOptions = 5; $indice=2+2*$nbJoueurs;
-	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivés profondeur bordbloqués diagonale tempspasreel
+	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivÃ©s profondeur bordbloquÃ©s diagonale tempspasreel
 		$options[$i]=0+$contenuFichier[$indice+$i];
 	$indice+=$nombreDOptions;
 //$tailleX = (int)($contenuFichier[$indice]);
@@ -167,13 +167,13 @@ $tableauDesMax = array();//calcule le maximum de cellules dans les cases
 				for($jj=-1;$jj<=1;$jj++)
 					if (abs($ii)+abs($jj)==1){//pas diagonale
 						switch($options[$N_OPT_BORDS_BLOQUES]){
-						case 1: //on regarde pas après les bords
+						case 1: //on regarde pas aprÃ¨s les bords
 						case 0:
 							if (entre(0,$ii+$i,$tailleY-1)&&entre(0,$jj+$j,$tailleX-1))
 								if ($tableauDecor[$i+$ii][$j+$jj]==3)
 									$k--;
 							break;
-						case 2://on regarde après le bord
+						case 2://on regarde aprÃ¨s le bord
 							if ($tableauDecor[mettreEntre($i+$ii,$tailleY)][mettreEntre($j+$jj,$tailleX)]==3)
 								$k--;
 							break;
@@ -197,7 +197,7 @@ if ($_GET["a"]=="nvp"){ //changement de mot de passe
 //il ne reste que la requete de jeu en x,y
 //renvoyer <reponse><action autorisee="oui"/"non"/></reponse>
 
-function pasAutorisee(){//arrete le script si l'action n'est pas autorisée
+function pasAutorisee(){//arrete le script si l'action n'est pas autorisÃ©e
 	header('Content-Type: text/xml');
 	$chaineReponse = XMLHeader."<reponse><action autorisee=\"non\" traitee=\"non\" /></reponse>";
 	echo $chaineReponse;
@@ -212,7 +212,7 @@ function case2cellules($entier){//retourne le nombre de cellules dans la case
 	return ($entier-(floor($entier/100)*100));
 }
 
-function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, même désertée
+function case2joueur($entier){//retourne le nÂ° d'un joueur Ã  qui est la case, mÃªme dÃ©sertÃ©e
 	/*if (case2cellules($entier) == 0)
 		return 0; //renvoie 0 si aucune cellule*/
 	return floor(($entier-(case2chateau($entier)?10000:0))/100);
@@ -224,54 +224,54 @@ function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, mê
 	$y = (int) $_GET["y"];
 	$action = ($_GET["a"]=="c"?"c":"n");
 	
-/************ on vérifie si l'action est autorisée *********/
+/************ on vÃ©rifie si l'action est autorisÃ©e *********/
 	if ($tableauDecor[$y][$x] != 0 && $action == "c")
 		pasAutorisee(); // chateau et case instable
 	if (case2joueur($tableauJeu[$y][$x]) != $joueurAppelant && case2cellules($tableauJeu[$y][$x]) > 0)
-		pasAutorisee(); //case déjà controlée par joueur adverse
+		pasAutorisee(); //case dÃ©jÃ  controlÃ©e par joueur adverse
 	if (case2joueur($tableauJeu[$y][$x]) == $joueurAppelant && case2cellules($tableauJeu[$y][$x]) > 0)
-		//case controlée par ce joueur
+		//case controlÃ©e par ce joueur
 		if ($tableauDecor[$y][$x] == 1 && case2cellules($tableauJeu[$y][$x]) >= $tableauDesMax[$y][$x] - 1)
 			pasAutorisee(); // mais glace et limite atteinte
 		else
-			CbonPeutJouer(); // pas de problème
+			CbonPeutJouer(); // pas de problÃ¨me
 	if ($tableauDecor[$y][$x] == 3)//obstacle
 		pasAutorisee();
 	for($i=-1;$i<2;$i++)//on va regarder si une case autour appartient au joueur
-		for($j=-1;$j<2;$j++){// 2 bordbloqués  3 diagonale
+		for($j=-1;$j<2;$j++){// 2 bordbloquÃ©s  3 diagonale
 			if ($i==0 && $j==0)
-				continue; // on a déjà testé la case centrale
+				continue; // on a dÃ©jÃ  testÃ© la case centrale
 			if ($options[$N_OPT_DIAGONALE] == 0 && abs($i)+abs($j)==2)
 				continue;//pas en diagonale
 			$nvx = $x+$i; $nvy = $y+$j;
 			if ($options[$N_OPT_BORDS_BLOQUES] != 2 && (!entre(0,$nvx,$tailleX-1) || !entre(0,$nvy,$tailleY-1)))
-				continue;//après le bord
-			$nvx = mettreEntre($nvx,$tailleX);//au cas où le monde est rond
+				continue;//aprÃ¨s le bord
+			$nvx = mettreEntre($nvx,$tailleX);//au cas oÃ¹ le monde est rond
 			$nvy = mettreEntre($nvy,$tailleY);
 			if (case2joueur($tableauJeu[$nvy][$nvx]) == $joueurAppelant && case2cellules($tableauJeu[$nvy][$nvx]) > 0)
-				CbonPeutJouer(); //case controlée par ce joueur
+				CbonPeutJouer(); //case controlÃ©e par ce joueur
 	}
 	pasAutorisee();
 
 function CbonPeutJouer(){//continue de jouer
 	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
 
-	if ($joueurEnCours != $joueurAppelant){//ne pas traiter la requête, ce n'est pas le bon joueur
+	if ($joueurEnCours != $joueurAppelant){//ne pas traiter la requÃªte, ce n'est pas le bon joueur
 		header('Content-Type: text/xml');//si le client est bon, pas besoin d'aller beaucoup plus loin :-)
 		$chaineReponse = XMLHeader."<reponse><action autorisee=\"oui\" traitee=\"non\"/></reponse>";
 		echo $chaineReponse;
-		die();//on arrête le script
+		die();//on arrÃªte le script
 	}
 	if (array_key_exists("k",$_GET)) if ($_GET["k"] == "0"){
-		header('Content-Type: text/xml');//ne pas traiter la requete, c'était pour savoir
+		header('Content-Type: text/xml');//ne pas traiter la requete, c'Ã©tait pour savoir
 		$chaineReponse = XMLHeader."<reponse><action autorisee=\"oui\" traitee=\"non\"/></reponse>";
 		echo $chaineReponse;
-		die();//on arrête le script
+		die();//on arrÃªte le script
 	}
 	
 	$tableauJeu[$y][$x] += $joueurEnCours*100-case2joueur($tableauJeu[$y][$x])*100;
 	if (case2cellules($tableauJeu[$y][$x]) >= 100 - ($tableauDecor[$y][$x]==2?2:1))
-		$tableauJeu[$y][$x] = floor($tableauJeu[$y][$x]/100)*100+99;//il a trop de cellules déjà
+		$tableauJeu[$y][$x] = floor($tableauJeu[$y][$x]/100)*100+99;//il a trop de cellules dÃ©jÃ 
 	else
 		$tableauJeu[$y][$x] += ($tableauDecor[$y][$x]==2?2:1);
 	if ($action=="c")
@@ -286,15 +286,15 @@ function CbonPeutJouer(){//continue de jouer
 	header('Content-Type: text/xml');//si le client est bon, pas besoin d'aller beaucoup plus loin :-)
 	$chaineReponse = XMLHeader."<reponse><action autorisee=\"oui\" traitee=\"oui\"/></reponse>";
 	echo $chaineReponse;
-	die();//on arrête le script
+	die();//on arrÃªte le script
 }
 
 function purifier(){
 	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
 	
 	$changement=false;
-	$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
-	$differences = array(); //préparation du traitement des explosions
+	$ouGlaceExplosion = array();//var indiceGlace=0;//prÃ©paration des endroits glacÃ©s
+	$differences = array(); //prÃ©paration du traitement des explosions
 	$conquetes = array();
 	for ($y=0;$y<$tailleY;$y++){
 		$differences[$y] = array();
@@ -309,25 +309,25 @@ function purifier(){
 		  if (($options[$N_OPT_TEMPS_PAS_REEL] == 1 && case2joueur($nbSurCase)==$joueurEnCours) || $options[$N_OPT_TEMPS_PAS_REEL] == 0)
 			if (case2cellules($nbSurCase) >= $tableauDesMax[$y][$x] && !case2chateau($nbSurCase)){//explosion !
 	$changement = true;
-	for ($ii=-1;$ii<2;$ii++)//va sur les cases d'à côté
+	for ($ii=-1;$ii<2;$ii++)//va sur les cases d'Ã  cÃ´tÃ©
 		for($jj=-1;$jj<2;$jj++)
 			if (abs($ii)+abs($jj)==1){//pas diagonale
 				$nvx = $x+$jj; $nvy = $y+$ii;
 				$perteBord = false;
 				switch($options[$N_OPT_BORDS_BLOQUES]){
-				  case 2: //on regarde après les bords
+				  case 2: //on regarde aprÃ¨s les bords
 					$nvx = mettreEntre($x+$jj,$tailleX); $nvy = mettreEntre($y+$ii,$tailleY);
 				  case 0: $perteBord=true; //on ne regarde pas au bord mais on perd une cellule
-				  case 1: //on regarde pas après les bords
+				  case 1: //on regarde pas aprÃ¨s les bords
 					if (entre(0,$nvy,$tailleY-1) && entre(0,$nvx,$tailleX-1)){
 						switch($tableauDecor[$nvy][$nvx]){
 						case 0: //case normale
 							$differences[$y][$x]--;
-							if (case2chateau($tableauJeu[$nvy][$nvx])&&(case2joueur($nbSurCase)!=case2joueur($tableauJeu[$nvy][$nvx]))&&case2cellules($tableauJeu[$nvy][$nvx])>=10){//traitement si membrane adverse protgée
+							if (case2chateau($tableauJeu[$nvy][$nvx])&&(case2joueur($nbSurCase)!=case2joueur($tableauJeu[$nvy][$nvx]))&&case2cellules($tableauJeu[$nvy][$nvx])>=10){//traitement si membrane adverse protgÃ©e
 								$differences[$nvy][$nvx]--;
-							} else {//jeu normal ou destruction de la membrane et conquète des cellules
-								//il va y avoir un bug si attaque et défense en même temps d'un chateau
-								//on va dire que les attaquants ont toujours priorité... C'est un jeu !
+							} else {//jeu normal ou destruction de la membrane et conquÃ¨te des cellules
+								//il va y avoir un bug si attaque et dÃ©fense en mÃªme temps d'un chateau
+								//on va dire que les attaquants ont toujours prioritÃ©... C'est un jeu !
 								$differences[$nvy][$nvx]++;
 								if (case2chateau($tableauJeu[$nvy][$nvx])&&(case2joueur($nbSurCase)!=case2joueur($tableauJeu[$nvy][$nvx]))&&case2cellules($tableauJeu[$nvy][$nvx])<10)
 									$tableauJeu[$nvy][$nvx]-=(case2chateau($tableauJeu[$nvy][$nvx])?10000:0);
@@ -338,9 +338,9 @@ function purifier(){
 							$differences[$y][$x]--;
 							if (!array_key_exists($nvy." ".$nvx,$ouGlaceExplosion)){//1ere fois
 								$ouGlaceExplosion[$nvy." ".$nvx] = 1;
-							} else {//fois après
-								//il va y avoir un BUG si 2 personnes tentent de conquérir une case de glace
-								//c'est à cause du vent, il souffle pour favoriser les joueurs x plus grands puis y
+							} else {//fois aprÃ¨s
+								//il va y avoir un BUG si 2 personnes tentent de conquÃ©rir une case de glace
+								//c'est Ã  cause du vent, il souffle pour favoriser les joueurs x plus grands puis y
 								$differences[$nvy][$nvx]++;
 								$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=case2joueur($nbSurCase);
 							}
@@ -386,19 +386,19 @@ function purifierTotalement($profondeur=0){
 	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
 	if ($profondeur>=$options[$N_OPT_PROFONDEUR]){
 		$joueurEnCours = mettreEntre($joueurEnCours,$nbJoueurs)+1;//on passe au suivant
-		if ($joueurEnCours == 1) $noTour++;//augmentation du n° du tour
+		if ($joueurEnCours == 1) $noTour++;//augmentation du nÂ° du tour
 		while(!peutJouer()) true;//tant que 
 	} else {
 		$changements = purifier();
 		$profondeur++;
-		if ($changements)//on arrête s'il y a pas de changements
+		if ($changements)//on arrÃªte s'il y a pas de changements
 			purifierTotalement($profondeur);
 		else
 			purifierTotalement($options[1]);
 	}
 }
 
-function peutJouer(){//vérifie si le joueur en cours peut jouer, sinon change de joueur
+function peutJouer(){//vÃ©rifie si le joueur en cours peut jouer, sinon change de joueur
 	extract($GLOBALS,EXTR_REFS);
 	for ($i=0;$i<$tailleX;$i++)
 		for ($j=0;$j<$tailleY;$j++)
@@ -422,7 +422,7 @@ function enregistrerPartie(){
 		for($j=0;$j<4;$j++)
 			$chaine .= $derniereAction[$i+1][$j] .($j+1==4?"\n":"\t");
 	$nombreDOptions = 5;
-	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivés profondeur bordbloqués diagonale tempspasreel
+	for($i=0;$i<$nombreDOptions;$i++)	//chateauxactivÃ©s profondeur bordbloquÃ©s diagonale tempspasreel
 		$chaine .= $options[$i]."\n";
 	$chaine .= $tailleX . "\n";
 	$chaine .= $tailleY . "\n";
@@ -441,47 +441,47 @@ function enregistrerPartie(){
 
 
 /******jeu.php : interface avec le fichier de jeu
-	reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
-	reçoit la requête de mise à jour de son propre jeu
-	reçoit la requête de plateau de jeu et le renvoie
-	paramètres GET :
-		p	numéro de la partie
-		j	joueur envoyant la requête
+	reÃ§oit les requÃªtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en consÃ©quence
+	reÃ§oit la requÃªte de mise Ã  jour de son propre jeu
+	reÃ§oit la requÃªte de plateau de jeu et le renvoie
+	paramÃ¨tres GET :
+		p	numÃ©ro de la partie
+		j	joueur envoyant la requÃªte
 X		pw	mot de passe du joueur
 		a	genre d'action
 0			(n normale,
 0			c chateau,
 X			g demande de grille (tout le jeu),
-X			m mise à jour)
-		x	abscisse de l'endroit joué
-		y	ordonnée de l'endroit joué
-X		k	si a=m, joueur dont on veut connaître la dernière action
+X			m mise Ã  jour)
+		x	abscisse de l'endroit jouÃ©
+		y	ordonnÃ©e de l'endroit jouÃ©
+X		k	si a=m, joueur dont on veut connaÃ®tre la derniÃ¨re action
 X			si k=0, on veut savoir le no du joueur en cours
-	renvoie une chaîne xml
+	renvoie une chaÃ®ne xml
 		si a=n ou a=c
-0			requête prise en compte ou non
+0			requÃªte prise en compte ou non
 		si a=g
-X			toute la grille à jour
+X			toute la grille Ã  jour
 		si a=m
-X			derniers paramètres acceptés de : a de k, x de k et y de k
+X			derniers paramÃ¨tres acceptÃ©s de : a de k, x de k et y de k
 X			ou no du joueur en cours
 
 			
 parties sous le nom aopNNNNNNbacteries.par
 	Nombre de joueurs
-	N°Joueur en cours entre 1 et NbJoueurs
+	NÂ°Joueur en cours entre 1 et NbJoueurs
 	Nom joueur 1	couleur	option : motdepasse	
-	Nom joueur 2	couleur	option : motdepasse	option : estIA?estenréseau?
-	Dernière action joueur 1
-	Dernière action joueur 2
-	Options : chateaux activés ? 1/0
+	Nom joueur 2	couleur	option : motdepasse	option : estIA?estenrÃ©seau?
+	DerniÃ¨re action joueur 1
+	DerniÃ¨re action joueur 2
+	Options : chateaux activÃ©s ? 1/0
 		Profondeur de jeu
-		Bord bloqués ?	1/0/2:monde rond
-		Ajout diagonale ? 1/0  (peut-on cliquer en diagonale ou seulement à côté ?)
+		Bord bloquÃ©s ?	1/0/2:monde rond
+		Ajout diagonale ? 1/0  (peut-on cliquer en diagonale ou seulement Ã  cÃ´tÃ© ?)
 		Explosion slt pour joueur en cours ? 1/0
 	Taille X
 	Taille y
-	Tableau de décor - 0 rien 1 glace 2 chaud 3 obstacle
+	Tableau de dÃ©cor - 0 rien 1 glace 2 chaud 3 obstacle
 	Tableau de jeu - +10000 : chateau  +N00 : case au joueur N +XX : nombre de cellules
 */
 

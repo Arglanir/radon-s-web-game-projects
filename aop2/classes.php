@@ -124,7 +124,7 @@ class PlateauDeJeu {
 			$this->getCase($j,$i)->setMax($k);
 		}
 	}
-	function purifie($options){//en fonction des options, 1 itération
+	function purifie($options,$joueurEnCours){//en fonction des options, 1 itération
 		$changement=false;
 		$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
 		$differences = array(); //préparation du traitement des explosions
@@ -137,14 +137,13 @@ class PlateauDeJeu {
 				$conquetes[$y][$x] = array();
 			}
 		}
-		for ($x=0;$x<$this->tailleX;$x++) for($y=0;$y<$this->tailleY;$y++){//traitement des explosions
-			  //$nbSurCase = $this->getCase($x,$y)->$tableauJeu[$y][$x];
-			  if (($options->yaExplosionJoueur() && $this->getCase($x,$y)->getJoueur()==$joueurEnCours) || !$options->yaExplosionJoueur())
-				if ($this->getCase($x,$y)->vaExploser() && !$this->getCase($x,$y)->getChateau()){//explosion !
-		$changement = true;
-		for ($ii=-1;$ii<2;$ii++)//va sur les cases d'à côté
-			for($jj=-1;$jj<2;$jj++)
-				if (abs($ii)+abs($jj)==1){//pas diagonale
+		//parcours du plateau pour traiter les explosions
+		for ($x=0;$x<$this->tailleX;$x++) for($y=0;$y<$this->tailleY;$y++){
+			$cetteCase = $this->getCase($x,$y);
+			if (($options->yaExplosionJoueur() && $$cetteCase->getJoueur()==$joueurEnCours) || !$options->yaExplosionJoueur())
+			if ($cetteCase->vaExploser() && !$cetteCase->getChateau()){//explosion !
+				$changement = true;			//va sur les cases d'à côté
+				for ($ii=-1;$ii<2;$ii++) for($jj=-1;$jj<2;$jj++) if (abs($ii)+abs($jj)==1){//pas diagonale
 					$nvx = $x+$jj; $nvy = $y+$ii;
 					$perteBord = false;
 					switch($options->quelTypeBord()){
@@ -153,18 +152,19 @@ class PlateauDeJeu {
 					  case 0: $perteBord=true; //on ne regarde pas au bord mais on perd une cellule
 					  case 1: //on regarde pas après les bords
 						if (entre(0,$nvy,$this->tailleY-1) && entre(0,$nvx,$this->tailleX-1)){
-							switch($tableauDecor[$nvy][$nvx]){
+							$autreCase=$this->getCase($nvx,$nvy);
+							switch($autreCase->getDecor()){
 							case 0: //case normale
 								$differences[$y][$x]--;
-								if (case2chateau($tableauJeu[$nvy][$nvx])&&(case2joueur($nbSurCase)!=case2joueur($tableauJeu[$nvy][$nvx]))&&case2cellules($tableauJeu[$nvy][$nvx])>=10){//traitement si membrane adverse protgée
+								if ($autreCase->getChateau()&&($cetteCase->getJoueur()!=$autreCase->getJoueur())&&$autreCase->getCellules()>=10){//traitement si membrane adverse protgée
 									$differences[$nvy][$nvx]--;
 								} else {//jeu normal ou destruction de la membrane et conquète des cellules
 									//il va y avoir un bug si attaque et défense en même temps d'un chateau
 									//on va dire que les attaquants ont toujours priorité... C'est un jeu !
 									$differences[$nvy][$nvx]++;
-									if (case2chateau($tableauJeu[$nvy][$nvx])&&(case2joueur($nbSurCase)!=case2joueur($tableauJeu[$nvy][$nvx]))&&case2cellules($tableauJeu[$nvy][$nvx])<10)
-										$tableauJeu[$nvy][$nvx]-=(case2chateau($tableauJeu[$nvy][$nvx])?10000:0);
-									$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=case2joueur($nbSurCase);
+									if ($autreCase->getChateau()&&($cetteCase->getJoueur()!=$autreCase->getJoueur())&&$autreCase->getCellules()<10)
+										$autreCase->setChateau(false);
+									$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=$cetteCase->getJoueur();
 								}
 								break;
 							case 1: //glace
@@ -175,13 +175,13 @@ class PlateauDeJeu {
 									//il va y avoir un BUG si 2 personnes tentent de conquérir une case de glace
 									//c'est à cause du vent, il souffle pour favoriser les joueurs x plus grands puis y
 									$differences[$nvy][$nvx]++;
-									$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=case2joueur($nbSurCase);
+									$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=$cetteCase->getJoueur();
 								}
 								break;
 							case 2: //point chaud
 								$differences[$y][$x]--;
 								$differences[$nvy][$nvx]+=2;
-								$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=case2joueur($nbSurCase);
+								$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=$cetteCase->getJoueur();
 								break;
 							case 3: //obstacle:rien !
 								break;
@@ -192,31 +192,56 @@ class PlateauDeJeu {
 						break;
 					}
 				}
-
-				}
+			}
 		}
-			
-		for ($x=0;$x<$this->tailleX;$x++)  //post traitement des explosions
-			for($y=0;$y<$this->tailleY;$y++){
-				$nbcellules = case2cellules($tableauJeu[$y][$x]);
-				if ($nbcellules + $differences[$y][$x] < 0){
-					$tableauJeu[$y][$x] = floor($tableauJeu[$y][$x]/100)*100;
-				} else if ($nbcellules + $differences[$y][$x] > 99) {
-					$tableauJeu[$y][$x] = floor($tableauJeu[$y][$x]/100)*100+99;
-				} else {
-					$tableauJeu[$y][$x] += $differences[$y][$x];
-				}
-				if (count($conquetes[$y][$x]) > 1){ //qui gagne la case ?
-					$gagnant = mettreEntre($x+$this->tailleX*$y, count($conquetes[$y][$x]));
-					$tableauJeu[$y][$x] += $conquetes[$y][$x][$gagnant]*100-case2joueur($tableauJeu[$y][$x])*100;
-				} else if (count($conquetes[$y][$x]) == 1){
-					$tableauJeu[$y][$x] += $conquetes[$y][$x][0]*100-case2joueur($tableauJeu[$y][$x])*100;
-				}
+		//post traitement des explosions
+		for ($x=0;$x<$this->tailleX;$x++) for($y=0;$y<$this->tailleY;$y++){
+			$cetteCase = $this->getCase($x,$y);
+			$nbcellules = $cetteCase->getCellules();
+			$cetteCase->addCellules($differences[$y][$x]);
+			if (count($conquetes[$y][$x]) > 1){ //qui gagne la case ?
+				$gagnant = mettreEntre($x+$this->tailleX*$y, count($conquetes[$y][$x]));
+				$cetteCase->setJoueur($conquetes[$y][$x][$gagnant]);
+			} else if (count($conquetes[$y][$x]) == 1){
+				$cetteCase->setJoueur($conquetes[$y][$x][0]);
+			}
 		}
 		return $changement;
-		
 	}
-	
+	function clicNormal($x,$y,$joueurEnCours,$chateau=false){//ajoute une cellule
+		$laCase = $this->getCase($x,$y);
+		$laCase->setJoueur($joueurEnCours);
+		$laCase->addCellules($laCase->getDecor()==2?2:1);
+		if ($chateau) $laCase->clicChateau();
+	}
+	function clicChateau($x,$y,$joueurEnCours){return $this->clicNormal($x,$y,$joueurEnCours,true);}
+	function peutJouer($x,$y,$joueurAppelant,$chateau=false){
+		$laCase = $this->getCase($x,$y);
+		if ($laCase->getDecor() != 0 && $chateau)
+			return false; // chateau et case instable
+		if ($laCase->getJoueur() != $joueurAppelant && $laCase->getCellules() > 0)
+			return false; //case déjà controlée par joueur adverse
+		if ($laCase->getJoueur() == $joueurAppelant && $laCase->getCellules() > 0)
+		//case controlée par ce joueur
+		if ($laCase->getDecor() == 1 && $laCase->getCellules() >= $laCase->getMax() - 1)
+			return false; // mais glace et limite atteinte
+		else
+			return true; // pas de problème
+		if ($laCase->getDecor() == 3)//obstacle
+			return false;
+		for($i=-1;$i<2;$i++) for($j=-1;$j<2;$j++){//on va regarder si une case autour appartient au joueur
+			if ($i==0 && $j==0) continue; // on a déjà testé la case centrale
+			if (!$options->yaPlacementDiag() && abs($i)+abs($j)==2) continue;//pas en diagonale
+			$nvx = $x+$i; $nvy = $y+$j;
+			if ($options->quelTypeBord() != 2 && (!entre(0,$nvx,$tailleX-1) || !entre(0,$nvy,$tailleY-1)))
+				continue;//après le bord
+			$nvx = mettreEntre($nvx,$tailleX);$nvy = mettreEntre($nvy,$tailleY);//au cas où le monde est rond
+			$autreCase = $this->getCase($nvx,$nvy);
+			if ($autreCase->getJoueur() == $joueurAppelant && $autreCase->getCellules() > 0)
+				return true; //case controlée par ce joueur
+		}
+		return false;
+	}
 }
 
 /****** classe de cases du plateau de jeu  ****/
@@ -279,5 +304,7 @@ class UneCase {
 	
 	function getDecor(){return $this->decor;}
 	function setDecor($decor){$this->decor = $decor;}
+	
+	function toInt(){return ($this->getChateau()?10000:0)+$this->getJoueur()*100+$this->getCellules();}
 }
 ?>
