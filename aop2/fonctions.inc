@@ -190,63 +190,65 @@ function afficherParties($fichier_parties,$admin=false) {
   if(!file_exists($fichier_parties)) {
     echo $no_party;
   } else {
-  if (floatval(phpversion())>=5){//dom change !
+		if (floatval(phpversion())>=5){//dom change !
 
-    $xml_parties = new DOMDocument();
-    $xml_parties->load($fichier_parties);
+			$xml_parties = new DOMDocument();
+			$xml_parties->load($fichier_parties);
 
-    $parties = $xml_parties->getElementsByTagName("partie");
-	echo "<tr><td colspan='3'>".count($parties)." parties</td></tr>";
-	if (count($parties) == 0)
-		echo $no_party;
-    foreach ($parties as $partie) {
-      if($partie->getAttribute("cachee") == "1" && !$admin) continue;
-      echo "<tr>";
-      echo "<td>";
-      $numero_partie = $partie->getAttribute("numero");
-      echo "Partie ".$numero_partie;
-      echo " : </td>";
-      foreach ($partie->getElementsByTagName("joueur") as $joueur) {
-        echo "<td>";
-        $url = getUrlJoueur($numero_partie, $joueur->getAttribute("numero"));
-        echo '<a href="'.$url.'">'.$joueur->getAttribute("nom").'</a>';
-        echo "</td>";
-      }
-		  echo "<td>";
-	  if ($admin){
-		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
-	  }
-		  echo "</td>";
-      echo "</tr>\n";
-    }
-  } else {//ancienne version de DOM
-	
-    $xml_parties = @domxml_open_file( $fichier_parties );
+			$parties = $xml_parties->getElementsByTagName("partie");
+			$__partie__ = count($parties) == 1 ? " partie" : " parties";
+			
+		echo "<tr><td colspan='3'>".count($parties).$__partie__."</td></tr>";
+		if (count($parties) == 0)
+			echo $no_party;
+		foreach ($parties as $partie) {
+			if($partie->getAttribute("cachee") == "1" && !$admin) continue;
+			echo "<tr>";
+			echo "<td>";
+			$numero_partie = $partie->getAttribute("numero");
+			echo "Partie ".$numero_partie;
+			echo " : </td>";
+			foreach ($partie->getElementsByTagName("joueur") as $joueur) {
+				echo "<td>";
+				$url = getUrlJoueur($numero_partie, $joueur->getAttribute("numero"));
+				echo '<a href="'.$url.'">'.$joueur->getAttribute("nom").'</a>';
+				echo "</td>";
+			}
+			echo "<td>";
+			if ($admin){
+				echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
+			}
+			echo "</td>";
+			echo "</tr>\n";
+			}
+		} else {//ancienne version de DOM
+		
+			$xml_parties = @domxml_open_file( $fichier_parties );
 
-    $parties = $xml_parties->get_elements_by_tagname("partie");
-	if (count($parties) == 0)
-		echo $no_party;
-    foreach ($parties as $partie) {
-      if($partie->get_attribute("cachee") == "1" && !$admin) continue;
-      echo "<tr>";
-      echo "<td>";
-      $numero_partie = $partie->get_attribute("numero");
-      echo "Partie ".$numero_partie;
-      echo " : </td>";
-      foreach ($partie->get_elements_by_tagname("joueur") as $joueur) {
-        echo "<td>";
-        $url = getUrlJoueur($numero_partie, $joueur->get_attribute("numero"));
-        echo '<a href="'.$url.'">'.$joueur->get_attribute("nom").'</a>';
-        echo "</td>";
-      }
-		  echo "<td>";
-	  if ($admin){
-		  echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
-	  }
-		  echo "</td>";
-      echo "</tr>\n";
-    }
-  }
+			$parties = $xml_parties->get_elements_by_tagname("partie");
+			if (count($parties) == 0)
+				echo $no_party;
+			foreach ($parties as $partie) {
+				if($partie->get_attribute("cachee") == "1" && !$admin) continue;
+				echo "<tr>";
+				echo "<td>";
+				$numero_partie = $partie->get_attribute("numero");
+				echo "Partie ".$numero_partie;
+				echo " : </td>";
+				foreach ($partie->get_elements_by_tagname("joueur") as $joueur) {
+					echo "<td>";
+					$url = getUrlJoueur($numero_partie, $joueur->get_attribute("numero"));
+					echo '<a href="'.$url.'">'.$joueur->get_attribute("nom").'</a>';
+					echo "</td>";
+				}
+				echo "<td>";
+			if ($admin){
+				echo "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$numero_partie."');\" />";
+			}
+				echo "</td>";
+				echo "</tr>\n";
+			}
+		}
   }
   echo "</table>";
 }
