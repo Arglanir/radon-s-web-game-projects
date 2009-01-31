@@ -223,10 +223,12 @@ class PlateauDeJeu {
 			return false; //case déjà controlée par joueur adverse
 		if ($laCase->getJoueur() == $joueurAppelant && $laCase->getCellules() > 0)
 		//case controlée par ce joueur
-		if ($laCase->getDecor() == 1 && $laCase->getCellules() >= $laCase->getMax() - 1)
-			return false; // mais glace et limite atteinte
-		else
-			return true; // pas de problème
+			if ($laCase->getDecor() == 1 && $laCase->getCellules() >= $laCase->getMax() - 1)
+				return false; // mais glace et limite atteinte
+			else
+				return true; // pas de problème
+		if ($laCase->getDecor() == 1 && $laCase->getJoueur() != $joueurAppelant)
+			return false // glace et case non controlée
 		if ($laCase->getDecor() == 3)//obstacle
 			return false;
 		for($i=-1;$i<2;$i++) for($j=-1;$j<2;$j++){//on va regarder si une case autour appartient au joueur
@@ -306,5 +308,9 @@ class UneCase {
 	function setDecor($decor){$this->decor = $decor;}
 	
 	function toInt(){return ($this->getChateau()?10000:0)+$this->getJoueur()*100+$this->getCellules();}
+	
+	function toXML($x,$y){
+		
+	}
 }
 ?>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /*
 Fichier: jeu.php
 Date: 27/01/2009
@@ -235,6 +235,8 @@ function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, 
 			pasAutorisee(); // mais glace et limite atteinte
 		else
 			CbonPeutJouer(); // pas de problème
+	if ($tableauDecor[$y][$x] == 1 && case2joueur($tableauJeu[$y][$x]) != $joueurAppelant)
+		return false // glace et case non controlée
 	if ($tableauDecor[$y][$x] == 3)//obstacle
 		pasAutorisee();
 	for($i=-1;$i<2;$i++)//on va regarder si une case autour appartient au joueur
