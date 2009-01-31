@@ -19,3 +19,5 @@ Wish:
 - Replay button pour voir les dernières actions
 - mettre où le dernier joueur a joué en surbrillance
 	c'est fait : soulignement
+- faire des images animées pour l'affichage
+- faire des images d'atomes
