@@ -47,23 +47,7 @@ if (tableauArguments["j"] != "observateur")
 /*** initialisation des paramètres et types ***/
 //les options d'affichage
 var tempsEntreAffichages = 1000;
-var tempsDAttenteAvantRelance = 5000;
-
-
-
-var jeuTest="2\n1\nCédric 0000FF\nSara FFFF00\nn 0 0\nn 3 3";
-jeuTest += "\n1\n9\n1\n1\n0";//chateauxactivés profondeur bordbloqués diagonale tempspasreel
-jeuTest += "\n4\n4\n";
-jeuTest += "0 0 0 0\n";
-jeuTest += "0 0 0 0\n";
-jeuTest += "0 0 0 0\n";
-jeuTest += "0 0 0 0\n";
-
-jeuTest += "0 0 0 0\n";
-jeuTest += "10110 203 204 0\n";
-jeuTest += "202 0 0 0\n";
-jeuTest += "201 203 0 0\n1\n";
-
+var tempsDAttenteAvantRelance = 5000;//connexion au serveur
 
 function CreerTableauJeu(chaineTexte){//constructeur d'un jeu
 	var tabJeuT = chaineTexte.split("\n\r");
@@ -381,8 +365,8 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	var typeJouable = (typeJouable == undefined?1:typeJouable);
 	
 	var statistiques = this.lesJoueurs2string();
-	
-	var colorTable = statistiques[0+(tableauArguments["j"])][0];
+	//Mikaël veut que le bord de la table soit de la couleur du joueur ayant le client... Ne marche que sous Chrome !
+	var colorTable = statistiques[tableauArguments["j"]][0];
 	var chaineHTML = "<table><tr><td><table cellpadding=\"0\" cellspacing=\"0\" BORDERCOLOR=\""+colorTable+"\">";
 	for(var y=0;y<this.tailleY;y++){
 		chaineHTML += "<tr>";
