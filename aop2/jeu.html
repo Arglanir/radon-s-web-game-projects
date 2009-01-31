@@ -462,9 +462,9 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	chaineHTML += "<tr>";
 	chaineHTML += "<td border=0>&nbsp;</td>";
 	chaineHTML += "<td>Cellules</td>";
-	chaineHTML += "<td>Contrôle</td>";
+	chaineHTML += "<td>Contr&ocirc;le</td>";
 	chaineHTML += "<td>Explosables</td>";
-	chaineHTML += "<td>Menacées</td>";
+	chaineHTML += "<td>Menac&eacute;es</td>";
 	chaineHTML += "</tr>";
 	for (var n = 1; n<=this.nbJoueurs;n++){
 		chaineHTML += "<tr><td style=\"background-color:"+statistiques[n][0]+"\">";
@@ -480,15 +480,15 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			chaineHTML += (statistiques[n][2]==1?" (IA)":" (NET)");
 		chaineHTML += (tableauArguments["j"] == n?"</b>":"");
 		
-		chaineHTML += "</td><td>";
+		chaineHTML += "</td><td style=\"text-align:center;\">";
 		//chaineHTML += (this.joueurEnCours == n?"</u>":"");
 		chaineHTML += " <span title='Nombre de cellules'>"+statistiques[n][3]+"</span> ";
-		chaineHTML += "</td><td>";
-		chaineHTML += "<span title='Cases contrôlées'>"+statistiques[n][4]+"</span> ";
-		chaineHTML += "</td><td>";
-		chaineHTML += "<span title='Cases prêtes à exploser'>"+statistiques[n][5]+"</span> ";
-		chaineHTML += "</td><td>";
-		chaineHTML += "<span title='Cases menacées'>"+statistiques[n][6]+"</span>";
+		chaineHTML += "</td><td style=\"text-align:center;\">";
+		chaineHTML += "<span title='Cases contr&ocirc;l&eacute;es'>"+statistiques[n][4]+"</span> ";
+		chaineHTML += "</td><td style=\"text-align:center;\">";
+		chaineHTML += "<span title='Cases pr&ecirc;tes à exploser'>"+statistiques[n][5]+"</span> ";
+		chaineHTML += "</td><td style=\"text-align:center;\">";
+		chaineHTML += "<span title='Cases menac&eacute;es'>"+statistiques[n][6]+"</span>";
 		//if(n == tableauArguments["j"]) {
 		//	chaineHTML += "</span>";
 		//}
@@ -508,7 +508,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		case 2:
 			if (this.options[0]) {
 				chaineHTML += "A toi de jouer : ";
-				chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Construire/détruire un chateau' onclick='unJeu.affiche(1)' title='' />";
+				chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Construire/d&eacute;truire un chateau' onclick='unJeu.affiche(1)' title='' />";
 				break;
 			}
 			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Jouez...' title='' />";
@@ -517,7 +517,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant le traitement...' onclick=\"alert('Pause')\" title='' />";
 			break;
 		case 255:
-			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[nGagnant][1]+"' value='"+this.joueurs[nGagnant][0]+" a gagné !' onclick=\"alert('Bravo !')\" title='' />";
+			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[nGagnant][1]+"' value='"+this.joueurs[nGagnant][0]+" a gagn&eacute; !' onclick=\"alert('Bravo !')\" title='' />";
 			if (nGagnant == tableauArguments["j"]){
 				setTimeout("document.getElementById(\"comm\").innerHTML = \"<input type=\\\"button\\\" onclick=\\\"supprimerPartie()\\\" value=\\\"Supprimer la partie\\\" />\";",10000);
 			}
@@ -641,7 +641,7 @@ function afficheOptions(){with(this){//affiche les options en cours, pour faire 
 //chateauxactivés profondeur bordbloqués diagonale tempspasreel
 	var chaineHTML = "";
 	chaineHTML += (this.options[0]?"Chateaux permis":"Chateaux non permis")+"<br />";
-	chaineHTML += "Profondeur de développement : "+this.options[1]+"<br />";
+	chaineHTML += "Profondeur de d&eacute;veloppement : "+this.options[1]+"<br />";
 	switch(this.options[2]){
 		case 0: chaineHTML += "Cellules perdues aux bords<br />";
 			break;
@@ -650,8 +650,8 @@ function afficheOptions(){with(this){//affiche les options en cours, pour faire 
 		case 2: chaineHTML += "Monde torrique<br />";
 			break;
 	}
-	chaineHTML += (this.options[3]?"Placement autour des cases à soi":"Placement sur cases adjacentes en croix")+"<br />";
-	chaineHTML += (this.options[4]?"Développement unique du joueur en cours":"Développement de tout le monde")+"<br />";
+	chaineHTML += (this.options[3]?"Placement autour des cases &agrave; soi":"Placement sur cases adjacentes en croix")+"<br />";
+	chaineHTML += (this.options[4]?"D&eacute;veloppement unique du joueur en cours":"D&eacute;veloppement de tout le monde")+"<br />";
 	
 	document.getElementById("options").innerHTML = chaineHTML;
 }}
@@ -693,10 +693,10 @@ function getJeu(){//demande au serveur le jeu
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				document.getElementById("jeu").innerHTML = "Jeu reçu, traitement en cours...";
+				document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
 				traiterJeu(xhr.responseText); 
 			} else {
-				document.getElementById("jeu").innerHTML = "Jeu non reçu, partie ou joueur inconnu ou mot de passe incorrect.";
+				document.getElementById("jeu").innerHTML = "Jeu non re&ccedil;u, partie ou joueur inconnu ou mot de passe incorrect.";
 			}
          }
     }; 
@@ -720,15 +720,15 @@ function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrê
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				document.getElementById("comm").innerHTML = "Information reçue.";
+				document.getElementById("comm").innerHTML = "Information re&ccedil;ue.";
 				if (xhr.responseXML.getElementsByTagName("action").item(0).getAttribute("autorisee")!="oui"){
 					alert("Action refusée par le serveur !");
 				}
 				if (fonctionALancer != undefined)
 					fonctionALancer(xhr);
 			} else {
-				document.getElementById("comm").innerHTML = "Information non reçue.<br />";
-				document.getElementById("comm").innerHTML += "Info envoyée :" + chaineDAppel;
+				document.getElementById("comm").innerHTML = "Information non re&ccedil;ue.<br />";
+				document.getElementById("comm").innerHTML += "Info envoy&eacute;e :" + chaineDAppel;
 				alert("Erreur");
 			}
          }
@@ -747,8 +747,8 @@ function ouJoue(noJoueur, fonctionALancer){//demande au serveur qu'a joué le jou
 			if(xhr.status  == 200) {
 				traiterOuJoue(noJoueur,xhr.responseXML,fonctionALancer);
 			} else {
-				document.getElementById("comm").innerHTML = "Information non reçue.<br />";
-				document.getElementById("comm").innerHTML += "Info envoyée :" + chaineDAppel;
+				document.getElementById("comm").innerHTML = "Information non re&ccedil;ue.<br />";
+				document.getElementById("comm").innerHTML += "Info envoy&eacute;e :" + chaineDAppel;
 			}
          }
     };
@@ -775,11 +775,11 @@ function quiJoue(fonctionALancer){// demande au serveur qui est en train de joue
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				document.getElementById("comm").innerHTML = "Information reçue.";
+				document.getElementById("comm").innerHTML = "Information re&ccedil;ue.";
 				traiterQuiJoue(xhr.responseXML,fonctionALancer);
 			} else {
-				document.getElementById("comm").innerHTML = "Information non reçue.<br />";
-				document.getElementById("comm").innerHTML += "Info envoyée :" + chaineDAppel;
+				document.getElementById("comm").innerHTML = "Information non re&ccedil;ue.<br />";
+				document.getElementById("comm").innerHTML += "Info envoy&eacute;e :" + chaineDAppel;
 			}
          }
     }; 
@@ -828,7 +828,7 @@ function supprimerPartie(){
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				document.getElementById("options").innerHTML = "Partie supprimée.<br />";
+				document.getElementById("options").innerHTML = "Partie supprim&eacute;e.<br />";
 			} else {
 			}
          }
@@ -871,7 +871,7 @@ function charge(){//charge les images
 <input type="button" onclick="ouJoue(2)" value="Où joue 2 ?"  title="Cliquer" />
 <input type="button" onclick="quiJoue()" value="Qui joue ?"  title="Cliquer" />
 <input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" /-->
-<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" /> | <input type="checkbox" name="prevenu" /> Etre prévenu quand c'est notre tour | <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> Développement instantané</form>
+<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" /> | <input type="checkbox" name="prevenu" /> Etre pr&eacute;venu quand c'est notre tour | <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute;</form>
 </div>
 
 <div name="Jeu" id="jeu">
@@ -879,13 +879,13 @@ function charge(){//charge les images
 </div>
 <div name="Jeu" id="options">
 <form method="GET">
-Numéro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
-Numéro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
+Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
+Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
 <input type="submit" value="Chercher la partie" title="clique ici" />
 </form>
 </div>
-<div name="imagespréchargées" id="imgs" style="visibility:hidden;">
-cette section est invisible et sert à précharger les images
+<div name="imagesprechargees" id="imgs" style="visibility:hidden;">
+cette section est invisible et sert à pr&eacute;charger les images
 </div>
 
 <script type="text/javascript"><!-- Debugage !
@@ -900,5 +900,6 @@ function debug(chaine){
 <div id="comm">
 
 </div>
+<div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
 </body>
 </html>
