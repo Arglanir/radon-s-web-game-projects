@@ -9,7 +9,12 @@ jeu.html : contient une interface de jeu javascript, crée le jeu chez le client 
 		p	numéro de la partie
 		s	son
 		pw	optionnel : mot de passe
-		offline	jouer sans le serveur (tous sur la même fenêtre)
+		offline	jouer sans le serveur (tous sur la même fenêtre), pour faire des tests de nos positions
+		type	type d'affichage pour les cases
+			texte	cases format texte
+			atome	cases avec atomes animés
+			cellule	cases avec cellules
+			mediev	cases version moyen-age
 
 jeu.php : interface avec le fichier de jeu
 	reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
@@ -57,6 +62,12 @@ image.php : crée une image de case
 		h	chateau ? 1/0
 		d	décor 0/1/2/3
 		m	max atteint ? 1/0
+		type type d'affichage
+			texte	cases format texte
+			atome	cases avec atomes animés
+			cellule	cases avec cellules
+			mediev	cases version moyen-age
+		taille	paramètre optionnel pour une taille d'atomes
 
 campagne.php : contient des parties sous le même format que les niveaux aopMMMMMM.lvl, avec des textes
 	paramètres GET :
