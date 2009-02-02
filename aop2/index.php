@@ -190,7 +190,7 @@ array("text" => "Nombre de joueurs",
 foreach($array_count as $i) {
   echo "<div id=divname".$i.">\n";
   echo "<table border=1><tr><td>";
-  echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="" style="background-color:#0000FF"><br/>';
+  echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br/>';
   echo ' Intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
   echo ' Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
   echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value="" /></div>';
