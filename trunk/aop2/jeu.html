@@ -57,7 +57,7 @@ function CreerTableauJeu(chaineTexte){//constructeur d'un jeu
 	var indice = 0;
 this.nbJoueurs = parseInt(tabJeuT[0]);
 this.joueurEnCours = parseInt(tabJeuT[1]);
-if (!this.joueurEnCours) alert("Mauvais chargement du jeu");
+if (!this.joueurEnCours) alert("Mauvais chargement du jeu !\n"+chaineTexte);
 this.joueurs = new Array();
 	for(var i=0;i<this.nbJoueurs;i++)
 		this.joueurs[i+1] = tabJeuT[2+i].split("\t");//nom couleur motdepasse 1ia/2autreordi
@@ -369,16 +369,44 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	var statistiques = this.lesJoueurs2string();
 	//Mikaël veut que le bord de la table soit de la couleur du joueur ayant le client... Ne marche que sous Chrome !
 	var colorTable = statistiques[tableauArguments["j"]][0];
-	var chaineHTML = "<table><tr><td><table cellpadding=\"0\" cellspacing=\"0\" BORDERCOLOR=\""+colorTable+"\">";
+	var chaineHTML = "<table><tr><td>";
+	chaineHTML += (tableauArguments["type"]=="texte"?"<table cellpadding=\"0\" cellspacing=\"0\" BORDERCOLOR=\""+colorTable+"\">":"");
 	for(var y=0;y<this.tailleY;y++){
-		chaineHTML += "<tr>";
+		chaineHTML += (tableauArguments["type"]=="texte"?"<tr>":"");
 		for(var x=0;x<this.tailleX;x++){
 			var decor = this.tableauDecor[y][x];
 			var joueur = case2joueur(this.tableauJeu[y][x]);
 			var couleur = (joueur == 0 ? "BFBFBF" : this.joueurs[joueur][1]);
 			if (decor==3) couleur = "000000";
 			var cellules = case2cellules(this.tableauJeu[y][x]);
-			if (tableauArguments["type"]=="texte" && cellules == 0 && joueur != 0){//éclaircir la couleur
+			var chateau = case2chateau(this.tableauJeu[y][x]);
+			
+			var dernier = false;
+			for (j=1; j<= this.nbJoueurs; j++)
+				dernier=(dernier||(this.derniereAction[j][1]==x && this.derniereAction[j][2]==y));
+			
+			onclick="";
+			switch(typeJouable){
+				case 0:
+					onclick += " onclick=\"alert('Pause')\"";
+					break;
+				case 254:
+					onclick += " onclick=\"alert('Attente de "+this.joueurs[this.joueurEnCours][0]+"')\"";
+					break;
+				case 255:
+					if (nGagnant == tableauArguments["j"])
+						onclick += " onclick=\"alert('Tu es le meilleur, bravo !')\"";
+					else
+						onclick += " onclick=\"alert('Tu as fait de ton mieux, bravo !')\"";
+					break;
+				case 1:
+					onclick += " onclick=\"unJeu.joueEn("+x+","+y+")\"";
+					break;
+				case 2:
+					onclick += " onclick=\"unJeu.chateauEn("+x+","+y+")\"";
+			}
+			if (tableauArguments["type"]=="texte"){
+			if (cellules == 0 && joueur != 0){//éclaircir la couleur
 				var coulvide = parseInt("FF",16);
 				var tabCouleur;
 				switch (couleur.substring(0,1)){
@@ -395,7 +423,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 				tabCouleur[2] = Math.floor((tabCouleur[2]+coulvide)/2);
 				couleur = "rgb("+tabCouleur[0]+","+tabCouleur[1]+","+tabCouleur[2]+")";
 			}
-			if (tableauArguments["type"]=="texte" && cellules >= this.tableauDesMax[y][x]){//Foncer la couleur
+			if (cellules >= this.tableauDesMax[y][x]){//Foncer la couleur
 				var coulvide = parseInt("BF",16);
 				var tabCouleur;
 				switch (couleur.substring(0,1)){
@@ -412,7 +440,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 				tabCouleur[2] = Math.floor((tabCouleur[2]+coulvide)/2);
 				couleur = "rgb("+tabCouleur[0]+","+tabCouleur[1]+","+tabCouleur[2]+")";
 			}
-			chateau = case2chateau(this.tableauJeu[y][x]);
+			couleur = "#"+versRRGGBB(couleur);
 			
 			chaineHTML += "<td style=\"";
 			var leStyle = "align:center;";
@@ -429,41 +457,25 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 				leStyle += "text-decoration:line-through;";
 			if (decor == 2)
 				leStyle += "font-style: italic;";
+			if (dernier)
+				leStyle += "text-decoration: underline;";
+			
 			//chaineHTML += leStyle;
 			chaineHTML += "\">";
-			if (tableauArguments["type"] == "texte"){
-				chaineHTML += "<input id=\"c"+x+"_"+y+"\" title=\""+(this.jouable(x,y)?"Jouable":"Non jouable")+"\" type=\"button\" style=\"";
-				chaineHTML += "align:center;height:30px;width:30px;background-color:"+couleur+";";
-				chaineHTML += leStyle + "\" ";
-				chaineHTML += " value=\""+cellules+"\" ";
-			} else {
-				chaineHTML += "<img title=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+" ";
-			}
-			switch(typeJouable){
-				case 0:
-					chaineHTML += " onclick=\"alert('Pause')\"";
-					break;
-				case 254:
-					chaineHTML += " onclick=\"alert('Attente de "+this.joueurs[this.joueurEnCours][0]+"')\"";
-					break;
-				case 255:
-					if (nGagnant == tableauArguments["j"])
-						chaineHTML += " onclick=\"alert('Tu es le meilleur, bravo !')\"";
-					else
-						chaineHTML += " onclick=\"alert('Tu as fait de ton mieux, bravo !')\"";
-					break;
-				case 1:
-					chaineHTML += " onclick=\"unJeu.joueEn("+x+","+y+")\"";
-					break;
-				case 2:
-					chaineHTML += " onclick=\"unJeu.chateauEn("+x+","+y+")\"";
-			}
-			chaineHTML += "/>";
+			chaineHTML += "<input id=\"c"+x+"_"+y+"\" title=\""+(this.jouable(x,y)?"Jouable":"Non jouable")+"\" type=\"button\" style=\"";
+			chaineHTML += "align:center;height:30px;width:30px;background-color:"+couleur+";";
+			chaineHTML += leStyle + "\" ";
+			chaineHTML += " value=\""+cellules+"\" "+onclick+" />";
 			chaineHTML += "</td>";
+			
+			} else {// border=\"0\" 
+				chaineHTML += "<img style=\"vertical-align:bottom;\" title=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick+" />";
+			}
 		}
-		chaineHTML += "</tr>";
+		chaineHTML += (tableauArguments["type"]=="texte"?"</tr>\n":"<br />\n");
 	}
-	chaineHTML += "</table></td><td>";
+	chaineHTML += (tableauArguments["type"]=="texte"?"</table>":"");
+	chaineHTML += "</td><td>";
 	
 	//Statistiques présentées sur un tableau
 	chaineHTML += "<table border=1>";
@@ -540,10 +552,6 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	}
 		
 	document.getElementById("jeu").innerHTML = chaineHTML;
-	
-	//traitement des dernières actions
-	for (j=1; j<= this.nbJoueurs; j++)
-		document.getElementById("c"+this.derniereAction[j][1]+"_"+this.derniereAction[j][2]).style.textDecoration = "underline";
 	
 }}
 
@@ -627,7 +635,7 @@ function jouable(x,y){with(this){//vérifie si le joueur en cours peut jouer en x
 		else
 			return true; // pas de problème
 	if (this.tableauDecor[y][x] == 1 && case2joueur(this.tableauJeu[y][x]) != this.joueurEnCours)
-		return false // glace et case non controlée
+		return false; // glace et case non controlée
 	if (this.tableauDecor[y][x] == 3)//obstacle
 		return false;
 	for(var i=-1;i<2;i++)//on va regarder si une case autour appartient au joueur
@@ -872,12 +880,15 @@ function versRRGGBB(couleur){//retourne le bon format de couleur pour les images
 		return couleur.substring(1);
 	case "r"://couleur rgb(rr,gg,bb)
 		tabCouleur = couleur.split(",");
-		tabCouleur = new Array(parseInt(couleur[0].split("(")[1]),parseInt(couleur[1],16),parseInt(couleur[2].split(")")[0]));
-		return (tabCouleur[0]<16?"0":"")+tabCouleur[0].toString(16)+(tabCouleur[1]<16?"0":"")+tabCouleur[1].toString(16)+(tabCouleur[2]<16?"0":"")+tabCouleur[2].toString(16);
-	default://couleur rgb(rr,gg,bb)
+		tabCouleur = new Array(parseInt(tabCouleur[0].split("(")[1]),parseInt(tabCouleur[1]),parseInt(tabCouleur[2].split(")")[0]));
+		retourne = (tabCouleur[0]<16?"0":"")+tabCouleur[0].toString(16)+(tabCouleur[1]<16?"0":"")+tabCouleur[1].toString(16)+(tabCouleur[2]<16?"0":"")+tabCouleur[2].toString(16);
+		//alert(couleur+" "+tabCouleur+" "+retourne);
+		return retourne;
+	default://couleur RRGGBB
 		return couleur;
 	}
 }
+listeDimages = new Array();indiceImages = 0;
 function charge(){//charge les images
 /*image.php : crée une image de case
 	paramètres GET :
@@ -892,26 +903,46 @@ function charge(){//charge les images
 			cellule	cases avec cellules
 			mediev	cases version moyen-age
 		taille	paramètre optionnel pour une taille d'atomes*/
+	var quelsDecors = new Array();
+	var quelsJoueurs = new Array();
+	for (x=0;x<4;x++) quelsDecors[x] = false;
+	for (x=0;x<=unJeu.nbJoueurs;x++) quelsJoueurs[x] = false;
+	for (x=0;x<unJeu.tailleX;x++)for (y=0;y<unJeu.tailleY;y++){
+			quelsDecors[unJeu.tableauDecor[y][x]] = true;
+			quelsJoueurs[case2joueur(unJeu.tableauJeu[y][x])] = (quelsJoueurs[case2joueur(unJeu.tableauJeu[y][x])] || 0<case2cellules(unJeu.tableauJeu[y][x]));
+	}
+	
 	if (tableauArguments["type"] != "texte"){
 		var ims = new Array();var ind=0;
 		var chaine = "";
-		for(j=0;j<unJeu.nbJoueurs;j++){
-			for (n=1; n<15; n++)
-				for (m=0; m<2; m++)
-					for (h=0;h<2 && m==0;h++)
-						for (d=0;d<3 && (h!=0 || d==0);d++) {
-							ims[ind] = new Image; ims[ind].src = "images/image.php?c="+(j==0?"808080":versRRGGBB(unJeu.joueurs[j][1]))+"&n="+n+"&h="+h+"&d="+d+"&type="+tableauArguments["type"]+"&m="+m;
-							chaine = "<img src=\""+ims[ind].src+"\" />";
-							ind;
-						}
-			for (d=0; d<4; d++) {
-				ims[ind] = new Image;ims[ind].src = "images/image.php?c="+(j==0?"808080":versRRGGBB(unJeu.joueurs[j][1]))+"&n=0&h=0&d="+d+"&type="+tableauArguments["type"]+"&m=0";
-				chaine = "<img src=\""+ims[ind].src+"\" />";
-				ind++;
-			}
-		}
-		document.getElementById("imgs").innerHTML = chaine; 
+		for(j=0;j<=unJeu.nbJoueurs;j++)
+			for (d=0; d<4 && quelsJoueurs[j]; d++)
+				for (r=0;r<2;r++){//cases vides
+					if (!quelsDecors[d]) continue;
+					url = "images/image.php?c="+(j==0?"808080":versRRGGBB(unJeu.joueurs[j][1]))+"&n=0&h=0&d="+d+"&type="+tableauArguments["type"]+"&m=0&r="+r;
+					listeDimages[indiceImages++] = url;
+				}
+		for (n=1; n<15; n++)
+			for (r=0;r<2;r++)
+				for(j=0;j<=unJeu.nbJoueurs;j++)
+					for (m=0; m<2 && quelsJoueurs[j]; m++)
+						for (h=0;h<2 && m==0;h++)
+							for (d=0;d==0 || (d<3 && h==0);d++) {
+								if (!quelsDecors[d]) continue;
+								url = "images/image.php?c="+(j==0?"BFBFBF":versRRGGBB(unJeu.joueurs[j][1]))+"&n="+n+"&h="+h+"&d="+d+"&type="+tableauArguments["type"]+"&m="+m+"&r="+r;
+								listeDimages[indiceImages++] = url;
+							}
+		indiceImages = 0;
+		document.getElementById("imgs").innerHTML = "Images : ";
+		imageSuivante();
 	}
+}
+function imageSuivante(){
+	url = listeDimages[indiceImages++];
+	if (!url)
+		document.getElementById("imgs").innerHTML = "Chargement des images termin&eacute; !";
+	else
+		document.getElementById("imgs").innerHTML = "Chargement de l'image "+indiceImages+" sur "+listeDimages.length+" : <img style=\"vertical-align:bottom\" src=\""+url+"\" onload=\"imageSuivante();\" />";
 }
 
 
@@ -919,14 +950,20 @@ function charge(){//charge les images
 </head>
 <body onload="main()">
 <div name="Joueurs" id="joueurs">
-<!--input type="button" onclick="main()" value="Démarrer" title="Cliquer" /-->
-<!--input type="button" onclick="document.getElementById('jeu').innerHTML = unJeu.toString().split('\n').join('<br/>');" value="Afficher la chaine" title="Cliquer" /-->
-<!--input type="button" onclick="getJeu()" value="Recharger le Jeu" title="Cliquer" />
-<input type="button" onclick="ouJoue(1)" value="Où joue 1 ?"  title="Cliquer" />
-<input type="button" onclick="ouJoue(2)" value="Où joue 2 ?"  title="Cliquer" />
-<input type="button" onclick="quiJoue()" value="Qui joue ?"  title="Cliquer" />
-<input type="button" onclick="affiche()" value="Afficher le jeu"  title="Cliquer" /-->
-<form name="mdp"><input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" /><input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" /><input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" /> | <input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" /> | <input type="checkbox" name="prevenu" /> Etre pr&eacute;venu quand c'est notre tour | <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute; | Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-âge</option></select><input type="button" value="OK" onclick="window.location.replace(window.location.href.split('type').join('rien')+'&type='+document.mdp.type.value);"></form>
+<form name="mdp">
+<input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" />
+<input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" />
+<input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" />
+ | 
+<input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />
+ | 
+<input type="checkbox" name="prevenu" /> Etre pr&eacute;venu quand c'est notre tour
+ | 
+<input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute;
+ | 
+Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option></select>
+<input type="button" value="OK" onclick="window.location.replace(window.location.href.split('type').join('rien')+'&type='+document.mdp.type.value);">
+</form>
 </div>
 
 <div name="Jeu" id="jeu">
@@ -939,13 +976,13 @@ Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option v
 <input type="submit" value="Chercher la partie" title="clique ici" />
 </form>
 </div>
-<div name="imagesprechargees" id="imgs" style="visibility:hidden;">
+<div name="imagesprechargees" id="imgs"> style="visibility:hidden;"
 cette section est invisible et sert à pr&eacute;charger les images
 </div>
 
 <script type="text/javascript"><!-- Debugage !
 function debug(chaine){
-	document.getElementById("debug").innerHTML += chaine+"<br />";
+	document.getElementById("debug").innerHTML = chaine+"<br />"+document.getElementById("debug").innerHTML;
 }
 //-->
 </script>

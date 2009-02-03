@@ -62,12 +62,14 @@ image.php : crée une image de case
 		h	chateau ? 1/0
 		d	décor 0/1/2/3
 		m	max atteint ? 1/0
+		r	dernier jeu du joueur
 		type type d'affichage
 			texte	cases format texte
 			atome	cases avec atomes animés
 			cellule	cases avec cellules
 			mediev	cases version moyen-age
 		taille	paramètre optionnel pour une taille d'atomes
+		
 
 campagne.php : contient des parties sous le même format que les niveaux aopMMMMMM.lvl, avec des textes
 	paramètres GET :

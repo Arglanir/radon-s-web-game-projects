@@ -1,12 +1,14 @@
-ï»¿<?php
+<?php
+error_reporting(0);//pas d'erreur sinon le client plantera :-)
+
 /*
 Fichier: jeu.php
 Date: 27/01/2009
-Auteur: Cédric Mayer / Mikaël Mayer
+Auteur: Cï¿½dric Mayer / Mikaï¿½l Mayer
 But: Interface avec le fichier de jeu
-	Reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
-	Reçoit la requête de mise à jour de son propre jeu
-	Reçoit la requête de plateau de jeu et le renvoie
+	Reï¿½oit les requï¿½tes de jeu, regarde si c'est bon et accepte ou non la requete et agit en consï¿½quence
+	Reï¿½oit la requï¿½te de mise ï¿½ jour de son propre jeu
+	Reï¿½oit la requï¿½te de plateau de jeu et le renvoie
 */
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
@@ -236,7 +238,7 @@ function case2joueur($entier){//retourne le nÂ° d'un joueur Ã  qui est la case, 
 		else
 			CbonPeutJouer(); // pas de problÃ¨me
 	if ($tableauDecor[$y][$x] == 1 && case2joueur($tableauJeu[$y][$x]) != $joueurAppelant)
-		return false // glace et case non controlÃ©e
+		return false; // glace et case non controlÃ©e
 	if ($tableauDecor[$y][$x] == 3)//obstacle
 		pasAutorisee();
 	for($i=-1;$i<2;$i++)//on va regarder si une case autour appartient au joueur

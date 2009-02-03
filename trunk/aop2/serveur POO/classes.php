@@ -228,7 +228,7 @@ class PlateauDeJeu {
 			else
 				return true; // pas de problème
 		if ($laCase->getDecor() == 1 && $laCase->getJoueur() != $joueurAppelant)
-			return false // glace et case non controlée
+			return false; // glace et case non controlée
 		if ($laCase->getDecor() == 3)//obstacle
 			return false;
 		for($i=-1;$i<2;$i++) for($j=-1;$j<2;$j++){//on va regarder si une case autour appartient au joueur
