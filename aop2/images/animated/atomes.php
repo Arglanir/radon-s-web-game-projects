@@ -17,6 +17,7 @@ include "GIFEncoder.class.php";
 $couleur = (array_key_exists("c",$_GET)?$_GET["c"]:"0000FF");
 $nombre = 0+(array_key_exists("n",$_GET)?$_GET["n"]:2);
 $chateau = (array_key_exists("h",$_GET)?$_GET["h"]=="1"||$_GET["h"]=="true":false);
+$dernier = (array_key_exists("r",$_GET)?$_GET["r"]=="1"||$_GET["r"]=="true":false);
 $decor = 0+(array_key_exists("d",$_GET)?$_GET["d"]:0);
 $maxatteint = (array_key_exists("m",$_GET)?$_GET["m"]=="1"||$_GET["m"]=="true":false);
 $tailleattome = max(min(0+(array_key_exists("taille",$_GET)?$_GET["taille"]:3),5),1);
@@ -29,6 +30,40 @@ $tailleimage = 0+(array_key_exists("tailleimage",$_GET)?$_GET["tailleimage"]:33)
 
 $imgs = array();
 $t = array();
+
+$imfond = @imagecreatetruecolor($tailleimage, $tailleimage);
+$coulcentre = array(0,0,0);
+switch ($decor){
+	case 0:break;
+	case 1 : $coulcentre = array(0,0,128);break;
+	case 2 : $coulcentre = array(128,64,0);break;
+	case 3 : $coulcentre = array(128,128,128);break;
+	/*case 1:  $bg = imagecolorallocate($imfond, 0, 0, 128);//glace
+	imagefill($imfond, 0, 0, $bg);break;
+	case 2:  $bg = imagecolorallocate($imfond, 128, 64, 0);//point chaud
+	imagefill($imfond, 0, 0, $bg);break;
+	case 3:  $bg = imagecolorallocate($imfond, 128, 128, 128);//obstacle
+	imagefill($imfond, 0, 0, $bg);break;*/
+}
+if ($decor != 0){
+	for ($ta=0; $ta<$tailleimage/2; $ta++){
+		$tabcoul = array();
+		for ($i=0;$i<count($coulcentre);$i++) $tabcoul[$i] = floor($coulcentre[$i]*$ta*2/$tailleimage);
+		$coul = imagecolorallocate($imfond, $tabcoul[0], $tabcoul[1], $tabcoul[2]);
+		imagefilledrectangle($imfond, $ta ,  $ta , $tailleimage-1-$ta ,  $tailleimage-1-$ta , $coul );
+	}
+}
+
+//dessin des bords
+$coulbord = array(128,128,128);
+if ($dernier) $coulbord = array($rouge, $vert, $bleu);
+$coulbord = imagecolorallocate($imfond, $coulbord[0], $coulbord[1], $coulbord[2]);
+for ($i=0;$i<5;$i++){
+	imagesetpixel($imfond, 0, $i, $coulbord);
+	imagesetpixel($imfond, $tailleimage-1-$i, 0, $coulbord);
+	imagesetpixel($imfond, $tailleimage-1, $tailleimage-1-$i, $coulbord);
+	imagesetpixel($imfond, $i, $tailleimage-1, $coulbord);
+}
 
 
 if (!$chateau){//atomes libres
@@ -46,17 +81,10 @@ if (!$chateau){//atomes libres
 			default:$dir [$i] = array(rand(1,1+$i)*(rand(0,1)*2-1),rand(1,1+$i)*(rand(0,1)*2-1));break;
 		}
 	}
+	
 	for ($j = 0; $j < $nbframes; $j++){
 		$im = @imagecreatetruecolor($tailleimage, $tailleimage);
-		switch ($decor){
-			case 0:break;
-			case 1:  $bg = imagecolorallocate($im, 0, 0, 128);//glace
-			imagefill($im, 0, 0, $bg);break;
-			case 2:  $bg = imagecolorallocate($im, 128, 64, 0);//point chaud
-			imagefill($im, 0, 0, $bg);break;
-			case 3:  $bg = imagecolorallocate($im, 128, 128, 128);//obstacle
-			imagefill($im, 0, 0, $bg);break;
-		}
+		imagecopy($im ,$imfond,0,0,0,0, $tailleimage, $tailleimage);
 		
 		$coul = imagecolorallocate($im, $rouge, $vert, $bleu);
 		for ($i = 0; $i < $nombre; $i++){
@@ -73,11 +101,10 @@ if (!$chateau){//atomes libres
 		ob_start();
 		imagegif($im);
 		$imgs[] = ob_get_clean();
-		if ($decor==1) $t[] = 10;
+		if ($decor==1) $t[] = 8;
 		else $t[] = 5;
 		imagedestroy($im);
 	}
-
 
 } else {//membrane activée : les atomes vont tourner dans un sens ou l'autre autour du centre de la case
 	$nombre2 = ($nombre < 10 ? $nombre+1:$nombre);//combien à prendre en compte
@@ -99,6 +126,7 @@ if (!$chateau){//atomes libres
 	$offset = $angle * rand(0,$nombre2);
 	for ($j = 0; $j < $nbframes; $j++){
 		$im = @imagecreatetruecolor($tailleimage, $tailleimage);
+		imagecopy($im ,$imfond,0,0,0,0, $tailleimage, $tailleimage);
 		$coul = imagecolorallocate($im, $rouge, $vert, $bleu);
 		for ($i = 0;$i<$nombre;$i++){
 			$angle2 = $i*$angle+$j*$delta+$offset;
@@ -117,6 +145,7 @@ if (!$chateau){//atomes libres
 	
 	
 }
+	imagedestroy($imfond);
 /*
 $string = "XoraX";
 
