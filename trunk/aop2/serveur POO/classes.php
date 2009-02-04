@@ -4,12 +4,81 @@ include_once("fonctions.inc");
 
 /****** classe de partie *******/
 class Partie {
+	int $nbJoueurs;
+	var $joueur;//tableau de Joueurs
+	int $noTour;
+	int $joueurEnCours;
+	Option $options;//objet Option
+	PlateauDeJeu $tableauJeu;//objet PlateauDeJeu
 	
+	//fonctions de création
+	function Partie(){
+		$this->nbJoueurs = 0;
+		$this->joueur = array();
+		$this->noTour = 1;
+		$this->joueurEnCours = 0;
+	}
+	function addJoueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
+		$this->nbJoueurs++;
+		$this->joueur[$this->nbJoueurs] = new Joueur($nom,$couleur,$mdp,$type,$niveau);
+	}
+	function setNoTour($noTour){
+		$this->noTour = $noTour;
+	}
+	function finaliser(){//finalise le jeu pour le rendre totlament jouable
+		if (!$this->joueurEnCours) $this->joueurEnCours = rand(1,$nbJoueurs);
+		
+	}
+	
+	function estPrete(){//teste la partie si elle est bien chargée
+		
+	}
+	
+	function joueurSuivant(){//met le joueur en cours au joueur suivant
+		$this->joueurEnCours = mettreEntre($this->joueurEnCours,$this->nbJoueurs)+1;//on passe au suivant
+		if ($this->joueurEnCours == 1) $this->noTour++;//augmentation du n° du tour
+		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) joueurSuivant();
+		return true;
+	}
+	
+	function nouvelle(){
+		
+	}
 }
 
 /****** classe gérant un joueur *******/
 class Joueur {
+	string $nom;
+	string $couleur;//string de couleur
+	string $mdp;
+	int $type;//0 : joueur humain 1 : ia (client : 2 : net)
+	int $niveau;//niveau IA : 0 jeu aléatoire, n meilleur coup profondeur n-1
+	Action $derniereAction;
+	
+	function Joueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
+		$this->nom = $nom;
+		$this->couleur = $couleur;
+		$this->mdp = $mdp;
+		$this->type = 0+$type;
+		$this->niveau = 0+$niveau;
+		$this->derniereAction = new Action();
+	}
 
+	
+}
+
+class Action {
+	string $quoi;//"n" ou "c"
+	int $ouX;
+	int $ouY;
+	int $quand;//no du tour
+	
+	function Action($quoi="n",$ouX=0,$ouY=0,$quand=0){
+		$this->quoi = $quoi;
+		$this->ouX = $ouX;
+		$this->ouY = $ouY;
+		$this->quand = $quand;
+	}
 }
 
 /****** classe prenant en compte les options ******/
@@ -43,8 +112,8 @@ class Options {
 /****** classe de plateau de jeu ******/
 class PlateauDeJeu {
 	var $plateau;//tableau bi dim de UneCase
-	var $tailleX;
-	var $tailleY;
+	int $tailleX;
+	int $tailleY;
 	
 	function PlateauDeJeu(){
 		$this->plateau = array();
@@ -208,6 +277,18 @@ class PlateauDeJeu {
 		}
 		return $changement;
 	}
+	function purifieTotalement($options,$joueurEnCours,$profondeur=0){
+		if ($profondeur>=$options->quelleProfondeur()){
+			return true;
+		} else {
+			$changements = $this->purifie($options,$joueurEnCours);
+			$profondeur++;
+			if ($changements)//on arrête s'il y a pas de changements
+				purifierTotalement($options,$joueurEnCours,$profondeur);
+			else
+				purifierTotalement($options,$joueurEnCours,$options->quelleProfondeur());
+		}
+	}
 	function clicNormal($x,$y,$joueurEnCours,$chateau=false){//ajoute une cellule
 		$laCase = $this->getCase($x,$y);
 		$laCase->setJoueur($joueurEnCours);
@@ -215,7 +296,7 @@ class PlateauDeJeu {
 		if ($chateau) $laCase->clicChateau();
 	}
 	function clicChateau($x,$y,$joueurEnCours){return $this->clicNormal($x,$y,$joueurEnCours,true);}
-	function peutJouer($x,$y,$joueurAppelant,$chateau=false){
+	function peutJouerEn($x,$y,$joueurAppelant,$chateau=false){
 		$laCase = $this->getCase($x,$y);
 		if ($laCase->getDecor() != 0 && $chateau)
 			return false; // chateau et case instable
@@ -244,15 +325,22 @@ class PlateauDeJeu {
 		}
 		return false;
 	}
+	function peutJouer($joueurAppelant){//vérifie si le joueur appelant peut jouer
+		for ($x=0;$x<$tailleX;$x++)
+			for ($y=0;$y<$tailleY;$y++)
+				if ($this->getCase($x, $y)->getJoueur()==$joueurAppelant && $this->getCase($x, $y)->getCellules()>0)
+					return true;
+		return false;
+	}
 }
 
 /****** classe de cases du plateau de jeu  ****/
 class UneCase {
-	var $joueur;//à qui appartient la case
-	var $nbcellules;//combien de cellules sont sur la case
-	var $chateau;//y a t il un chateau ? 
-	var $max;//maximum de cellules sur la cas
-	var $decor;//0 rien, 1 glace, 2 chaud, 3 obstacle
+	int $joueur;//à qui appartient la case
+	int $nbcellules;//combien de cellules sont sur la case
+	bool $chateau;//y a t il un chateau ? 
+	int $max;//maximum de cellules sur la cas
+	int $decor;//0 rien, 1 glace, 2 chaud, 3 obstacle
 	
 	function UneCase($decor = 0){
 		switch( func_num_args ()){
@@ -309,8 +397,10 @@ class UneCase {
 	
 	function toInt(){return ($this->getChateau()?10000:0)+$this->getJoueur()*100+$this->getCellules();}
 	
-	function toXML($x,$y){
-		
+	function toXML($x,$y){//renvoie un DOMNode
+		$element = DOMDocument::createElement
 	}
 }
+
+$partie = new Partie();
 ?>

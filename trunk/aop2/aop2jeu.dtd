@@ -9,7 +9,8 @@
 		nom CDATA #REQUIRED
 		couleur CDATA #REQUIRED
 		estia (oui | non)  #REQUIRED
-		estnet (oui | non) "0"
+		niveau NMTOKEN  "0"
+		estnet (oui | non) non
 		mdp CDATA "0">
 <!ELEMENT action EMPTY>
 <!ATTLIST action 

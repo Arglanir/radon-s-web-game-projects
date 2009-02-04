@@ -469,7 +469,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			chaineHTML += "</td>";
 			
 			} else {// border=\"0\" 
-				chaineHTML += "<img style=\"vertical-align:bottom;\" title=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick+" />";
+				chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+cellules+"\" alt=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick+" />";
 			}
 		}
 		chaineHTML += (tableauArguments["type"]=="texte"?"</tr>\n":"<br />\n");
@@ -701,6 +701,22 @@ function mettreEntre(nombre,base){//fonction permettant le modulo
 	return nombre;
 }
 
+function versRRGGBB(couleur){//retourne le bon format de couleur pour les images
+	switch (couleur.substring(0,1)){
+	case "#"://couleur #HHHHHH
+		return couleur.substring(1);
+	case "r"://couleur rgb(rr,gg,bb)
+		tabCouleur = couleur.split(",");
+		tabCouleur = new Array(parseInt(tabCouleur[0].split("(")[1]),parseInt(tabCouleur[1]),parseInt(tabCouleur[2].split(")")[0]));
+		retourne = (tabCouleur[0]<16?"0":"")+tabCouleur[0].toString(16)+(tabCouleur[1]<16?"0":"")+tabCouleur[1].toString(16)+(tabCouleur[2]<16?"0":"")+tabCouleur[2].toString(16);
+		//alert(couleur+" "+tabCouleur+" "+retourne);
+		return retourne;
+	default://couleur RRGGBB
+		return couleur;
+	}
+}
+
+
 
 
 /**** fonctions de communication AJAX ****/
@@ -726,7 +742,12 @@ function getJeu(){//demande au serveur le jeu
 function traiterJeu(leJeuChaine){//fonction de traitement après getJeu()
 	//document.getElementById('jeu').innerHTML = leJeuChaine.split('\n').join('<br/>');
 	unJeu = new CreerTableauJeu(leJeuChaine);
-	charge();//on charge les images !
+	if (tableauArguments["type"] != "texte")
+		chargeImages();//on charge les images !
+	else
+		apresChargement();
+}
+function apresChargement(){
 	unJeu.affiche(1);
 	unJeu.afficheOptions();
 	unJeu.faireJouerSuivant();
@@ -874,22 +895,8 @@ function main(){
 }
 
 /*** fonctions diverses ***/
-function versRRGGBB(couleur){//retourne le bon format de couleur pour les images
-	switch (couleur.substring(0,1)){
-	case "#"://couleur #HHHHHH
-		return couleur.substring(1);
-	case "r"://couleur rgb(rr,gg,bb)
-		tabCouleur = couleur.split(",");
-		tabCouleur = new Array(parseInt(tabCouleur[0].split("(")[1]),parseInt(tabCouleur[1]),parseInt(tabCouleur[2].split(")")[0]));
-		retourne = (tabCouleur[0]<16?"0":"")+tabCouleur[0].toString(16)+(tabCouleur[1]<16?"0":"")+tabCouleur[1].toString(16)+(tabCouleur[2]<16?"0":"")+tabCouleur[2].toString(16);
-		//alert(couleur+" "+tabCouleur+" "+retourne);
-		return retourne;
-	default://couleur RRGGBB
-		return couleur;
-	}
-}
-listeDimages = new Array();indiceImages = 0;
-function charge(){//charge les images
+var listeDimages = new Array();var indiceImages = 0;var maxCellules = 0;var maxIndURL = 0;
+function chargeImages(){//charge les images
 /*image.php : crée une image de case
 	paramètres GET :
 		c	couleur RRGGBB
@@ -910,6 +917,7 @@ function charge(){//charge les images
 	for (x=0;x<unJeu.tailleX;x++)for (y=0;y<unJeu.tailleY;y++){
 			quelsDecors[unJeu.tableauDecor[y][x]] = true;
 			quelsJoueurs[case2joueur(unJeu.tableauJeu[y][x])] = (quelsJoueurs[case2joueur(unJeu.tableauJeu[y][x])] || 0<case2cellules(unJeu.tableauJeu[y][x]));
+			maxCellules = Math.max(maxCellules, case2cellules(unJeu.tableauJeu[y][x]));
 	}
 	
 	if (tableauArguments["type"] != "texte"){
@@ -922,7 +930,7 @@ function charge(){//charge les images
 					url = "images/image.php?c="+(j==0?"808080":versRRGGBB(unJeu.joueurs[j][1]))+"&n=0&h=0&d="+d+"&type="+tableauArguments["type"]+"&m=0&r="+r;
 					listeDimages[indiceImages++] = url;
 				}
-		for (n=1; n<15; n++)
+		for (n=1; n<15; n++){
 			for (r=0;r<2;r++)
 				for(j=0;j<=unJeu.nbJoueurs;j++)
 					for (m=0; m<2 && quelsJoueurs[j]; m++)
@@ -932,17 +940,29 @@ function charge(){//charge les images
 								url = "images/image.php?c="+(j==0?"BFBFBF":versRRGGBB(unJeu.joueurs[j][1]))+"&n="+n+"&h="+h+"&d="+d+"&type="+tableauArguments["type"]+"&m="+m+"&r="+r;
 								listeDimages[indiceImages++] = url;
 							}
+			if (n < maxCellules) maxIndURL = indiceImages+1;
+		}
 		indiceImages = 0;
 		document.getElementById("imgs").innerHTML = "Images : ";
 		imageSuivante();
 	}
 }
+var lefaireunefois = false;
 function imageSuivante(){
 	url = listeDimages[indiceImages++];
-	if (!url)
+	if (!url) {
 		document.getElementById("imgs").innerHTML = "Chargement des images termin&eacute; !";
-	else
-		document.getElementById("imgs").innerHTML = "Chargement de l'image "+indiceImages+" sur "+listeDimages.length+" : <img style=\"vertical-align:bottom\" src=\""+url+"\" onload=\"imageSuivante();\" />";
+	} else {
+		if (maxIndURL<indiceImages){
+			if (!lefaireunefois){
+				apresChargement();//on lance l'affichage
+				lefaireunefois = true;
+			}
+			document.getElementById("imgs").innerHTML = "Chargement des autres images "+indiceImages+" sur "+listeDimages.length+" : <img alt=\"Si cette image n'apparait pas, recharger la page\" style=\"vertical-align:bottom\" src=\""+url+"\" onload=\"imageSuivante();\" />";
+		} else {
+			document.getElementById("imgs").innerHTML = "Chargement de l'image "+indiceImages+" sur "+maxIndURL+" : <img alt=\"Si cette image n'apparait pas, recharger la page\" style=\"vertical-align:bottom\" src=\""+url+"\" onload=\"imageSuivante();\" />";
+		}
+	}
 }
 
 
@@ -976,8 +996,7 @@ Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option v
 <input type="submit" value="Chercher la partie" title="clique ici" />
 </form>
 </div>
-<div name="imagesprechargees" id="imgs"> style="visibility:hidden;"
-cette section est invisible et sert à pr&eacute;charger les images
+<div name="imagesprechargees" id="imgs">
 </div>
 
 <script type="text/javascript"><!-- Debugage !
