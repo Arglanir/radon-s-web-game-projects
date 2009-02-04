@@ -31,13 +31,14 @@ $tailleimage = 0+(array_key_exists("tailleimage",$_GET)?$_GET["tailleimage"]:33)
 $imgs = array();
 $t = array();
 
-$imfond = @imagecreatetruecolor($tailleimage, $tailleimage);
-$coulcentre = array(0,0,0);
+$imfond = imagecreatetruecolor($tailleimage, $tailleimage);
+
+$coulcentre = array(0,0,0);$plateau = 0;//en pourcentage
 switch ($decor){
 	case 0:break;
 	case 1 : $coulcentre = array(0,0,128);break;
 	case 2 : $coulcentre = array(128,64,0);break;
-	case 3 : $coulcentre = array(128,128,128);break;
+	case 3 : $coulcentre = array(128,128,128);$plateau=50;break;
 	/*case 1:  $bg = imagecolorallocate($imfond, 0, 0, 128);//glace
 	imagefill($imfond, 0, 0, $bg);break;
 	case 2:  $bg = imagecolorallocate($imfond, 128, 64, 0);//point chaud
@@ -46,14 +47,13 @@ switch ($decor){
 	imagefill($imfond, 0, 0, $bg);break;*/
 }
 if ($decor != 0){
-	for ($ta=0; $ta<$tailleimage/2; $ta++){
+	for ($ta=0; $ta<$tailleimage*(100-$plateau)/200; $ta++){
 		$tabcoul = array();
-		for ($i=0;$i<count($coulcentre);$i++) $tabcoul[$i] = floor($coulcentre[$i]*$ta*2/$tailleimage);
+		for ($i=0;$i<count($coulcentre);$i++) $tabcoul[$i] = floor($coulcentre[$i]*$ta*200/($tailleimage*(100-$plateau)));
 		$coul = imagecolorallocate($imfond, $tabcoul[0], $tabcoul[1], $tabcoul[2]);
 		imagefilledrectangle($imfond, $ta ,  $ta , $tailleimage-1-$ta ,  $tailleimage-1-$ta , $coul );
 	}
 }
-
 //dessin des bords
 $coulbord = array(128,128,128);
 if ($dernier) $coulbord = array($rouge, $vert, $bleu);
