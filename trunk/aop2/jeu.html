@@ -385,26 +385,28 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			for (j=1; j<= this.nbJoueurs; j++)
 				dernier=(dernier||(this.derniereAction[j][1]==x && this.derniereAction[j][2]==y));
 			
-			onclick="";
+			onclick_string="";
+			//debug(typeJouable+";"+onclick_string+":"+x+","+y);
 			switch(typeJouable){
 				case 0:
-					onclick += " onclick=\"alert('Pause')\"";
+					onclick_string += " onclick=\"alert('Pause')\"";
 					break;
 				case 254:
-					onclick += " onclick=\"alert('Attente de "+this.joueurs[this.joueurEnCours][0]+"')\"";
+					onclick_string += " onclick=\"alert('Attente de "+this.joueurs[this.joueurEnCours][0]+"')\"";
 					break;
 				case 255:
 					if (nGagnant == tableauArguments["j"])
-						onclick += " onclick=\"alert('Tu es le meilleur, bravo !')\"";
+						onclick_string += " onclick=\"alert('Tu es le meilleur, bravo !')\"";
 					else
-						onclick += " onclick=\"alert('Tu as fait de ton mieux, bravo !')\"";
+						onclick_string += " onclick=\"alert('Tu as fait de ton mieux, bravo !')\"";
 					break;
 				case 1:
-					onclick += " onclick=\"unJeu.joueEn("+x+","+y+")\"";
+					onclick_string += " onclick=\"unJeu.joueEn("+x+","+y+")\"";
 					break;
 				case 2:
-					onclick += " onclick=\"unJeu.chateauEn("+x+","+y+")\"";
+					onclick_string += " onclick=\"unJeu.chateauEn("+x+","+y+")\"";
 			}
+			//debug(onclick_string);
 			if (tableauArguments["type"]=="texte"){
 			if (cellules == 0 && joueur != 0){//éclaircir la couleur
 				var coulvide = parseInt("FF",16);
@@ -465,11 +467,11 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			chaineHTML += "<input id=\"c"+x+"_"+y+"\" title=\""+(this.jouable(x,y)?"Jouable":"Non jouable")+"\" type=\"button\" style=\"";
 			chaineHTML += "align:center;height:30px;width:30px;background-color:"+couleur+";";
 			chaineHTML += leStyle + "\" ";
-			chaineHTML += " value=\""+cellules+"\" "+onclick+" />";
+			chaineHTML += " value=\""+cellules+"\" "+onclick_string+" />";
 			chaineHTML += "</td>";
 			
 			} else {// border=\"0\" 
-				chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+cellules+"\" alt=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick+" />";
+				chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+cellules+"\" alt=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
 			}
 		}
 		chaineHTML += (tableauArguments["type"]=="texte"?"</tr>\n":"<br />\n");
@@ -583,6 +585,7 @@ function toString(){with(this){//recrée une string de jeu
 }}
 
 function joueEn(x,y){with(this){//ajoute une cellule du joueur en cours en x,y
+	//alert("Joue en "+x+", "+y)
 	if (!this.jouable(x,y))
 		return false;
 	if (tableauArguments["offline"]==0 && this.joueurEnCours==tableauArguments["j"])
@@ -944,7 +947,12 @@ function chargeImages(){//charge les images
 		}
 		indiceImages = 0;
 		document.getElementById("imgs").innerHTML = "Images : ";
-		imageSuivante();
+		var prechargement = true;
+		if(prechargement) {
+			imageSuivante();
+		} else {
+			apresChargement();
+		}
 	}
 }
 var lefaireunefois = false;
