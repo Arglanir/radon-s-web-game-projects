@@ -369,7 +369,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	var statistiques = this.lesJoueurs2string();
 	//Mikaël veut que le bord de la table soit de la couleur du joueur ayant le client... Ne marche que sous Chrome !
 	var colorTable = statistiques[tableauArguments["j"]][0];
-	var chaineHTML = "<table><tr><td BORDERCOLOR=\""+colorTable+"\">";
+	var chaineHTML = "<table><tr><td style=\"border:solid #"+versRRGGBB(colorTable)+";\">";
 	chaineHTML += (tableauArguments["type"]=="texte"?"<table cellpadding=\"0\" cellspacing=\"0\" >":"");
 	for(var y=0;y<this.tailleY;y++){
 		chaineHTML += (tableauArguments["type"]=="texte"?"<tr>":"");
@@ -456,7 +456,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			if (decor == 1)
 				leStyle += "text-decoration:line-through;";
 			if (decor == 2)
-				leStyle += "font-style: italic;";
+				leStyle += "font-style: italic bold;";
 			if (dernier)
 				leStyle += "text-decoration: underline;";
 			
@@ -484,10 +484,10 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	chaineHTML += "<td>Cellules</td>";
 	chaineHTML += "<td>Contr&ocirc;le</td>";
 	chaineHTML += "<td>Explosables</td>";
-	chaineHTML += "<td>Menac&eacute;es</td>";
+	chaineHTML += "<td>Menaces</td>";
 	chaineHTML += "</tr>";
 	for (var n = 1; n<=this.nbJoueurs;n++){
-		chaineHTML += "<tr><td style=\"background-color:"+statistiques[n][0]+"\">";
+		chaineHTML += "<tr><td style=\"background-color:#"+versRRGGBB(statistiques[n][0])+"\">";
 		//chaineHTML += "<p>";
 		chaineHTML += (this.joueurEnCours == n?"&gt;":"");
 		//chaineHTML += "<span style=\"background-color:"+statistiques[n][0]+"\">";
@@ -498,7 +498,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		//}
 		if (statistiques[n][2]>0)//joueur spécial
 			chaineHTML += (statistiques[n][2]==1?" (IA)":" (NET)");
-		chaineHTML += (tableauArguments["j"] == n?"</b>":"");
+		chaineHTML += (tableauArguments["j"] == n?"( moi)</b>":"");
 		
 		chaineHTML += "</td><td style=\"text-align:center;\">";
 		//chaineHTML += (this.joueurEnCours == n?"</u>":"");
