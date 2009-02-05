@@ -5,10 +5,10 @@ include_once("fonctions.inc");
 /****** classe de partie *******/
 class Partie {
 	int $nbJoueurs;
-	var $joueur;//tableau de Joueurs
+	var $joueur;//tableau de Joueurs, commence par 1
 	int $noTour;
 	int $joueurEnCours;
-	Option $options;//objet Option
+	Options $options;//objet Options
 	PlateauDeJeu $tableauJeu;//objet PlateauDeJeu
 	
 	//fonctions de création
@@ -22,9 +22,8 @@ class Partie {
 		$this->nbJoueurs++;
 		$this->joueur[$this->nbJoueurs] = new Joueur($nom,$couleur,$mdp,$type,$niveau);
 	}
-	function setNoTour($noTour){
-		$this->noTour = $noTour;
-	}
+	function setNoTour($noTour){$this->noTour = $noTour;}
+	function setJoueurEnCours($joueurEnCours){$this->joueurEnCours = $joueurEnCours;}
 	function finaliser(){//finalise le jeu pour le rendre totlament jouable
 		if (!$this->joueurEnCours) $this->joueurEnCours = rand(1,$nbJoueurs);
 		
@@ -41,8 +40,53 @@ class Partie {
 		return true;
 	}
 	
-	function nouvelle(){
+	function nouvelle(){// A FAIRE
 		
+	}
+	
+	function fromXML($fichier){
+		$xml_partie = new DOMDocument();
+		$xml_partie->load( $fichier );
+		$Xpartie = $xml_partie->get_elements_by_tagname( "partie" )[0];
+		$partie = new Partie();
+		$partie->setNoTour(0+$Xpartie->get_attribute("notour"));
+		$partie->setJoueurEnCours(0+$Xpartie->get_attribute("joueurencours"));
+		$partie->nbJoueurs = 0+$Xpartie->get_attribute("nbjoueurs");
+		$joueurs_array = $Xpartie->get_elements_by_tagname( "joueurs" )[0]->get_elements_by_tagname( "joueur" );
+		foreach ($joueurs_array as $Xjoueur)
+			$partie->joueur[$Xjoueur->get_attribute("numero")+0] = Joueur::fromXML($Xjoueur);
+		$partie->options = Options::fromXML($Xpartie->get_elements_by_tagname( "options" )[0]);
+		$partie->tableauJeu = PlateauDeJeu::fromXML($Xpartie->get_elements_by_tagname( "tableaudejeu" )[0]);
+		return $partie;
+	}
+	
+	function toXML(){//renvoie le document XML de partie
+		$xml_partie = domxml_new_doc("1.0");
+		$Xpartie = $xml_partie->add_root( "partie" );
+		$Xpartie->set_attribute("nombredejoueurs", $this->nbJoueurs);
+		$Xpartie->set_attribute("notour", $this->noTour);
+		$Xpartie->set_attribute("joueurencours", $this->joueurEnCours);
+		
+		$Xjoueurs = $Xpartie->create_element("joueurs");
+		$Xpartie->append_child($Xjoueurs);
+		
+		for ($i = 1; $i <= $nbJoueurs; $i++){
+			$Xjoueur = $this->joueur[$i]->toXML($Xjoueurs,$i);
+			$Xjoueurs->append_child($Xjoueur);
+		}
+
+		$Xoptions = $this->options->toXML($Xpartie);
+		$Xpartie->append_child($Xoptions);
+		
+		$Xtableau = $this->tableauJeu->toXML($Xpartie);
+		$Xpartie->append_child($Xtableau);
+
+		return $xml_partie;
+
+	}
+	
+	function enregistrerXML($fichierCourant){
+		$this->toXML()->dump_file("x".$fichierCourant, false, true);
 	}
 }
 
@@ -55,15 +99,40 @@ class Joueur {
 	int $niveau;//niveau IA : 0 jeu aléatoire, n meilleur coup profondeur n-1
 	Action $derniereAction;
 	
-	function Joueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
+	function Joueur($nom,$couleur,$mdp="0",$type=0,$niveau=0,$mettrederniereaction=true){
 		$this->nom = $nom;
 		$this->couleur = $couleur;
 		$this->mdp = $mdp;
 		$this->type = 0+$type;
 		$this->niveau = 0+$niveau;
-		$this->derniereAction = new Action();
+		if ($mettrederniereaction)
+			$this->derniereAction = new Action();
 	}
-
+	
+	function fromXML($Xjoueur){
+		$joueur = new Joueur($Xjoueur->get_attribute("nom"),
+							$Xjoueur->get_attribute("couleur"),
+							$Xjoueur->get_attribute("mdp"),
+							($Xjoueur->get_attribute("estia")=="oui"?1:
+								($Xjoueur->get_attribute("estnet")=="oui"?2:0)),
+							0+$Xjoueur->get_attribute("niveau"),false);
+		
+		$joueur->derniereAction = Action::fromXML($Xjoueur->get_elements_by_tagname("derniereaction")[0]);
+		return joueur;
+	}
+	
+	function toXML($parent,$numero){
+		$Xjoueur = $parent->create_element("joueur");
+		$Xjoueur->set_attribute("numero", $numero);
+		$Xjoueur->set_attribute("nom", $this->nom);
+		$Xjoueur->set_attribute("mdp", $this->mdp);
+		$Xjoueur->set_attribute("couleur", $this->couleur);
+		$Xjoueur->set_attribute("estia", ($this->type==1?"oui":"non"));
+		$Xjoueur->set_attribute("niveau", $this->niveau);//à intégrer
+		$Xjoueur->set_attribute("estnet", ($this->type==2?"oui":"non"));
+		$Xjoueur->append_child($this->derniereAction->toXML($Xjoueur));
+		return $joueur;
+	}
 	
 }
 
@@ -79,15 +148,31 @@ class Action {
 		$this->ouY = $ouY;
 		$this->quand = $quand;
 	}
+	
+	function fromXML($Xaction){
+		return new Action($Xaction->get_attribute("type"),
+						0+$Xaction->get_attribute("x"),
+						0+$Xaction->get_attribute("y"),
+						0+$Xaction->get_attribute("notour"));
+	}
+	
+	function toXML($parent){
+		$derniereact = $parent->create_element("derniereaction");
+		$derniereact->set_attribute("type", $this->quoi);
+		$derniereact->set_attribute("x", $this->ouX);
+		$derniereact->set_attribute("y", $this->ouY);
+		$derniereact->set_attribute("notour", $this->quand);
+		return $derniereact;
+	}
 }
 
 /****** classe prenant en compte les options ******/
 class Options {
-	var $chateauxPermis;//	Options : chateaux activés ? true/false
-	var $profondeur;	//Profondeur de jeu
-	var $typeBord;	//Bord bloqués ?	1/0/2:monde rond
-	var $ajoutDiag;	//Ajout diagonale ? 1/0  (peut-on cliquer en diagonale ou seulement à côté ?)
-	var $explosionJoueur;//Explosion slt pour joueur en cours ? 1/0
+	bool $chateauxPermis;//	Options : chateaux activés ? true/false
+	int $profondeur;	//Profondeur de jeu
+	int $typeBord;	//Bord bloqués ?	1/0/2:monde rond
+	bool $ajoutDiag;	//Ajout diagonale ? true/false  (peut-on cliquer en diagonale ou seulement à côté ?)
+	bool $explosionJoueur;//Explosion slt pour joueur en cours ? true/false
 	
 	function Options($chateauxPermis=0,$profondeur=100,$typeBord=1,$ajoutDiag=1,$explosionJoueur=1){
 		$this->chateauxPermis = ($chateauxPermis?true:false);
@@ -107,6 +192,46 @@ class Options {
 	function quelTypeBord(){return $this->typeBord;}
 	function yaPlacementDiag(){return $this->ajoutDiag;}
 	function yaExplosionJoueur(){return $this->explosionJoueur;}
+	
+	function fromXML($Xoptions){
+		$options = new Options();
+
+		$lesOptions = array();
+		
+		$options_array = $Xoptions->get_elements_by_tagname( "option" );
+		
+		foreach ($options_array as $Xoption){
+			$valeur = 0+$Xoption->get_attribute("valeur");
+			switch($Xoption->get_attribute("type")){
+				case "chateaux_actifs": setPermissionChateau($valeur);
+					break;
+				case "profondeur_jeu": setProfondeur($valeur);
+					break;
+				case "type_bords": setTypeBord($valeur);
+					break;
+				case "ajout_diagonale": setPlacementDiag($valeur);
+					break;
+				case "explosion_joueur": setExplosionJoueur($valeur);
+					break;
+			}
+		}
+		return $options;
+	}
+	
+	function toXML($parent){
+		$Xoptions = $parent->create_element("options");
+		
+		$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur");
+		$options = array((yaPermissionChateau()?1:0), quelleProfondeur() , quelTypeBord(), (yaPlacementDiag()?1:0), (yaExplosionJoueur()?1:0));
+		for ($i = 0; $i < 5; $i++){
+			$Xoption = $Xoptions->create_element("option");
+			$Xoption->set_attribute("type", $lesOptions[$i]);
+			$Xoption->set_attribute("valeur", $options[$i]);
+			$Xoptions->append_child($Xoption);
+		}
+		
+		return $Xoptions;
+	}
 }
 
 /****** classe de plateau de jeu ******/
@@ -332,6 +457,39 @@ class PlateauDeJeu {
 					return true;
 		return false;
 	}
+	
+	function fromXML($Xplateau){
+		$lePlateau = new PlateauDeJeu(0+$Xplateau->get_attribute("taillex"),
+								0+$Xplateau->get_attribute("tailley"),
+								false);//pour que les cases ne soient pas initialisées
+		$lignes_array = $Xplateau->get_elements_by_tagname( "ligne" );
+		foreach($lignes_array as $Xligne){
+			$y = 0+$Xligne->get_attribute("y");
+			$cases_array = $Xligne->get_elements_by_tagname( "case" );
+			foreach($cases_array as $Xcase){
+				$x = 0+$Xcase->get_attribute("x");
+				$this->plateau[$y][$x] = UneCase::fromXML($Xcase);
+			}
+		}
+		return $lePlateau;
+	}
+	
+	function toXML($parent){
+		$Xtableau = $parent->create_element("tableaudejeu");
+		$Xtableau->set_attribute("taillex", $this->tailleX);
+		$Xtableau->set_attribute("tailley", $this->tailleY);
+
+		for($i=0;$i<$tailleY;$i++){
+			$Xligne = $Xtableau->create_element("ligne");
+			$Xtableau->append_child($Xligne);
+			$Xligne->set_attribute("y", $i);
+			for($j=0;$j<$tailleX;$j++){
+				$Xcase = $this->getCase($x,$y)->toXML($Xligne,$x,$y);
+				$Xligne->append_child($Xcase);
+			}
+		}
+		return $Xtableau;
+	}
 }
 
 /****** classe de cases du plateau de jeu  ****/
@@ -397,8 +555,27 @@ class UneCase {
 	
 	function toInt(){return ($this->getChateau()?10000:0)+$this->getJoueur()*100+$this->getCellules();}
 	
-	function toXML($x,$y){//renvoie un DOMNode
-		$element = DOMDocument::createElement
+	function fromXML($Xcase){
+		//joueur, cellules, chateau?, max, decor
+		$laCase = new UneCase(0+$Xcase->get_attribute("joueur"),
+								0+$Xcase->get_attribute("cellules"),
+								0+$Xcase->get_attribute("chateau"),
+								0+$Xcase->get_attribute("max"),
+								0+$Xcase->get_attribute("decor")
+								);
+		return $laCase;
+	}
+	
+	function toXML($parent,$x,$y){//renvoie un DOMNode
+		$Xcase = $parent->create_element("case");
+		$Xcase->set_attribute("x", $x);
+		$Xcase->set_attribute("y", $y);
+		$Xcase->set_attribute("decor", $this->getDecor());
+		$Xcase->set_attribute("joueur", $this->getJoueur());
+		$Xcase->set_attribute("cellules", $this->getCellules());
+		$Xcase->set_attribute("max", $this->getMax());
+		$Xcase->set_attribute("chateau", $this->getChateau()?1:0);
+		return $Xcase;
 	}
 }
 

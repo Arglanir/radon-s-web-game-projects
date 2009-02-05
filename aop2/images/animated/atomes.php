@@ -83,7 +83,7 @@ if (!$chateau){//atomes libres
 	}
 	
 	for ($j = 0; $j < $nbframes; $j++){
-		$im = @imagecreatetruecolor($tailleimage, $tailleimage);
+		$im = imagecreatetruecolor($tailleimage, $tailleimage);
 		imagecopy($im ,$imfond,0,0,0,0, $tailleimage, $tailleimage);
 		
 		$coul = imagecolorallocate($im, $rouge, $vert, $bleu);

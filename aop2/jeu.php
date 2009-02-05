@@ -443,6 +443,138 @@ function enregistrerPartie(){
 	fclose($f);
 }
 
+function enregistrerPartieXML(){
+	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
+
+	$xml_partie = domxml_new_doc("1.0");
+	$Xpartie = $xml_partie->add_root( "partie" );
+	$Xpartie->set_attribute("nombredejoueurs", $nbJoueurs);
+	$Xpartie->set_attribute("notour", $noTour);
+	$Xpartie->set_attribute("joueurencours", $joueurEnCours);
+	
+	$Xjoueurs = $Xpartie->create_element("joueurs");
+	$Xpartie->append_child($Xjoueurs);
+	
+	for ($i = 1; $i <= $nbJoueurs; $i++){
+		$joueur = $Xjoueurs->create_element("joueur");
+		$joueur->set_attribute("numero", $i);
+		$joueur->set_attribute("nom", $joueurs[$i][0]);
+		$joueur->set_attribute("mdp", $joueurs[$i][2]);
+		$joueur->set_attribute("couleur", $joueurs[$i][1]);
+		$joueur->set_attribute("estia", ($joueurs[$i][3]==1?"oui":"non"));
+		$joueur->set_attribute("niveau", $joueurs[$i][4]);//à intégrer
+		$joueur->set_attribute("estnet", "non");
+		$derniereact = $joueur->create_element("derniereaction");
+		$derniereact->set_attribute("type", $derniereAction[$i][0]);
+		$derniereact->set_attribute("x", $derniereAction[$i][1]);
+		$derniereact->set_attribute("y", $derniereAction[$i][2]);
+		$derniereact->set_attribute("notour", $derniereAction[$i][3]);
+		$joueur->append_child($derniereact);
+		$Xjoueurs->append_child($joueur);
+	}
+
+	$Xoptions = $Xpartie->create_element("options");
+	$Xpartie->append_child($Xoptions);
+	
+	$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur");
+	for ($i = 0; $i < 5; $i++){
+		$Xoption = $Xoptions->create_element("option");
+		$Xoption->set_attribute("type", $lesOptions[$i]);
+		$Xoption->set_attribute("valeur", $options[$i]);
+		$Xoptions->append_child($Xoption);
+	}
+
+	$Xtableau = $Xpartie->create_element("tableaudejeu");
+	$Xpartie->append_child($Xtableau);
+	$Xtableau->set_attribute("taillex", $tailleX);
+	$Xtableau->set_attribute("tailley", $tailleY);
+
+	for($i=0;$i<$tailleY;$i++){
+		$Xligne = $Xtableau->create_element("ligne");
+		$Xtableau->append_child($Xligne);
+		$Xligne->set_attribute("y", $i);
+		for($j=0;$j<$tailleX;$j++){
+			$Xcase = $Xligne->create_element("case");
+			$Xcase->set_attribute("x", $j);
+			$Xcase->set_attribute("y", $i);
+			$Xcase->set_attribute("decor", $tableauDecor[$i][$j]);
+			$Xcase->set_attribute("joueur", case2joueur($tableauJeu[$i][$j]));
+			$Xcase->set_attribute("cellules", case2cellules($tableauJeu[$i][$j]));
+			$Xcase->set_attribute("max", $tableauDesMax[$i][$j]);
+			$Xcase->set_attribute("chateau", case2chateau($tableauJeu[$i][$j])?1:0);
+			$Xligne->append_child($Xcase);
+		}
+	}
+  
+	$xml_parties->dump_file("x".$fichierCourant, false, true);
+}
+
+function lirePartieXML(){
+	extract($GLOBALS,EXTR_REFS);//pour continuer sur les variables
+
+	$xml_partie = domxml_new_doc("1.0");
+	$Xpartie = $xml_partie->add_root( "partie" );
+	$Xpartie->set_attribute("nombredejoueurs", $nbJoueurs);
+	$Xpartie->set_attribute("notour", $noTour);
+	$Xpartie->set_attribute("joueurencours", $joueurEnCours);
+	
+	$Xjoueurs = $Xpartie->create_element("joueurs");
+	$Xpartie->append_child($Xjoueurs);
+	
+	for ($i = 1; $i <= $nbJoueurs; $i++){
+		$joueur = $Xjoueurs->create_element("joueur");
+		$joueur->set_attribute("numero", $i);
+		$joueur->set_attribute("nom", $joueurs[$i][0]);
+		$joueur->set_attribute("mdp", $joueurs[$i][2]);
+		$joueur->set_attribute("couleur", $joueurs[$i][1]);
+		$joueur->set_attribute("estia", ($joueurs[$i][3]==1?"oui":"non"));
+		$joueur->set_attribute("niveau", $joueurs[$i][4]);//à intégrer
+		$joueur->set_attribute("estnet", "non");
+		$derniereact = $joueur->create_element("derniereaction");
+		$derniereact->set_attribute("type", $derniereAction[$i][0]);
+		$derniereact->set_attribute("x", $derniereAction[$i][1]);
+		$derniereact->set_attribute("y", $derniereAction[$i][2]);
+		$derniereact->set_attribute("notour", $derniereAction[$i][3]);
+		$joueur->append_child($derniereact);
+		$Xjoueurs->append_child($joueur);
+	}
+
+	$Xoptions = $Xpartie->create_element("options");
+	$Xpartie->append_child($Xoptions);
+	
+	$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur");
+	for ($i = 0; $i < 5; $i++){
+		$Xoption = $Xoptions->create_element("option");
+		$Xoption->set_attribute("type", $lesOptions[$i]);
+		$Xoption->set_attribute("valeur", $options[$i]);
+		$Xoptions->append_child($Xoption);
+	}
+
+	$Xtableau = $Xpartie->create_element("tableaudejeu");
+	$Xpartie->append_child($Xtableau);
+	$Xtableau->set_attribute("taillex", $tailleX);
+	$Xtableau->set_attribute("tailley", $tailleY);
+
+	for($i=0;$i<$tailleY;$i++){
+		$Xligne = $Xtableau->create_element("ligne");
+		$Xtableau->append_child($Xligne);
+		$Xligne->set_attribute("y", $i);
+		for($j=0;$j<$tailleX;$j++){
+			$Xcase = $Xligne->create_element("case");
+			$Xcase->set_attribute("x", $j);
+			$Xcase->set_attribute("y", $i);
+			$Xcase->set_attribute("decor", $tableauDecor[$i][$j]);
+			$Xcase->set_attribute("joueur", case2joueur($tableauJeu[$i][$j]));
+			$Xcase->set_attribute("cellules", case2cellules($tableauJeu[$i][$j]));
+			$Xcase->set_attribute("max", $tableauDesMax[$i][$j]);
+			$Xcase->set_attribute("chateau", case2chateau($tableauJeu[$i][$j])?1:0);
+			$Xligne->append_child($Xcase);
+		}
+	}
+  
+	$xml_parties->dump_file("x".$fichierCourant, false, true);
+
+}
 
 /******jeu.php : interface avec le fichier de jeu
 	reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
