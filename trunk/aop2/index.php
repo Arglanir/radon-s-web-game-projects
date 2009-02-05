@@ -289,7 +289,12 @@ Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_
 <?php
 afficherParties($fichier_parties);
 ?>
-	
+<form method="GET" action="jeu.html">Aller dans une partie non affichée<br/><br/>
+Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
+Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
+<input type="submit" value="Chercher la partie" title="clique ici" />
+</form>
+
 <form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form></div>
 <div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
 </body>
