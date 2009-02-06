@@ -22,6 +22,19 @@ function mettreEntre($nombre,$base){//fonction permettant le modulo, met le nomb
 	return $nombre;
 }
 
+//fonctions de recherche dans un entier
+function case2chateau($entier){//regarde si sur une case il y a un chateau
+	return ($entier>=10000);
+}
+function case2cellules($entier){//retourne le nombre de cellules dans la case
+	return ($entier-(floor($entier/100)*100));
+}
+function case2joueur($entier){//retourne le n° d'un joueur à qui est la case, même désertée
+	/*if (case2cellules($entier) == 0)
+		return 0; //renvoie 0 si aucune cellule*/
+	return floor(($entier-(case2chateau($entier)?10000:0))/100);
+}
+
 //renvoie une chaine contenant l'URL du client pour le joueur
 function getUrlJoueur($numero_partie, $numero_joueur, $si_mot_de_passe=false, $mot_de_passe="") {
   $url = "jeu.html?j=".$numero_joueur."&p=".$numero_partie;
