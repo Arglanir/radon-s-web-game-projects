@@ -13,12 +13,6 @@ define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
 $fichierPartie = "xaop".$p."bacteries.par";
 
 $partie = Partie::ouvrirXML($fichierPartie);
-var_dump($partie);
-echo "<br/><textarea cols=70>";
-$partie->enregistrerXML();
-echo "</textarea>";
-
-
 
 
 ?>
