@@ -104,7 +104,7 @@ class Partie {
 		$partie = new Partie();
 		$partie->setNoTour(0+$Xpartie->get_attribute("notour"));
 		$partie->setJoueurEnCours(0+$Xpartie->get_attribute("joueurencours"));
-		$partie->nbJoueurs = 0+$Xpartie->get_attribute("nbjoueurs");
+		$partie->nbJoueurs = 0+$Xpartie->get_attribute("nombredejoueurs");
 		$joueurs_array = $Xpartie->get_elements_by_tagname( "joueur" );
 		foreach ($joueurs_array as $Xjoueur)
 			$partie->joueur[$Xjoueur->get_attribute("numero")+0] = Joueur::fromXML($Xjoueur);
@@ -125,7 +125,7 @@ class Partie {
 		
 		$partie->setNoTour(0+$Xpartie["notour"]);
 		$partie->setJoueurEnCours(0+$Xpartie["joueurencours"]);
-		$partie->nbJoueurs = 0+$Xpartie["nbjoueurs"];
+		$partie->nbJoueurs = 0+$Xpartie["nombredejoueurs"];
 		
 		foreach($Xpartie->children() as $Xelement){
 			switch($Xelement->getName()){
@@ -146,24 +146,24 @@ class Partie {
 	}
 	
 	function toSXML(){//renvoie le document SimpleXML de partie
-			$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><partie></partie>');
-			//$Xpartie = $xml_partie->addChild('partie');
+		$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><partie></partie>');
+		//$Xpartie = $xml_partie->addChild('partie');
+	
+		$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
+		$Xpartie->addAttribute("notour", $this->noTour);
+		$Xpartie->addAttribute("joueurencours", $this->joueurEnCours);
 		
-			$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
-			$Xpartie->addAttribute("notour", $this->noTour);
-			$Xpartie->addAttribute("joueurencours", $this->joueurEnCours);
-			
-			$Xjoueurs = $Xpartie->addChild('joueurs');
-			
-			for ($i = 1; $i <= $this->nbJoueurs; $i++){
-				$Xjoueur = $this->joueur[$i]->toSXML($Xjoueurs,$i);
-			}
+		$Xjoueurs = $Xpartie->addChild('joueurs');
+		
+		for ($i = 1; $i <= $this->nbJoueurs; $i++){
+			$Xjoueur = $this->joueur[$i]->toSXML($Xjoueurs,$i);
+		}
 
-			$Xoptions = $this->options->toSXML($Xpartie);
-			
-			$Xtableau = $this->tableauJeu->toSXML($Xpartie);
+		$Xoptions = $this->options->toSXML($Xpartie);
+		
+		$Xtableau = $this->tableauJeu->toSXML($Xpartie);
 
-			return $Xpartie;
+		return $Xpartie;
 	}
 	
 	function toXML(){//renvoie le document XML de partie
@@ -192,17 +192,20 @@ class Partie {
 
 	}
 	
-	function enregistrerXML($fichierCourant=false){
+	function enregistrerXML($fichierCourant=true){//chaine de fichier, sinon, booléen demandant l'affichage
+		$chaine = "";
 		if (floatval(phpversion())>=5)
-			if ($fichierCourant)
+			if (is_string($fichierCourant))
 				return $this->toSXML()->asXML($fichierCourant);
 			else
-				echo $this->toSXML()->asXML();
+				if ($fichierCourant) echo $this->toSXML()->asXML();
+				else return $this->toSXML()->asXML();
 		else	
-			if ($fichierCourant)
+			if (is_string($fichierCourant))
 				return $this->toXML()->dump_file($fichierCourant, false, true);
 			else
-				echo $this->toXML()->dump_mem(true);
+				if ($fichierCourant) echo $this->toXML()->dump_mem(true);
+				else return $this->toXML()->dump_mem(true);
 	}
 	function ouvrirXML($fichierCourant){
 		if (floatval(phpversion())>=5)
@@ -479,17 +482,17 @@ class PlateauDeJeu {
 	}
 	function copie(){//crée une copie du plateau
 		$leNouveau = new PlateauDeJeu($this->tailleX, $this->tailleY, false);
-		for ($i = 0; $i < $this->$tailleY; $i++)
-			for ($j = 0; $j < $this->$tailleX; $j++)
+		for ($i = 0; $i < $this->tailleY; $i++)
+			for ($j = 0; $j < $this->tailleX; $j++)
 				$leNouveau->plateau[$i][$j] = $this->plateau[$i][$j]->copie();
 		return $leNouveau;
 	}
 	function getCase($x, $y){ return $this->plateau[$y][$x];}
 	function poseDecor($tableauDecor){//tableau en Y X
-		if (count($tableauDecor) <  $this->$tailleY) return false;
-		for ($i = 0; $i < $this->$tailleY; $i++){
-			if (count($tableauDecor[$i]) <  $this->$tailleX) return false;
-			for ($j = 0; $j < $this->$tailleX; $j++)
+		if (count($tableauDecor) <  $this->tailleY) return false;
+		for ($i = 0; $i < $this->tailleY; $i++){
+			if (count($tableauDecor[$i]) <  $this->tailleX) return false;
+			for ($j = 0; $j < $this->tailleX; $j++)
 				$this->plateau[$i][$j]->setDecor($tableauDecor[$i][$j]);
 		}
 		return true;
@@ -510,13 +513,21 @@ class PlateauDeJeu {
 								if ($this->getCase($j+$jj,$i+$ii)->getDecor()==3) $k--;
 							break;
 						case 2://on regarde après le bord
-							if ($this->getCase(mettreEntre($j+$jj,$tailleX),mettreEntre($i+$ii,$tailleY))->getDecor()==3) $k--;
+							if ($this->getCase(mettreEntre($j+$jj,$this->tailleX),mettreEntre($i+$ii,$this->tailleY))->getDecor()==3) $k--;
 							break;
 						}
 					}
 			$this->getCase($j,$i)->setMax($k);
 		}
 	}
+	function metsLesJoueurs($tabPosJoueurs){
+		foreach ($tabPosJoueurs as $joueur => $tab){
+			list($x,$y) = $tab;
+			$this->getCase($x,$y)->setJoueur($joueur);
+			$this->getCase($x,$y)->setCellules(1);
+		}
+	}
+	
 	function purifie($options,$joueurEnCours){//en fonction des options, 1 itération
 		$changement=false;
 		$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
@@ -778,7 +789,7 @@ class UneCase {
 	function vaExploser(){return ($this->cellules >= $this->max);}
 	
 	function getDecor(){return $this->decor;}
-	function setDecor($decor){$this->decor = $decor;}
+	function setDecor($decor){if ($decor!=3 || $this->nbcellules==0) $this->decor = $decor;}
 	
 	function toInt(){return ($this->getChateau()?10000:0)+$this->getJoueur()*100+$this->getCellules();}
 	
