@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<!--
+Age of paramecia 2
+jeu créé par Cédric Mayer
+
+editeur.html : contient une interface de jeu pour créer, éditer et générer des cartes
+-->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-language" content="fr" />
+<title>AOP2 Editeur de carte</title>
+<!--script type="text/javascript" src="ajax.js" ></script-->
+<script type="text/javascript">
+var decor = new Array();
+var last_panel = 0;
+var current_decor = 0;
+var default_decor = 0;
+var DimX = 0;
+var DimY = 0;
+
+function image_case(typedecor) {
+	return "images/image.php?n=0&h=0&m=0&type=cool&d="+typedecor;
+}
+
+function creeTableau(n, m) {
+	DimX = n;
+	DimY = m;
+	decor2 = new Array();
+	var imgDefault = image_case(0);
+	
+	var chaineHTML = ""
+	chaineHTML += "<table cellpadding=\"0\" cellspacing=\"0\" margin=\"0\" padding=\"0\">";
+	for(j = 1; j <= n; j++) {
+		chaineHTML += "<tr>";
+		decor2[j] = new Array();
+		for(i = 1; i <= n; i++) {
+			onmouseout_string  =  "";//"onMouseOut=\"hidePanel('p"    +i+"_"+j+"',"+i+","+j+")\"";
+
+			chaineHTML += "<td style='line-height:0px;'>";
+			
+			//L'action onclick
+			onclick_string = "onClick=\"changeCase('d"+i+"_"+j+"',"+i+","+j+")\"";
+			onmouseover_string = "";
+			//L'image de la case
+			chaineHTML += "<img id=\"d"+i+"_"+j+"\" width=\"33px\" height=\"33px\" alt=\"\" src=\""+image_case(0)+"\" "+onclick_string+" "+onmouseover_string+" />";
+			chaineHTML += "</td>";
+			decor2[j][i] = 0;
+		}
+		//chaineHTML += "<br>";
+		chaineHTML += "</tr>";
+	}
+	chaineHTML += "</table>";
+	chaineHTML += "<br>";
+	chaineHTML += "<br>";
+	chaineHTML += "";
+	
+	chaineHTML += "<div id=\"p"+i+"_"+j+"\" style=\"display:block;margin:0;padding:0;\">";
+	for(i = 0; i <= 3; i++) {
+		chaineHTML += "<img id=\"palette_"+i+"\" width=33 height=33 alt=\"\" src=\""+image_case(i)+"\" border=2 onClick=\"select_palette('palette_"+i+"', "+i+")\"/>&nbsp;";
+	}
+	chaineHTML += "</div>";
+
+	document.getElementById("decor").innerHTML = chaineHTML;
+	select_palette('palette_3', 3);
+	decor = decor2;
+}
+
+function updateOutput() {
+	var chaine = "";
+	chaine +=	DimX+"\n";
+	chaine += DimY+"\n";
+	for(j = 1; j <= DimY; j++) {
+		for(i = 1; i <= DimX; i++) {
+			chaine += decor[j][i]+(i==DimX?"":"\t");
+		}
+		chaine += (j==DimY?"":"\n");
+	}
+	document.getElementById("output").value = chaine;
+}
+
+function changeCase(id, i, j) {
+	if(decor[j][i] == current_decor) {
+		decor[j][i] = default_decor;
+	} else {
+		default_decor = decor[j][i];
+		decor[j][i] = current_decor;
+	}
+	document.getElementById(id).src = image_case(decor[j][i]);
+	updateOutput();
+}
+
+function select_palette(id, i) {
+	for(j = 0; j <= 3; j++) {
+		if(j != i) document.getElementById("palette_"+j).style.borderColor = "white";
+	}
+	document.getElementById(id).style.borderColor = "black";
+	current_decor = i;
+}
+
+function main() {
+	creeTableau(6, 6)
+}
+</script>
+</head>
+<body onload="main()" ondragstart="return false">
+<h1>AOP2 Editeur de carte</h1>
+
+<div name="decor" id="decor">
+
+</div>
+<textarea id="output">
+</textarea>
+<div name="imagesprechargees" id="imgs">
+</div>
+<script type="text/javascript"><!-- Debugage !
+function debug(chaine){
+	document.getElementById("debug").innerHTML = chaine+"<br />"+document.getElementById("debug").innerHTML;
+}
+//-->
+</script>
+<div id="debug">
+
+</div>
+<div id="comm">
+
+</div>
+<div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
+</body>
+</html>
