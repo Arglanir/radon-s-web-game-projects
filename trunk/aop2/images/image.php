@@ -7,6 +7,7 @@ image.php : crée une image de case
 		h	chateau ? 1/0
 		d	décor 0/1/2/3
 		m	max atteint ? 1/0
+		type	type de case (cellule, médiéval)
 
 ***************/
 if (!array_key_exists("type",$_GET))
@@ -28,6 +29,8 @@ $tailleattome = max(min(0+(array_key_exists("taille",$_GET)?$_GET["taille"]:3),5
 
 if ($_GET["type"] == "cellule") {
 	$fichierDeBase = "aop.png";
+} elseif ($_GET["type"] == "cool") {
+	$fichierDeBase = "aopcool.png";
 } else {
 	$fichierDeBase = "aopmed.png";
 }
