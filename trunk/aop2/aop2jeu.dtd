@@ -1,7 +1,9 @@
 <!ELEMENT partie (joueurs, options, tableaudejeu) >
 <!ATTLIST partie 
 		nombredejoueurs NMTOKEN #REQUIRED
+		demarree (0|1) #REQUIRED
 		notour NMTOKEN #REQUIRED
+		gagnant NMTOKEN #REQUIRED
 		joueurencours NMTOKEN #REQUIRED>
 <!ELEMENT joueurs (joueur*) >
 <!ELEMENT joueur  (derniereaction) >
