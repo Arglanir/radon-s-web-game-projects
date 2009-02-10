@@ -37,11 +37,11 @@ function nomIA(){//génère un nom d'IA
 }
 
 function bodyOnLoad() {
-	document.cre.nbJoueurs.value = 2
-	updateNumberPlayers()
+	document.cre.nbJoueurs.value = 2;
+	updateNumberPlayers();
 	cacherTout();
 	for(var i = 1; i <= <?php echo $max_joueurs.""; ?>; i++) {
-		changecolor(i)
+		changecolor(i);
 	}
 }
 
@@ -70,8 +70,8 @@ function updateIA(n) {
 
 function changecolor(n) {
 	var color = document.getElementById("couleur"+n).value;
-	if(color.substr(0, 1)=="#") {
-		document.getElementById("no"+n).style.backgroundColor = color;
+	if(color.length==6) {
+		document.getElementById("no"+n).style.backgroundColor = "#"+color;
 	}
 }
 
@@ -182,7 +182,7 @@ echo "</div>\n";
 }*/
 ?>
 <table>
-<tr><td>
+<tr><td style="text-align:right;">
 Taille : </td><td>
 <input type=text id="x" name="x" value="6" style="width:30px">
 x
@@ -247,7 +247,7 @@ array("text" => "Decor",
 	"table"=>true
 ));
 addSelectOption(
-array("text" => "Attente des joueurs avant de démarrer",
+array("text" => "Attente d'autres joueurs",
 	"idname" => "opt_attente_joueurs",
 	"options" => array("non" => 0,
 						"oui" => 1),
@@ -255,21 +255,28 @@ array("text" => "Attente des joueurs avant de démarrer",
 	"table"=>true
 ));
 ?>
-<tr><td>
+<tr><td style="text-align:right;">
 Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
+</td></tr>
+<tr><td style="text-align:center;" colspan=2>
+<input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 </td></tr>
 </table>
 
-<input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
+
 </form>
 </div>
 
 <h2><a href="" onclick="changerAffichage('parties');return false;" style="color:black;text-decoration:none;">&gt; Parties en cours</a></h2>
 <div id="parties">
 <?php
-afficherParties($fichier_parties);
+include_once ("newjeux.php");
+
+$lesParties = new PartiesEnCours();
+
+$lesParties->afficherParties(false);
 ?>
-<form method="GET" action="jeu.html">Aller dans une partie non affichée<br/><br/>
+<form method="GET" action="jeu.html"><h3>Aller dans une partie non affichée</h3>
 Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
 Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
 <input type="submit" value="Chercher la partie" title="clique ici" />

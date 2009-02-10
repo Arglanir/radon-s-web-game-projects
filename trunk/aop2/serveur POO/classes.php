@@ -71,9 +71,9 @@ class Partie {
 	}
 	
 	function finDePartie(){
-		if ($g = $this->tableauJeu->yaGagant())
+		if ($g = $this->tableauJeu->yaGagnant())
 			$this->gagnant = $g;
-		return ($this->gagnant>0);
+		return ($this->gagnant);
 	}
 	
 	function fromText($fichier){
@@ -201,7 +201,6 @@ class Partie {
 
 		return $Xpartie;
 	}
-	
 	function toXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document XML de partie
 		$xml_partie = domxml_new_doc("1.0");
 		$Xpartie = $xml_partie->create_element( "partie" );
@@ -265,7 +264,7 @@ class Joueur {
 	function Joueur($nom,$couleur,$mdp="0",$type=0,$niveau=0,$mettrederniereaction=true){
 		$this->nom = $nom;
 		$this->couleur = $couleur;
-		$this->mdp = $mdp;
+		$this->mdp = ($type==1?md5mdpIA:$mdp);
 		$this->type = 0+$type;
 		$this->niveau = 0+$niveau;
 		if ($mettrederniereaction)
@@ -530,7 +529,7 @@ class PlateauDeJeu {
 		return $leNouveau;
 	}
 	function getCase($x, $y){
-		if ($x>0 && $x<$this->tailleX && $y>0 && $y<$this->tailleY) return $this->plateau[$y][$x];
+		if ($x>=0 && $x<$this->tailleX && $y>=0 && $y<$this->tailleY) return $this->plateau[$y][$x];
 		else return false;
 	}
 	function poseDecor($tableauDecor){//tableau en Y X
@@ -598,8 +597,9 @@ class PlateauDeJeu {
 			$posJoueurs = array();
 			for ($j = 0;$j < $this->tailleY;$j++) for ($i = 0;$i < $this->tailleX;$i++){
 				//recherche des positions des joueurs
-				if ($jou = $this->getCase($i,$j)->getJoueur())
-					$posJoueurs[$jou] = array($i,$j);
+				if ($c = $this->getCase($i,$j))
+					if ($jou = $c->getJoueur())
+						$posJoueurs[$jou] = array($i,$j);
 			}
 			$d = $this->tailleX + $this->tailleY;
 			foreach($posJoueurs as $pos){
@@ -614,7 +614,7 @@ class PlateauDeJeu {
 		$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
 		$differences = array(); //préparation du traitement des explosions
 		$conquetes = array();
-		for ($y=0;$y<$tailleY;$y++){
+		for ($y=0;$y<$this->tailleY;$y++){
 			$differences[$y] = array();
 			$conquetes[$y] = array();
 			for ($x=0;$x<$this->tailleX;$x++){
@@ -625,7 +625,7 @@ class PlateauDeJeu {
 		//parcours du plateau pour traiter les explosions
 		for ($x=0;$x<$this->tailleX;$x++) for($y=0;$y<$this->tailleY;$y++){
 			$cetteCase = $this->getCase($x,$y);
-			if (($options->yaExplosionJoueur() && $$cetteCase->getJoueur()==$joueurEnCours) || !$options->yaExplosionJoueur())
+			if (($options->yaExplosionJoueur() && $cetteCase->getJoueur()==$joueurEnCours) || !$options->yaExplosionJoueur())
 			if ($cetteCase->vaExploser() && !$cetteCase->getChateau()){//explosion !
 				$changement = true;			//va sur les cases d'à côté
 				for ($ii=-1;$ii<2;$ii++) for($jj=-1;$jj<2;$jj++) if (abs($ii)+abs($jj)==1){//pas diagonale
@@ -700,13 +700,14 @@ class PlateauDeJeu {
 			$changements = $this->purifie($options,$joueurEnCours);
 			$profondeur++;
 			if ($changements)//on arrête s'il y a pas de changements
-				purifierTotalement($options,$joueurEnCours,$profondeur);
+				$this->purifieTotalement($options,$joueurEnCours,$profondeur);
 			else
-				purifierTotalement($options,$joueurEnCours,$options->quelleProfondeur());
+				$this->purifieTotalement($options,$joueurEnCours,$options->quelleProfondeur());
 		}
 	}
 	function clicNormal($x,$y,$joueurEnCours,$chateau=false){//ajoute une cellule
 		$laCase = $this->getCase($x,$y);
+		if (!$laCase) var_dump($this);
 		$laCase->setJoueur($joueurEnCours);
 		$laCase->addCellules($laCase->getDecor()==2?2:1);
 		if ($chateau) $laCase->clicChateau();
@@ -732,9 +733,9 @@ class PlateauDeJeu {
 			if ($i==0 && $j==0) continue; // on a déjà testé la case centrale
 			if (!$options->yaPlacementDiag() && abs($i)+abs($j)==2) continue;//pas en diagonale
 			$nvx = $x+$i; $nvy = $y+$j;
-			if ($options->quelTypeBord() != 2 && (!entre(0,$nvx,$tailleX-1) || !entre(0,$nvy,$tailleY-1)))
+			if ($options->quelTypeBord() != 2 && (!entre(0,$nvx,$this->tailleX-1) || !entre(0,$nvy,$this->tailleY-1)))
 				continue;//après le bord
-			$nvx = mettreEntre($nvx,$tailleX);$nvy = mettreEntre($nvy,$tailleY);//au cas où le monde est rond
+			$nvx = mettreEntre($nvx,$this->tailleX);$nvy = mettreEntre($nvy,$this->tailleY);//au cas où le monde est rond
 			$autreCase = $this->getCase($nvx,$nvy);
 			if ($autreCase->getJoueur() == $joueurAppelant && $autreCase->getCellules() > 0)
 				return true; //case controlée par ce joueur
@@ -756,17 +757,17 @@ class PlateauDeJeu {
 					return true;
 		return false;
 	}
-	function yaGagant(){//regarde s'il n'y a qu'un type de joueur sur la carte
+	function yaGagnant(){//regarde s'il n'y a qu'un type de joueur sur la carte
 		$joueursRestants = array();$gagnant = 0;
 		for ($x=0;$x<$this->tailleX;$x++) for ($y=0;$y<$this->tailleY;$y++){
 			$j = $this->getCase($x,$y)->getJoueur();
 			$c = $this->getCase($x,$y)->getCellules();
 			if ($c>0 && $j>0) {
 				$joueursRestants[$j] = 1; $gagnant = $j;
-				if (count($joueursRestants)>2) return false;
+				if (count($joueursRestants)>=2) return false;
 			}
 		}
-		if (count($joueursRestants)>2) return false;
+		if (count($joueursRestants)>=2) return false;
 		return $j;
 	}
 	
@@ -872,6 +873,7 @@ class UneCase {
 		$uneCase->setChateau($this->getChateau());
 		$uneCase->setMax($this->getMax());
 		$uneCase->setDecor($this->getDecor());
+		return $uneCase;
 	}
 	function setJoueur($joueur){$this->joueur = $joueur;}
 	function getJoueur(){return $this->joueur;}
@@ -893,8 +895,8 @@ class UneCase {
 	
 	function getMax(){return $this->max;}
 	function setMax($leMax){$this->max = $leMax;}
-	function vaExploser(){return ($this->cellules >= $this->max);}
-	function preteAExploser(){return ($this->cellules >= $this->max-($this->decor==2?2:1));}
+	function vaExploser(){return ($this->nbcellules >= $this->max);}
+	function preteAExploser(){return ($this->nbcellules >= $this->max-($this->decor==2?2:1));}
 	
 	function getDecor(){return $this->decor;}
 	function setDecor($decor){if ($decor!=3 || $this->nbcellules==0) $this->decor = $decor;}
@@ -946,7 +948,7 @@ class UneCase {
 	}
 }
 
-
+/*
 $plateau = new PlateauDeJeu(4,4,true);
 $plateau->getCase(0,0)->setJoueur(1);
 $plateau->getCase(3,3)->setJoueur(2);
@@ -961,5 +963,5 @@ for ($y=0;$y<4;$y++){
 	}
 }
 var_dump( $tabDist);
-
+*/
 ?>

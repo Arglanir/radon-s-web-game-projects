@@ -6,23 +6,24 @@ Auteur: Mikaël Mayer / Cédric Mayer
 But: Fonctions communes à plusieurs fichiers
 */
 
-$mdpadminmd5 = md5("meuhmeuh");
 
 $fichier_parties = "lespartiesencours.xml";
 
+define ("mdpadminmd5", md5("meuhmeuh"));
 define ("serveur_fichier","serveur.php");
+define ("md5mdpIA",md5("jesuisuneiatresbelle"));
 define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
 
 $color_array = 
-array("Bleu" => "#4040FF",
-"Rouge"  => "#FF0000",
-"Vert" => "#00FF00",
-"Jaune" => "#FFFF00",
-"Orange" => "#FF8000",
-"Cyan" => "#00FFFF",
-"Violet" => "#FF00FF",
-"Emeraude" => "#00FF80",
-"Gris" => "#808080",
+array("Bleu" => "4040FF",
+"Rouge"  => "FF0000",
+"Vert" => "00FF00",
+"Jaune" => "FFFF00",
+"Orange" => "FF8000",
+"Cyan" => "00FFFF",
+"Violet" => "FF00FF",
+"Emeraude" => "00FF80",
+"Gris" => "808080",
 "Autre..." => ".....");
 
 function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
@@ -80,10 +81,10 @@ function getNumeroPartie() {//crée un indentifiant unique de partie
 function envoyerReponse($reponse_corps_xml){
 	header('Content-Type: text/xml');
 	echo XMLHeader;
-	echo '<reponse>\n'.$reponse_corps_xml.'\n</reponse>';die();
+	echo "<reponse>\n".$reponse_corps_xml."\n</reponse>";die();
 }
 function lancerErreur($raison_erreur,$ce_qui_etait_tente=false){
-	envoyerReponse('<erreur raison="'.addslashes($raison_erreur).'" origine=\"'.addslashes($ce_qui_etait_tente?$ce_qui_etait_tente:"").'\" />');
+	envoyerReponse('<erreur raison="'.addslashes($raison_erreur).'" origine="'.addslashes($ce_qui_etait_tente?$ce_qui_etait_tente:"").'" />');
 }
 
 
@@ -111,7 +112,7 @@ function addSelectOption($arrayOptions,$affichage=true) {
 		case "table": $table = $value; break;//booleen
 		}
 	}
-	if($table) $sortie_ecran .=  "<tr><td>";
+	if($table) $sortie_ecran .=  "<tr><td style=\"text-align:right;\">";
 	$sortie_ecran .=  $text.' : ';
 	if($table) $sortie_ecran .=  "</td><td>";
 	$sortie_ecran .=  '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
@@ -120,7 +121,7 @@ function addSelectOption($arrayOptions,$affichage=true) {
 		if(isset($value)) {
 			$sortie_ecran .= "<option";
 			if(isset($value)) $sortie_ecran .= ' value="'.$text.'"';
-			if($color) $sortie_ecran .= ' style="background-color:'.$text.'"';
+			if($color) $sortie_ecran .= ' style="background-color:#'.$text.'"';
 			if($value == $default or $text == $default or $i == $default_index) $sortie_ecran .= ' selected';
 			$sortie_ecran .= ">".$value."</option> ";
 		} else {
