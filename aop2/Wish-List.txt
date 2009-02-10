@@ -17,7 +17,6 @@ Wish:
 	c'est juste un title, ça peut être pratique pour les débutants
 	ah et aussi firefox envoie un warning quand il n'y a pas de title... donc c'est mieux pour débugger dans la console
 - Replay button pour voir les dernières actions
-- mettre où le dernier joueur a joué en surbrillance
-	c'est fait : soulignement
-- faire des images animées pour l'affichage
-- faire des images d'atomes
+
+Mik/Cédric :
+- Salle d'attente de jeu

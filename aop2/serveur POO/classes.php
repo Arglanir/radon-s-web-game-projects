@@ -10,17 +10,38 @@ class Partie {
 	var $joueurEnCours;
 	var $options;//objet Options
 	var $tableauJeu;//objet PlateauDeJeu
+	var $demarree;
+	var $gagnant;
 	
 	//fonctions de création
 	function Partie(){
+		$this->demarree = false;
+		$this->gagnant = 0;
 		$this->nbJoueurs = 0;
 		$this->joueur = array();
 		$this->noTour = 1;
 		$this->joueurEnCours = 0;
 	}
 	function addJoueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
+		if ($this->demarree) return false;//plus d'ajout après le démarrage
 		$this->nbJoueurs++;
 		$this->joueur[$this->nbJoueurs] = new Joueur($nom,$couleur,$mdp,$type,$niveau);
+		if ($this->nbJoueurs == 1){
+			$this->tableauJeu->getCase(rand(0,1),rand(0,1))->placeJoueur(1);//premier joueur en 0,0
+		}
+		else{
+			$leMaxDist = 0;
+			$lEndroit = array(0,0);
+			for ($i=0;$i<$this->tableauJeu->tailleX;$i++) for ($j=0;$j<$this->tableauJeu->tailleY;$j++){
+				$m = $this->tableauJeu->distance($this->options,$i,$j);
+				if ($m > $leMaxDist){
+					$leMaxDist = $m;
+					$lEndroit = array($i,$j);
+				}
+			}
+			$this->tableauJeu->getCase($lEndroit[0],$lEndroit[1])->placeJoueur($this->nbJoueurs);
+		}
+		return $this->nbJoueurs;
 	}
 	function setNoTour($noTour){$this->noTour = $noTour;}
 	function setJoueurEnCours($joueurEnCours){$this->joueurEnCours = $joueurEnCours;}
@@ -39,11 +60,20 @@ class Partie {
 		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) joueurSuivant();
 		return true;
 	}
+	function getJoueurEnCours(){
+		return $this->joueur[$this->joueurEnCours];
+	}
 	
 	function nouvelle(){//en fonction des données POST
 	
 	// A FAIRE, copier sur Mikaël
 		
+	}
+	
+	function finDePartie(){
+		if ($g = $this->tableauJeu->yaGagant())
+			$this->gagnant = $g;
+		return ($this->gagnant>0);
 	}
 	
 	function fromText($fichier){
@@ -102,8 +132,10 @@ class Partie {
 		$Xpartie = $xml_partie->get_elements_by_tagname( "partie" );
 		$Xpartie = $Xpartie[0];
 		$partie = new Partie();
+		$partie->demarree = ($Xpartie->get_attribute("demarree")=="1");
 		$partie->setNoTour(0+$Xpartie->get_attribute("notour"));
 		$partie->setJoueurEnCours(0+$Xpartie->get_attribute("joueurencours"));
+		$partie->gagnant = 0+$Xpartie->get_attribute("gagnant");
 		$partie->nbJoueurs = 0+$Xpartie->get_attribute("nombredejoueurs");
 		$joueurs_array = $Xpartie->get_elements_by_tagname( "joueur" );
 		foreach ($joueurs_array as $Xjoueur)
@@ -126,6 +158,8 @@ class Partie {
 		$partie->setNoTour(0+$Xpartie["notour"]);
 		$partie->setJoueurEnCours(0+$Xpartie["joueurencours"]);
 		$partie->nbJoueurs = 0+$Xpartie["nombredejoueurs"];
+		$partie->gagnant = 0+$Xpartie["gagnant"];
+		$partie->demarree = ($Xpartie["demarree"]=="1");
 		
 		foreach($Xpartie->children() as $Xelement){
 			switch($Xelement->getName()){
@@ -145,18 +179,20 @@ class Partie {
 		return $partie;
 	}
 	
-	function toSXML(){//renvoie le document SimpleXML de partie
+	function toSXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document SimpleXML de partie
 		$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><partie></partie>');
 		//$Xpartie = $xml_partie->addChild('partie');
 	
 		$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->addAttribute("notour", $this->noTour);
+		$Xpartie->addAttribute("gagnant", $this->gagnant);
 		$Xpartie->addAttribute("joueurencours", $this->joueurEnCours);
+		$Xpartie->addAttribute("demarree", ($this->demarree?1:0));
 		
 		$Xjoueurs = $Xpartie->addChild('joueurs');
 		
 		for ($i = 1; $i <= $this->nbJoueurs; $i++){
-			$Xjoueur = $this->joueur[$i]->toSXML($Xjoueurs,$i);
+			$Xjoueur = $this->joueur[$i]->toSXML($Xjoueurs,$i,$cacherMotsDePasse,$joueurAppelant!=$i);
 		}
 
 		$Xoptions = $this->options->toSXML($Xpartie);
@@ -166,19 +202,21 @@ class Partie {
 		return $Xpartie;
 	}
 	
-	function toXML(){//renvoie le document XML de partie
+	function toXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document XML de partie
 		$xml_partie = domxml_new_doc("1.0");
 		$Xpartie = $xml_partie->create_element( "partie" );
 		$xml_partie->append_child($Xpartie);
 		$Xpartie->set_attribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->set_attribute("notour", $this->noTour);
+		$Xpartie->set_attribute("gagnant", $this->gagnant);
 		$Xpartie->set_attribute("joueurencours", $this->joueurEnCours);
+		$Xpartie->set_attribute("demarree", ($this->demarree?1:0));
 		
 		$Xjoueurs = $xml_partie->create_element("joueurs");
 		$Xpartie->append_child($Xjoueurs);
 		
 		for ($i = 1; $i <= $this->nbJoueurs; $i++){
-			$Xjoueur = $this->joueur[$i]->toXML($xml_partie,$i);
+			$Xjoueur = $this->joueur[$i]->toXML($xml_partie,$i,$cacherMotsDePasse,$joueurAppelant!=$i);
 			$Xjoueurs->append_child($Xjoueur);
 		}
 
@@ -192,20 +230,20 @@ class Partie {
 
 	}
 	
-	function enregistrerXML($fichierCourant=true){//chaine de fichier, sinon, booléen demandant l'affichage
+	function enregistrerXML($fichierCourant=true,$cacherMotsDePasse=false,$joueurAppelant=0){//chaine de fichier, sinon, booléen demandant l'affichage
 		$chaine = "";
 		if (floatval(phpversion())>=5)
 			if (is_string($fichierCourant))
-				return $this->toSXML()->asXML($fichierCourant);
+				return $this->toSXML($cacherMotsDePasse,$joueurAppelant)->asXML($fichierCourant);
 			else
-				if ($fichierCourant) echo $this->toSXML()->asXML();
-				else return $this->toSXML()->asXML();
+				if ($fichierCourant) {header('Content-Type: text/xml');echo $this->toSXML($cacherMotsDePasse,$joueurAppelant)->asXML();}
+				else return $this->toSXML($cacherMotsDePasse,$joueurAppelant)->asXML();
 		else	
 			if (is_string($fichierCourant))
-				return $this->toXML()->dump_file($fichierCourant, false, true);
+				return $this->toXML($cacherMotsDePasse,$joueurAppelant)->dump_file($fichierCourant, false, true);
 			else
-				if ($fichierCourant) echo $this->toXML()->dump_mem(true);
-				else return $this->toXML()->dump_mem(true);
+				if ($fichierCourant) {header('Content-Type: text/xml');echo $this->toXML($cacherMotsDePasse,$joueurAppelant)->dump_mem(true);}
+				else return $this->toXML($cacherMotsDePasse,$joueurAppelant)->dump_mem(true);
 	}
 	function ouvrirXML($fichierCourant){
 		if (floatval(phpversion())>=5)
@@ -234,6 +272,10 @@ class Joueur {
 			$this->derniereAction = new Action();
 	}
 	
+	function isIA(){
+		return ($this->type == 1);
+	}
+	
 	function fromXML($Xjoueur){
 		$joueur = new Joueur($Xjoueur->get_attribute("nom"),
 							$Xjoueur->get_attribute("couleur"),
@@ -258,27 +300,27 @@ class Joueur {
 		return $joueur;
 	}
 	
-	function toSXML($parent,$numero){//renvoie un noeud SimpleXML
+	function toSXML($parent,$numero,$cacherMotsDePasse=false,$mettreNet=false){//renvoie un noeud SimpleXML
 		$Xjoueur = $parent->addChild("joueur");
 		$Xjoueur->addAttribute("numero", $numero);
 		$Xjoueur->addAttribute("nom", $this->nom);
-		$Xjoueur->addAttribute("mdp", $this->mdp);
+		$Xjoueur->addAttribute("mdp", ($cacherMotsDePasse?0:$this->mdp));
 		$Xjoueur->addAttribute("couleur", $this->couleur);
 		$Xjoueur->addAttribute("estia", ($this->type==1?"oui":"non"));
 		$Xjoueur->addAttribute("niveau", $this->niveau);//à intégrer
-		$Xjoueur->addAttribute("estnet", ($this->type==2?"oui":"non"));
+		$Xjoueur->addAttribute("estnet", ($mettreNet ?"oui":"non"));
 		$this->derniereAction->toSXML($Xjoueur);
 		return $Xjoueur;
 	}
-	function toXML($xml_partie,$numero){//renvoie un DOMNode
+	function toXML($xml_partie,$numero,$cacherMotsDePasse=false,$mettreNet=false){//renvoie un DOMNode
 		$Xjoueur = $xml_partie->create_element("joueur");
 		$Xjoueur->set_attribute("numero", $numero);
 		$Xjoueur->set_attribute("nom", $this->nom);
-		$Xjoueur->set_attribute("mdp", $this->mdp);
+		$Xjoueur->set_attribute("mdp", ($cacherMotsDePasse?0:$this->mdp));
 		$Xjoueur->set_attribute("couleur", $this->couleur);
 		$Xjoueur->set_attribute("estia", ($this->type==1?"oui":"non"));
 		$Xjoueur->set_attribute("niveau", $this->niveau);//à intégrer
-		$Xjoueur->set_attribute("estnet", ($this->type==2?"oui":"non"));
+		$Xjoueur->set_attribute("estnet", ($mettreNet ?"oui":"non"));
 		$Xjoueur->append_child($this->derniereAction->toXML($xml_partie));
 		return $Xjoueur;
 	}
@@ -487,7 +529,10 @@ class PlateauDeJeu {
 				$leNouveau->plateau[$i][$j] = $this->plateau[$i][$j]->copie();
 		return $leNouveau;
 	}
-	function getCase($x, $y){ return $this->plateau[$y][$x];}
+	function getCase($x, $y){
+		if ($x>0 && $x<$this->tailleX && $y>0 && $y<$this->tailleY) return $this->plateau[$y][$x];
+		else return false;
+	}
 	function poseDecor($tableauDecor){//tableau en Y X
 		if (count($tableauDecor) <  $this->tailleY) return false;
 		for ($i = 0; $i < $this->tailleY; $i++){
@@ -525,6 +570,42 @@ class PlateauDeJeu {
 			list($x,$y) = $tab;
 			$this->getCase($x,$y)->setJoueur($joueur);
 			$this->getCase($x,$y)->setCellules(1);
+		}
+	}
+	
+	function distance($options,$x,$y,$x2=-1,$y2=-1){//renvoie un flottant
+		if ($x2>=0 && $y2>=0){//entre 2 cases
+			$dx=$x2-$x;$dy=$y2-$y;
+			switch($options->quelTypeBord()){
+				case 0:case 1:
+					if ($options->yaPlacementDiag())
+						return	distN0($dx,$dy);//max(abs($dx),abs($dy));
+								//round(sqrt(pow($dx,2)+pow($dy,2)),1);
+					else
+						return abs($dx)+abs($dy);
+				case 2://torrique
+					$d = $this->tailleX + $this->tailleY;
+					if ($options->yaPlacementDiag())
+						for ($i=-1;$i<2;$i++) for ($j=-1;$j<2;$j++)
+							$d = min($d,distN0($dx+$i*$this->tailleX,$dy+$j*$this->tailleY));//sqrt(pow($dx+$i*$this->tailleX,2)+pow($dy+$j*$this->tailleY,2));
+					else
+						for ($i=-1;$i<2;$i++) for ($j=-1;$j<2;$j++)
+							$d = min($d,abs($dx+$i*$this->tailleX)+abs($dy+$j*$this->tailleY));
+					return $d;
+			}
+		}
+		else {//entre la case et les joueurs existants
+			$posJoueurs = array();
+			for ($j = 0;$j < $this->tailleY;$j++) for ($i = 0;$i < $this->tailleX;$i++){
+				//recherche des positions des joueurs
+				if ($jou = $this->getCase($i,$j)->getJoueur())
+					$posJoueurs[$jou] = array($i,$j);
+			}
+			$d = $this->tailleX + $this->tailleY;
+			foreach($posJoueurs as $pos){
+				$d = min($d,$this->distance($options,$x,$y,$pos[0],$pos[1]));
+			}
+			return $d;
 		}
 	}
 	
@@ -631,7 +712,7 @@ class PlateauDeJeu {
 		if ($chateau) $laCase->clicChateau();
 	}
 	function clicChateau($x,$y,$joueurEnCours){return $this->clicNormal($x,$y,$joueurEnCours,true);}
-	function peutJouerEn($x,$y,$joueurAppelant,$chateau=false){
+	function peutJouerEn($options,$x,$y,$joueurAppelant,$chateau=false){
 		$laCase = $this->getCase($x,$y);
 		if ($laCase->getDecor() != 0 && $chateau)
 			return false; // chateau et case instable
@@ -660,12 +741,33 @@ class PlateauDeJeu {
 		}
 		return false;
 	}
+	function ouPeutJouer($options,$joueurAppelant,$chateau=false){//renvoie un tableau des positions jouables
+		$positions = array();
+		for ($x=0;$x<$this->tailleX;$x++)
+			for ($y=0;$y<$this->tailleY;$y++)
+				if ($this->peutJouerEn($options,$x,$y,$joueurAppelant,$chateau))
+					$positions[] = array($x,$y);
+		return $positions;
+	}
 	function peutJouer($joueurAppelant){//vérifie si le joueur appelant peut jouer
-		for ($x=0;$x<$tailleX;$x++)
-			for ($y=0;$y<$tailleY;$y++)
+		for ($x=0;$x<$this->tailleX;$x++)
+			for ($y=0;$y<$this->tailleY;$y++)
 				if ($this->getCase($x, $y)->getJoueur()==$joueurAppelant && $this->getCase($x, $y)->getCellules()>0)
 					return true;
 		return false;
+	}
+	function yaGagant(){//regarde s'il n'y a qu'un type de joueur sur la carte
+		$joueursRestants = array();$gagnant = 0;
+		for ($x=0;$x<$this->tailleX;$x++) for ($y=0;$y<$this->tailleY;$y++){
+			$j = $this->getCase($x,$y)->getJoueur();
+			$c = $this->getCase($x,$y)->getCellules();
+			if ($c>0 && $j>0) {
+				$joueursRestants[$j] = 1; $gagnant = $j;
+				if (count($joueursRestants)>2) return false;
+			}
+		}
+		if (count($joueursRestants)>2) return false;
+		return $j;
 	}
 	
 	function fromXML($Xplateau){
@@ -773,6 +875,11 @@ class UneCase {
 	}
 	function setJoueur($joueur){$this->joueur = $joueur;}
 	function getJoueur(){return $this->joueur;}
+	function placeJoueur($joueur){//place un joueur au début du jeu
+		$this->setDecor(0);
+		$this->setJoueur(1);
+		$this->setCellules(1);
+	}
 	
 	function getCellules(){return $this->nbcellules;}
 	function setCellules($nb){$this->nbcellules = $nb;}
@@ -787,6 +894,7 @@ class UneCase {
 	function getMax(){return $this->max;}
 	function setMax($leMax){$this->max = $leMax;}
 	function vaExploser(){return ($this->cellules >= $this->max);}
+	function preteAExploser(){return ($this->cellules >= $this->max-($this->decor==2?2:1));}
 	
 	function getDecor(){return $this->decor;}
 	function setDecor($decor){if ($decor!=3 || $this->nbcellules==0) $this->decor = $decor;}
@@ -838,5 +946,20 @@ class UneCase {
 	}
 }
 
-$partie = new Partie();
+
+$plateau = new PlateauDeJeu(4,4,true);
+$plateau->getCase(0,0)->setJoueur(1);
+$plateau->getCase(3,3)->setJoueur(2);
+$options = new Options($chateauxPermis=0,$profondeur=100,$typeBord=2,$ajoutDiag=1,$explosionJoueur=1);
+echo "testons !<br />";
+$tabDist = array();
+for ($y=0;$y<4;$y++){
+	echo "<br />\n";
+	$tabDist[$y] = array();
+	for ($x=0;$x<4;$x++){
+		echo ($tabDist[$y][$x] = $plateau->distance($options,$x,$y))." ";
+	}
+}
+var_dump( $tabDist);
+
 ?>

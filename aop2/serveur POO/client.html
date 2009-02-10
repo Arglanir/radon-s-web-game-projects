@@ -13,6 +13,12 @@ jouer
 		p	numéro de la partie
 		s	son
 		pw	optionnel : mot de passe
+		offline	jouer sans le serveur (tous sur la même fenêtre), pour faire des tests de nos positions
+		type	type d'affichage pour les cases
+			texte	cases format texte
+			atome	cases avec atomes animés
+			cellule	cases avec cellules
+			mediev	cases version moyen-age
 
 
 ********* Structure des données
@@ -24,7 +30,7 @@ tableauArguments : tableau des arguments de la page
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="Content-language" content="fr" />
 <title>AOP2</title>
-<script type="text/javascript" src="ajax.js" ></script>
+<script type="text/javascript" src="clientclasses.js" ></script>
 <script type="text/javascript">
 /*** lecture des arguments de la page ***/
 /*	paramètres GET :
