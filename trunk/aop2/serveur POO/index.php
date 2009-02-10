@@ -15,81 +15,6 @@ for($i=1; $i<=$max_joueurs; $i++) {
 	$array_count[$i] = $i;
 }
 
-function addSelectOption($arrayOptions) {
-	$text = "";
-	$idname = "";
-	$options = "";
-	$callback = "";
-	$default = -1;
-	$default_index = -1;
-	$table = False;
-	$color = False;
-	foreach($arrayOptions as $key => $value) {
-		switch($key) {
-		case "text": $text = $value; break;
-		case "idname": $idname = $value; break;
-		case "options": $options = $value; break;//tableau
-		case "callback": $callback = $value; break;//fonction
-		case "default": $default = $value; break;
-		case "default_index": $default_index = $value; break;
-		case "color": $color = $value; break;//booleen
-		case "table": $table = $value; break;//booleen
-		}
-	}
-	if($table) echo "<tr><td>";
-	echo $text.' : ';
-	if($table) echo "</td><td>";
-	echo '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'."\n";
-	$i = 1;
-	foreach($options as $value => $text) {
-		if(isset($value)) {
-			echo "<option";
-			if(isset($value)) echo ' value="'.$text.'"';
-			if($color) echo ' style="background-color:'.$text.'"';
-			if($value == $default or $text == $default or $i == $default_index) echo ' selected';
-			echo ">".$value."</option>\n";
-		} else {
-			echo "<option>".$text."</option>\n";
-		}
-		$i += 1;
-	}
-	echo '</select>';
-	if($table) echo "</td></tr>";
-	else echo '<br/>';
-}
-
-function addCheckOption($arrayOptions) {
-	$text = "";
-	$idname = "";
-	$callback = "";
-	$default = True;
-	foreach($arrayOptions as $key => $value) {
-		switch($key) {
-		case "text": $text = $value; break;
-		case "idname": $idname = $value; break;
-		case "callback": $callback = $value; break;
-		case "default": $default = $value; break;
-		}
-	}
-	echo $text.' : <input type=checkbox name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'"';
-	if($default) {
-		echo ' checked';
-	}
-	echo ' /><br />'."\n";
-
-}
-
-$color_array = (
-array("Bleu" => "#4040FF",
-"Rouge"  => "#FF0000",
-"Vert" => "#00FF00",
-"Jaune" => "#FFFF00",
-"Orange" => "#FF8000",
-"Cyan" => "#00FFFF",
-"Violet" => "#FF00FF",
-"Emeraude" => "#00FF80",
-"Gris" => "#808080",
-"Autre..." => "....."));
 
 
 $game_name = "Age Of Paramecia II";
@@ -99,6 +24,18 @@ $game_name = "Age Of Paramecia II";
 <head>
 <title><?php echo $game_name;?></title>
 <script language="javascript">
+function nomIA(){//génère un nom d'IA
+	var syllabes = new Array("kel","gal","mot","juh","syd","fek","péd","van","xor","bel","jol");
+	var suffixe = "ia";
+	var nbSyl = 1+Math.floor(2*Math.random());
+	var nom = "";
+	for (var i=0;i<nbSyl;i++)
+		nom+=syllabes[Math.floor(syllabes.length*Math.random())];
+	nom += suffixe;
+	nom = nom.substr(0,1).toUpperCase() + nom.substr(1,nom.length-1);
+	return nom;
+}
+
 function bodyOnLoad() {
 	document.cre.nbJoueurs.value = 2
 	updateNumberPlayers()
@@ -126,6 +63,7 @@ function updateMotDePasse(n) {
 }
 function updateIA(n) {
 	checked = document.getElementById("is_ia"+n).checked;
+	document.getElementById("no"+n).value = nomIA();
 	document.getElementById("divia"+n).style.display = (checked ? "inline": "none");
 	document.getElementById("divmdps"+n).style.display = (checked ?"none" : "inline" );
 }
@@ -305,6 +243,14 @@ array("text" => "Decor",
 						"Parsemé" => 1,
 						"Parsemé" => 2,
 						"Dense" => 3),
+	"default_index" => 0,
+	"table"=>true
+));
+addSelectOption(
+array("text" => "Attente des joueurs avant de démarrer",
+	"idname" => "opt_attente_joueurs",
+	"options" => array("non" => 0,
+						"oui" => 1),
 	"default_index" => 0,
 	"table"=>true
 ));

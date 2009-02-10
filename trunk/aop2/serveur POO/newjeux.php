@@ -15,6 +15,7 @@ class CreaJeu{
 	var $opt_profondeur_jeu;
 	var $opt_partie_cachee;
 	var $opt_avec_decor;//vaut 0 sans, 1 10%, 2 30%, 3 50% (nombre d'obstacles inférieur strict à min(x,y) )
+	var $opt_attente_joueurs;
 	
 	var $numero_partie;
 	var $nomfichier;
@@ -49,6 +50,7 @@ class CreaJeu{
 		
 		$this->numero_partie = getNumeroPartie();
 		$this->nomfichier = getNomFichier($this->numero_partie);
+		$this->partie->demarree = ($this->opt_attente_joueurs == 1);
 		
 		$partiesEnCours = new PartiesEnCours();
 		$partiesEnCours->ajouterPartie($this->numero_partie, $this->opt_partie_cachee, $this->partie);
@@ -66,6 +68,7 @@ class CreaJeu{
 		$this->opt_profondeur_jeu=100;
 		$this->opt_partie_cachee=0;
 		$this->opt_avec_decor=1;
+		$this->opt_attente_joueurs=0;
 		if(isset($_POST["nbJoueurs"])) {
 			$this->partie->nbJoueurs = (int)$_POST["nbJoueurs"];
 		} else return "Erreur : Nombre de joueurs indéterminé";
@@ -115,6 +118,8 @@ class CreaJeu{
 		$this->opt_avec_decor = (int)$_POST["opt_avec_decor"];
 		if(isset($_POST["opt_partie_cachee"]))
 		$this->opt_partie_cachee = (int)$_POST["opt_partie_cachee"];
+		if(isset($_POST["opt_attente_joueurs"]))
+		$this->opt_attente_joueurs = (int)$_POST["opt_attente_joueurs"];
 		$this->partie->options = new Options($this->opt_chateaux_actifs,
 											$this->opt_profondeur_jeu,
 											$this->opt_type_bords,
@@ -238,8 +243,39 @@ class CreaJeu{
 			echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
 		}
 	}
-
 	
+	function ajouterJoueur(){//avec paramètres POST, seulement humain
+		$raison_erreur = "";
+		while (true){
+			if (!array_key_exists("p",$_POST) || !array_key_exists("nom",$_POST) || !array_key_exists("couleur",$_POST)){
+				$raison_erreur = "Information de partie, de nom ou de couleur manquante.";
+				break;//c'est pas autorisé
+			}
+			$noPartie = $_POST["p"];
+			$fichier = getNomFichier($noPartie);
+			$partie = Partie::ouvrirXML($fichier);
+			if (!$partie){
+				$raison_erreur = "Partie inconnue.";
+				break;//c'est pas autorisé
+			}
+			$noJoueur = $partie->addJoueur($_POST["nom"],$_POST["couleur"]);
+			if (!$noJoueur){
+				$raison_erreur = "Partie probablement déjà commencée.";
+				break;//c'est pas autorisé
+			}
+			$partie->enregistrerXML($fichier);
+			$PEC = new PartiesEnCours();
+			$PEC->supprimerPartie($noPartie,false);
+			$PEC->ajouterPartie($noPartie,false,$partie);
+
+			echo "Vous avez été ajouté avec succès à la partie ".$noPartie.".<br />\n";
+			echo "<a href=\"".getUrlJoueur($noPartie, $noJoueur )."\">Cliquez ici pour rentrer</a><br />";
+			echo "Bienvenue dans le jeu ".$_POST["nom"]." !\n";
+			return true;
+		}
+		echo "Action non autoris&eacute;e : \n".$raison_erreur;
+		return false;
+	}	
 }
 
 class PartiesEnCours {
@@ -277,6 +313,10 @@ class PartiesEnCours {
 		}
 	}
 	
+	function ajouterUnJoueur(){//avec les paramètre POST
+		CreaJeu::ajouterJoueur();
+	}
+	
 	function ajouterPartie($numero, $cachee, $partie){//ajoute une partie
 		if (floatval(phpversion())>=5)
 			$this->ajouterPartieSXML($numero, $cachee, $partie);
@@ -292,6 +332,7 @@ class PartiesEnCours {
 		foreach($partie->joueur as $index => $joueur) {
 			$joueur_xml = $Xpartie->addChild("joueur");
 			$joueur_xml->addAttribute("numero", $index);
+			$joueur_xml->addAttribute("couleur", $joueur->couleur);
 			$joueur_xml->addAttribute("nom", utf8_encode($joueur->nom));
 		}
 		$this->enregistrerParties();
@@ -309,15 +350,16 @@ class PartiesEnCours {
 		foreach($partie->joueur as $index => $joueur) {
 			$joueur_xml = $this->enDOMDocument->create_element("joueur");
 			$joueur_xml->set_attribute("numero", $index);
+			$joueur_xml->set_attribute("couleur", $joueur->couleur);
 			$joueur_xml->set_attribute("nom", utf8_encode($joueur->nom));
 			$Xpartie->append_child($joueur_xml);
 		}
 
 	}
 	
-	function supprimerPartie($numero){//charge les parties en cours
+	function supprimerPartie($numero,$suppressionFichier=true){//charge les parties en cours
 		$fichier = getNomFichier($numero);
-		if (file_exists($fichier))
+		if (file_exists($fichier) && $suppressionFichier)
 			unlink($fichier);
 		$changement = false;
 		if (floatval(phpversion())>=5)
@@ -353,17 +395,38 @@ class PartiesEnCours {
 	function afficherParties($admin=false){//tableauArguments["pw"] doit être fixé, Ajax opérationnel, et un <div id="comm"/>
 		if ($admin){//on écrit la fonction de suppression
 			echo "<script type='text/javascript'>\nfunction supprimerPartie(numero){\nvar xhr = createXHR();\n".
-				"var chaineDAppel = 'jeu.php?a=s&pw='+tableauArguments['pw']+'&p='+numero+'&j=admin&nocache=' + Math.random();\n".
+				"var chaineDAppel = '".serveur_fichier."?a=s&pw='+tableauArguments['pw']+'&p='+numero+'&j=admin&nocache=' + Math.random();\n".
 				"xhr.onreadystatechange  = function(){\nif(xhr.readyState  == 4){\nif(xhr.status  == 200) {\n".
 				"window.location.reload();\n} else {\ndocument.getElementById('comm').innerHTML = 'partie non supprimée';\n".
 				"}\n}\n};\ndocument.getElementById('comm').innerHTML = 'Attente du serveur...';\n".
 				"xhr.open('GET', chaineDAppel, true); xhr.send(null);}\n</script>\n";
+		} else {
+?>
+<script type='text/javascript'>//crée un formulaire
+function sajouter(numeroPartie){
+	chaineaafficher = "<form action=\"<?php echo serveur_fichier; ?>?a=autrejoueur&p="+numeroPartie+"\" method='POST'>";
+	chaineaafficher += "<input type=\"hidden\" name=\"p\" value=\""+numeroPartie+"\" />";
+	chaineaafficher += "<input type=\"text\" name=\"nom\" value=\"Votre nom\" onfocus=\"if (this.value=='Votre nom') this.value='';\" />";
+	chaineaafficher += "<?php echo addslashes(addSelectOption(
+array("text" => " Couleur",
+	"idname" => "couleur",
+	"options" => $GLOBALS["color_array"],
+	"callback" => "",//"changecolor(".$i.")",
+	"default_index" => 0,
+	"color" => True
+),false)); ?>";
+	chaineaafficher += "<input type=\"submit\" value=\"OK\" /></form>";
+	document.getElementById("action"+numeroPartie).innerHTML = chaineaafficher;
+}
+</script>
+<?php
 		}
 		if (floatval(phpversion())>=5)
 			$this->afficherPartiesSXML($admin);
 		else
 			$this->afficherPartiesXML($admin);
 	}
+	
 	function afficherPartiesSXML($admin=false){
 		echo "<table>";
 		$nbParties = 0; $nbCachees=0;
@@ -379,13 +442,14 @@ class PartiesEnCours {
 			foreach ($partie->children() as $joueur) {
 				$chaineAAfficherDansTable .= "<td>";
 				$url = getUrlJoueur($partie["numero"], $joueur["numero"]);
-				$chaineAAfficherDansTable .= '<a href="'.$url.'">'.$joueur["nom"].'</a>';
+				$chaineAAfficherDansTable .= '<a style="background-color:#'.$joueur["couleur"].';" href="'.$url.'">'.$joueur["nom"].'</a>';
 				$chaineAAfficherDansTable .= "</td>";
 			}
-			$chaineAAfficherDansTable .=  "<td>";
-			if ($admin){
+			$chaineAAfficherDansTable .=  "<td id='action".$partie["numero"]."'>";
+			if ($admin)
 				$chaineAAfficherDansTable .= "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$partie["numero"]."');\" />";
-			}
+			else
+				$chaineAAfficherDansTable .= "<input type=\"button\" value=\"S'ajouter\" onclick=\"sajouter('".$partie["numero"]."');\" />";
 			$chaineAAfficherDansTable .=  "</td>";
 
 			$chaineAAfficherDansTable .= "</tr>\n";
@@ -436,7 +500,7 @@ class PartiesEnCours {
 	}
 
 }
-
+/*
 $_POST["nbJoueurs"] = "2";
 $_POST["x"] = 6;
 $_POST["y"] = 6;
@@ -448,7 +512,7 @@ $_POST["nomJoueur2"] = "Sara";
 $_POST["mdp2"] = "Sara";
 $_POST["couleur2"] = "FF8080";
 $_POST["nivia2"] = "0";
-$_POST["opt_partie_cachee"] = "1";
+$_POST["opt_partie_cachee"] = "0";
 $_POST["opt_type_bords"] = "2";
 
 $jeu = new CreaJeu();
@@ -456,16 +520,26 @@ $jeu->affichageLiensPartie();
 
 echo "<br /><br />";
 
+$_POST["nom"] = "Mik";
+$_POST["couleur"] = "00FF00";
+$_POST["p"] = $jeu->numero_partie;
+
+CreaJeu::ajouterJoueur();
+
+
+echo "<br /><br />";
 $parties = new PartiesEnCours();
-$parties->afficherParties(true);
+//$parties->afficherParties(true);
 $parties->afficherParties(false);
 
-echo "<textarea cols=70>".$jeu->getPartie()->enregistrerXML(false)."</textarea>";
+
+
+//echo "<textarea cols=70>".$jeu->getPartie()->enregistrerXML(false)."</textarea>";
 
 $parties->supprimerPartie($jeu->numero_partie);
-
+/*
 $parties->afficherParties(true);
 $parties->afficherParties();
-
+*/
 
 ?>
