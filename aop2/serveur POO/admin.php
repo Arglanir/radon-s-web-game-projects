@@ -1,9 +1,10 @@
 <?php
 	//A FAIRE : vérifier que l'administrateur est le bon
 
-include ("fonctions.inc");
+include_once ("fonctions.inc");
+include_once ("newjeux.php");
 
-if (@md5($_GET["pw"]) != $mdpadminmd5){
+if (@md5($_GET["pw"]) != mdpadminmd5){
 	header("HTTP/1.0 404 Not found",true,404);die();
 	die("Vous n'êtes pas autorisés à venir ici.");
 }
@@ -22,7 +23,7 @@ for (i=0;i<bouh.length;i++){
 
 function supprimerPartie(numero){
 	var xhr = createXHR();
-	var chaineDAppel = "jeu.php?a=s&pw="+tableauArguments["pw"]+"&p="+numero+"&j=admin&nocache=" + Math.random();
+	var chaineDAppel = "serveur.php?a=s&pw="+tableauArguments["pw"]+"&p="+numero+"&j=admin&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
@@ -47,7 +48,7 @@ include_once ("newjeux.php");
 
 $lesParties = new PartiesEnCours();
 
-$lesParties->afficherParties();
+$lesParties->afficherParties(true);
 
 ?>
 <h3>Répertoire :</h3>
@@ -56,7 +57,7 @@ $dir = opendir('.');
 echo "<br /><table>";
 while (false !== ($file = readdir($dir))) {
 	$num = array();
-	if (!ereg("^aop([0-9]{5,8})bacteries\.par$",$file,$num))
+	if (!ereg("^xaop([0-9]{5,8})bacteries\.par$",$file,$num))
 		continue;
 	$numero = $num[1];
 	echo "<tr><td>$numero</td><td>";

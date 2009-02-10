@@ -50,7 +50,7 @@ class CreaJeu{
 		
 		$this->numero_partie = getNumeroPartie();
 		$this->nomfichier = getNomFichier($this->numero_partie);
-		$this->partie->demarree = ($this->opt_attente_joueurs == 1);
+		$this->partie->demarree = ($this->opt_attente_joueurs == 0);
 		
 		$partiesEnCours = new PartiesEnCours();
 		$partiesEnCours->ajouterPartie($this->numero_partie, $this->opt_partie_cachee, $this->partie);
@@ -392,21 +392,21 @@ class PartiesEnCours {
 		return false;
 	}
 	
-	function afficherParties($admin=false){//tableauArguments["pw"] doit être fixé, Ajax opérationnel, et un <div id="comm"/>
+	function afficherParties($admin=false){//tableauArguments["pw"] doit être fixé, supprimerPartie(numero) opérationnel, et un <div id="comm"/>
 		if ($admin){//on écrit la fonction de suppression
-			echo "<script type='text/javascript'>\nfunction supprimerPartie(numero){\nvar xhr = createXHR();\n".
+			/*echo "<script type='text/javascript'>\nfunction supprimerPartie(numero){\nvar xhr = createXHR();\n".
 				"var chaineDAppel = '".serveur_fichier."?a=s&pw='+tableauArguments['pw']+'&p='+numero+'&j=admin&nocache=' + Math.random();\n".
 				"xhr.onreadystatechange  = function(){\nif(xhr.readyState  == 4){\nif(xhr.status  == 200) {\n".
 				"window.location.reload();\n} else {\ndocument.getElementById('comm').innerHTML = 'partie non supprimée';\n".
 				"}\n}\n};\ndocument.getElementById('comm').innerHTML = 'Attente du serveur...';\n".
-				"xhr.open('GET', chaineDAppel, true); xhr.send(null);}\n</script>\n";
+				"xhr.open('GET', chaineDAppel, true); xhr.send(null);}\n</script>\n";*/
 		} else {
 ?>
 <script type='text/javascript'>//crée un formulaire
 function sajouter(numeroPartie){
 	chaineaafficher = "<form action=\"<?php echo serveur_fichier; ?>?a=autrejoueur&p="+numeroPartie+"\" method='POST'>";
 	chaineaafficher += "<input type=\"hidden\" name=\"p\" value=\""+numeroPartie+"\" />";
-	chaineaafficher += "<input type=\"text\" name=\"nom\" value=\"Votre nom\" onfocus=\"if (this.value=='Votre nom') this.value='';\" />";
+	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"text\" name=\"nom\" value=\"Votre nom\" onfocus=\"if (this.value=='Votre nom') this.value='';\" />";
 	chaineaafficher += "<?php echo addslashes(addSelectOption(
 array("text" => " Couleur",
 	"idname" => "couleur",
@@ -415,7 +415,7 @@ array("text" => " Couleur",
 	"default_index" => 0,
 	"color" => True
 ),false)); ?>";
-	chaineaafficher += "<input type=\"submit\" value=\"OK\" /></form>";
+	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"submit\" value=\"OK\" /></form>";
 	document.getElementById("action"+numeroPartie).innerHTML = chaineaafficher;
 }
 </script>
@@ -442,14 +442,14 @@ array("text" => " Couleur",
 			foreach ($partie->children() as $joueur) {
 				$chaineAAfficherDansTable .= "<td>";
 				$url = getUrlJoueur($partie["numero"], $joueur["numero"]);
-				$chaineAAfficherDansTable .= '<a style="background-color:#'.$joueur["couleur"].';" href="'.$url.'">'.$joueur["nom"].'</a>';
+				$chaineAAfficherDansTable .= '<a style="color:black;background-color:#'.$joueur["couleur"].';" href="'.$url.'">'.$joueur["nom"].'</a>';
 				$chaineAAfficherDansTable .= "</td>";
 			}
 			$chaineAAfficherDansTable .=  "<td id='action".$partie["numero"]."'>";
 			if ($admin)
-				$chaineAAfficherDansTable .= "<input type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$partie["numero"]."');\" />";
+				$chaineAAfficherDansTable .= "<input style=\"vertical-align:bottom;\" type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$partie["numero"]."');\" />";
 			else
-				$chaineAAfficherDansTable .= "<input type=\"button\" value=\"S'ajouter\" onclick=\"sajouter('".$partie["numero"]."');\" />";
+				$chaineAAfficherDansTable .= "<input style=\"vertical-align:bottom;\" type=\"button\" value=\"S'ajouter\" onclick=\"sajouter('".$partie["numero"]."');\" />";
 			$chaineAAfficherDansTable .=  "</td>";
 
 			$chaineAAfficherDansTable .= "</tr>\n";

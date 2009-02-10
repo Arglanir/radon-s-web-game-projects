@@ -46,6 +46,8 @@ X			s supprimer la partie)
 ******************************************************************************/
 
 include_once ("fonctions.inc");
+include_once ("classes.php");
+include_once ("newjeux.php");
 
 if (!array_key_exists("p",$_GET))
 	lancerErreur("Numéro de partie requis","Lancement du serveur");
@@ -83,7 +85,7 @@ if ($action=="g"){//on renvoie la grille XML
 if ($joueurAppelant == "admin"){
 	if (!array_key_exists("pw",$_GET))
 		lancerErreur("Mot de passe administrateur requis","Login administrateur");
-	if (md5($_GET["pw"])!=$mdpadminmd5)
+	if (md5($_GET["pw"])!=mdpadminmd5)
 		lancerErreur("Mot de passe administrateur incorrect","Login administrateur");	
 }
  else if ($joueurAppelant != "observateur") {//joueur jouant
@@ -134,6 +136,8 @@ if ($action == "m"){
 }
 
 //jeu d'un joueur
+if ($partie->gagnant)
+		lancerErreur("La partie est termin&eacute;, le gagant &eacute;tait ".$partie->joueur[$partie->gagnant]->nom." !","Peut-on jouer ?");
 if (($action == "n" || $action=="c") && is_int($joueurAppelant)) {
 	if (!array_key_exists("x",$_GET) || !array_key_exists("y",$_GET))
 		lancerErreur("Coordonnées (x,y) du coup requis","Analyse du coup");

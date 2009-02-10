@@ -22,6 +22,8 @@ if (!$partie->joueur[$joueurIA]->isIA())
 $niveauIA = $partie->joueur[$joueurIA]->niveau;
 
 $_GET["a"] = "n";
+$_GET["j"] = "".$joueurIA;
+$_GET["pw"] = md5mdpIA;
 //$_GET["p"] = $p;
 $_GET["x"] = 0;
 $_GET["y"] = 0;
@@ -50,7 +52,7 @@ function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre év
 	for ($x=0;$x<$plateau->tailleX;$x++){
 		for ($y=0;$y<$plateau->tailleY;$y++){
 			$c = $plateau->getCase($x,$y);
-			if (peutJouerEn($options,$x,$y,$joueur)){
+			if ($plateau->peutJouerEn($options,$x,$y,$joueur)){
 				$cellules += ($nb = $c->getCellules());
 				if ($nb==0) $casesMenacees += 1;
 				if ($nb>0) $casesControlees += 1;
