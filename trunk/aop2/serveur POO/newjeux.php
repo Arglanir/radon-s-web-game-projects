@@ -84,7 +84,7 @@ class CreaJeu{
 					$mdp = $_POST["mdp".$indice];
 					$couleur = $_POST["couleur".$indice];
 					$niveau = $_POST["nivia".$indice];
-					$this->partie->joueur[$indice] = new Joueur($nom, 
+					$this->partie->joueur[$indice] = new Joueur(htmlentities($nom), 
 														$couleur, 
 														($is_ia?md5(mot_de_passe_ia):($si_mdp?md5($mdp):"0")),
 														($is_ia?1:0),
@@ -359,15 +359,18 @@ class PartiesEnCours {
 	
 	function supprimerPartie($numero,$suppressionFichier=true){//charge les parties en cours
 		$fichier = getNomFichier($numero);
-		if (file_exists($fichier) && $suppressionFichier)
+		$changement1 = false;
+		if (file_exists($fichier) && $suppressionFichier){
 			unlink($fichier);
-		$changement = false;
+			$changement1 = true;
+		}
 		if (floatval(phpversion())>=5)
-			$changement = $this->supprimerPartieSXML($numero);
+			$changement2 = $this->supprimerPartieSXML($numero);
 		else
-			$changement = $this->supprimerPartieXML($numero);
-		if ($changement)
+			$changement2 = $this->supprimerPartieXML($numero);
+		if ($changement2)
 			$this->enregistrerParties();
+		return $changement1 || $changement2;
 	}
 	function supprimerPartieSXML($numero){
 		$Xparties = $this->enSimpleXML;

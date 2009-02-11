@@ -1,5 +1,4 @@
 <?php
-	//A FAIRE : vérifier que l'administrateur est le bon
 
 include_once ("fonctions.inc");
 include_once ("newjeux.php");
@@ -27,7 +26,17 @@ function supprimerPartie(numero){
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				window.location.reload();
+				leXML = xhr.responseXML;
+				yaErreur = leXML.getElementsByTagName("erreur").length;
+				if (yaErreur){
+					document.getElementById("comm").innerHTML = 
+						"Erreur : "+leXML.getElementsByTagName("erreur").item(0).getAttribute('raison')+
+						" lors de "+leXML.getElementsByTagName("erreur").item(0).getAttribute('origine')+".";
+				}
+				else {
+					document.getElementById("comm").innerHTML = leXML.getElementsByTagName("action").item(0).getAttribute('type')+" r&eacute;ussie. Rechargement de la page...";
+					window.setTimeout("window.location.reload()",5000);
+				}
 			} else {
 				document.getElementById("comm").innerHTML = "partie non supprimée";
 			}

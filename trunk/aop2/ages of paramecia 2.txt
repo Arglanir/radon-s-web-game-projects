@@ -56,7 +56,7 @@ jeu.php : interface avec le fichier de jeu
 			ou no du joueur en cours et le no du tour
 			<reponse><n valeur=noTour /><k valeur=k /></reponse>
 		si erreur
-			<reponse><erreur raison="Devinez l'erreur !" /></reponse>
+			<reponse><erreur raison="Devinez l'erreur !" origine="Ce qui était tenté" /></reponse>
 
 		
 ia.php : cherche le plateau de jeu et joue à la place d'un joueur, appelée par le client du joueur 1 (créateur)

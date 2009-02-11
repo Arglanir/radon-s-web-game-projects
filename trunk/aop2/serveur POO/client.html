@@ -50,12 +50,16 @@ tableauArguments["offline"] = parseInt(tableauArguments["offline"]);
 if (tableauArguments["j"] != "observateur")
 	tableauArguments["j"] = parseInt(tableauArguments["j"]);
 tableauArguments["type"] = (tableauArguments["type"]?tableauArguments["type"]:"texte");
-var serveur = "jeu.php";
+
 
 /*** initialisation des paramètres et types ***/
 //les options d'affichage
 var tempsEntreAffichages = 1000;
 var tempsDAttenteAvantRelance = 5000;//connexion au serveur
+
+function CreerJeu(docXML){
+
+}
 
 function CreerTableauJeu(chaineTexte){//constructeur d'un jeu
 	var tabJeuT = chaineTexte.split("\n\r");

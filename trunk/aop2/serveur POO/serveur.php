@@ -103,8 +103,8 @@ if ($joueurAppelant == "admin"){
  //suppression de la partie
 if ($action == "s" && $joueurAppelant != "observateur"){
 	$parties = new PartiesEnCours();
-	$parties->supprimerPartie($p);
-	envoyerReponse("<action type=\"suppression de partie\" traitee=\"oui\" partiesupprimee=\"".$p."\" />");
+	$changement = $parties->supprimerPartie($p);
+	envoyerReponse("<action type=\"suppression de partie\" traitee=\"".($changement?"oui":"non")."\" partiesupprimee=\"".$p."\" />");
 }
 
 //nouveau mot de passe
