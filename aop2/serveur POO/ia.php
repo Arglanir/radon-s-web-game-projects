@@ -9,14 +9,35 @@ ia.php : cherche le plateau de jeu et joue à la place d'un joueur, appelée par l
 include_once ("fonctions.inc");
 include_once ("classes.php");
 
+function tempsRestant(){
+	static $debut;
+	if (!isset($debut)) $debut=microtime(true);
+	$la = microtime(true);
+	return 30-$la+$debut;
+}
+tempsRestant();
+function melanger(&$unTableau){
+	$temp = NULL;$longueur = count($unTableau);
+	foreach($unTableau as $key => $value){
+		$key2 = rand(0,$longueur-1);
+		$temp = $value;
+		$unTableau[$key] = $unTableau[$key2];
+		$unTableau[$key2] = $temp;
+	}
+	return $unTableau;
+}
+
 if (!array_key_exists("p",$_GET))
 	lancerErreur("Numéro de partie requis","Lancement de l'IA");
 
 $p = (array_key_exists("p",$_GET)?$_GET["p"]:"000001");
 $fichierPartie = getNomFichier($p);
 $partie = Partie::ouvrirXML($fichierPartie);
+if (!$partie)
+	lancerErreur("Partie ".$p." inconnue.","Lancement de l'IA");
 
 $joueurIA = $partie->joueurEnCours;
+$forcerAJouer = (array_key_exists("pw",$_GET)?md5($_GET["pw"])==$partie->joueur[$joueurIA]->mdp:false);
 if (!$partie->joueur[$joueurIA]->isIA())
 	lancerErreur("Le joueur en cours est humain","Lancement de l'IA");
 $niveauIA = $partie->joueur[$joueurIA]->niveau;
@@ -86,7 +107,7 @@ function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre év
 }
 //le plateau, le joueur qui va jouer
 function descente($plateau,$joueur,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur=0,$alpha=-10000000,$beta=10000000){
-	$lesPositions = $plateau->ouPeutJouer($options,$joueur);
+	$lesPositions = melanger($plateau->ouPeutJouer($options,$joueur));
 	if (count($lesPositions) == 0)
 		return descente($plateau,mettreEntre($joueur,$nbJoueurs)+1,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur+1,$alpha,$beta);
 	$evaluationPositions = array();
@@ -97,12 +118,18 @@ function descente($plateau,$joueur,$options,$joueurIA,$nbJoueurs,$profondeurMax,
 		$plateau2 = $plateau->copie();
 		$plateau2->clicNormal($pos[0],$pos[1],$joueur);
 		$plateau2->purifieTotalement($options,$joueur);
-		if ($profondeur >= $profondeurMax)
-			$evaluationPositions = heuristique($plateau2,$joueurIA,$options,false);
-		else
-			$evaluationPositions = descente($plateau2,mettreEntre($joueur,$nbJoueurs)+1,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur+1,$alpha,$beta);
-			//heuristique($plateau2,$joueurIA,$options,false);
-		$valeur = $evaluationPositions;
+		$g = $plateau2->yaGagnant();
+		if ($g){
+			if ($g==$joueurIA && $noeudMax) $evaluationPositions[$key] = 100000;
+			else if ($g!=$joueurIA && !$noeudMax) $evaluationPositions[$key] = -100000;
+		} else {
+			if ($profondeur >= $profondeurMax || tempsRestant()<3)
+				$evaluationPositions[$key] = heuristique($plateau2,$joueur,$options,$joueurIA);
+			else
+				$evaluationPositions[$key] = descente($plateau2,mettreEntre($joueur,$nbJoueurs)+1,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur+1,$alpha,$beta);
+				//heuristique($plateau2,$joueurIA,$options,false);
+		}
+		$valeur = $evaluationPositions[$key];
 		if ((!$noeudMax && $meilleur > $valeur) || ($noeudMax && $meilleur < $valeur)){
 			$meilleur = $valeur;
 			$meilleurePos = $lesPositions[$key];

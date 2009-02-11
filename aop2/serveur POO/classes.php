@@ -57,7 +57,7 @@ class Partie {
 	function joueurSuivant(){//met le joueur en cours au joueur suivant
 		$this->joueurEnCours = mettreEntre($this->joueurEnCours,$this->nbJoueurs)+1;//on passe au suivant
 		if ($this->joueurEnCours == 1) $this->noTour++;//augmentation du n° du tour
-		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) joueurSuivant();
+		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) $this->joueurSuivant();
 		return true;
 	}
 	function getJoueurEnCours(){

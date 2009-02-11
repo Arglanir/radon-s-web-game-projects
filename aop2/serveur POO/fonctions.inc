@@ -12,7 +12,7 @@ $fichier_parties = "lespartiesencours.xml";
 define ("mdpadminmd5", md5("meuhmeuh"));
 define ("serveur_fichier","serveur.php");
 define ("md5mdpIA",md5("jesuisuneiatresbelle"));
-define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
+define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"UTF-16\"?>");
 
 $color_array = 
 array("Bleu" => "4040FF",
@@ -81,7 +81,7 @@ function getNumeroPartie() {//crée un indentifiant unique de partie
 function envoyerReponse($reponse_corps_xml){
 	header('Content-Type: text/xml');
 	echo XMLHeader;
-	echo "<reponse>\n".$reponse_corps_xml."\n</reponse>";die();
+	echo "<reponse>\n".utf8_encode($reponse_corps_xml)."\n</reponse>";die();
 }
 function lancerErreur($raison_erreur,$ce_qui_etait_tente=false){
 	envoyerReponse('<erreur raison="'.addslashes($raison_erreur).'" origine="'.addslashes($ce_qui_etait_tente?$ce_qui_etait_tente:"").'" />');

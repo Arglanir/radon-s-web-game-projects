@@ -23,6 +23,7 @@ $game_name = "Age Of Paramecia II";
 <html>
 <head>
 <title><?php echo $game_name;?></title>
+<script type="text/javascript" src="clientclasses.js" ></script>
 <script language="javascript">
 function nomIA(){//génère un nom d'IA
 	var syllabes = new Array("kel","gal","mot","juh","syd","fek","péd","van","xor","bel","jol");
@@ -86,6 +87,54 @@ function changerAffichage(quoi,comment){
 	else
 	document.getElementById(quoi).style.display = "none";
 }
+
+
+
+function chargerPartiesEnCours(){
+	communique("lespartiesencours.xml",function(Rxml){
+		var listeParties = Rxml.getElementsByTagName("partie");
+		var chaineAAfficher = "<b>"+listeParties.length+" parties en cours"+(listeParties.length?" :":"")+"</b><br />";
+		var partiesCachees = 0;
+		for (var i = 0; i < listeParties.length ; i++){
+			var partie = listeParties[i];
+			var numeroP = partie.getAttribute('numero');
+			var cachee = parseInt(partie.getAttribute('cachee'));
+			if (cachee) {
+				partiesCachees++;
+				continue;
+			}
+			chaineAAfficher += "Partie n°"+numeroP+" : ";
+			var listeJoueurs = partie.getElementsByTagName("joueur");
+			for (var j=0;j < listeJoueurs.length;j++){
+				var joueur = listeJoueurs[j];
+				var nom = joueur.getAttribute('nom');
+				var numeroJ = joueur.getAttribute('numero');
+				var couleur = joueur.getAttribute('couleur');
+				var lien = "client.html?j="+numeroJ+"&p=".numeroP;
+				chaineAAfficher += '<a style="color:black;background-color:#'+couleur+';" href="'+lien+'">'+nom+'</a> ';
+			}
+			chaineAAfficher += '<span id="action-'+numeroP+'"><input type="button" value="Entrer" onclick="sajouter2(\''+numeroP+'\');" /></span><br/>';
+		}
+		if (!partiesCachees)
+			chaineAAfficher += partiesCachees+" autres parties cachées."
+		document.getElementById("parties2").innerHTML = chaineAAfficher;
+	});
+}
+function sajouter2(numeroPartie){
+	chaineaafficher = "<form action=\"<?php echo serveur_fichier; ?>?a=autrejoueur&p="+numeroPartie+"\" method='POST'>";
+	chaineaafficher += "&nbsp;&nbsp;&#9495;&nbsp;<input type=\"hidden\" name=\"p\" value=\""+numeroPartie+"\" />";
+	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"text\" name=\"nom\" value=\"Votre nom\" onfocus=\"if (this.value=='Votre nom') this.value='';\" />";
+	chaineaafficher += "<?php echo addslashes(addSelectOption(
+array("text" => " Couleur",
+	"idname" => "couleur",
+	"options" => $GLOBALS["color_array"],
+	"callback" => "",//"changecolor(".$i.")",
+	"default_index" => 0,
+	"color" => True
+),false)); ?>";
+	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"submit\" value=\"OK\" /></form>";
+	document.getElementById("action-"+numeroPartie).innerHTML = chaineaafficher;
+}
 </script>
 </head>
 <body onload="bodyOnLoad()">
@@ -93,7 +142,7 @@ function changerAffichage(quoi,comment){
 <i>Jeu développé par Cédric, Mikaël et Erwin Mayer</i>
 <br />
 <h2><a href="" onclick="changerAffichage('regles');return false;" style="color:black;text-decoration:none;">&gt; Règles</a></h2>
-<div id="regles">
+<div id="regles" style="display:none;">
 <h3>Introduction</h3>
 <?php echo $game_name;?> est un jeu hautement instable où vous devez lutter pour la survie de votre colonie de cellules sans cesse grandissante. C'est la dure loi de l'évolution : seuls les plus forts gagneront cette course pour la Vie !
 
@@ -138,7 +187,7 @@ Il y a 4 types de terrain :
 
 </div>
 <h2><a href="" onclick="changerAffichage('creation');return false;" style="color:black;text-decoration:none;">&gt; Cr&eacute;ation d'une partie</a></h2>
-<div id="creation">
+<div id="creation" style="display:none;">
 <form action="creajeu.php" method=POST name=cre>
 <?php
 addSelectOption(
@@ -267,22 +316,22 @@ Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_
 </form>
 </div>
 
-<h2><a href="" onclick="changerAffichage('parties');return false;" style="color:black;text-decoration:none;">&gt; Parties en cours</a></h2>
-<div id="parties">
+<h2><a href="" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" style="color:black;text-decoration:none;">&gt; Parties en cours</a></h2>
+<div id="parties" style="display:none;">
 <?php
-include_once ("newjeux.php");
-
-$lesParties = new PartiesEnCours();
-
-$lesParties->afficherParties(false);
+//include_once ("newjeux.php");
+//$lesParties = new PartiesEnCours();
+//$lesParties->afficherParties(false);
 ?>
+<div id="parties2"></div><div id="comm"></div>
 <form method="GET" action="jeu.html"><h3>Aller dans une partie non affichée</h3>
 Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
 Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
 <input type="submit" value="Chercher la partie" title="clique ici" />
 </form>
 
-<form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form></div>
+<a href="" onclick="changerAffichage('admini');return false;" style="color:black;text-decoration:none;">&gt; Administration</a><form style="display:none;" id='admini' action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form>
+</div>
 <div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
 </body>
 </html>
