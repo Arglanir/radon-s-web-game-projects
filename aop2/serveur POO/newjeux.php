@@ -240,8 +240,21 @@ class CreaJeu{
 
 		for($i = 1; $i <= $this->partie->nbJoueurs; $i++) {
 			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), $_POST["mdp".$i]);
-			echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
+			if (!$this->partie->joueur[$i]->isIA())
+				echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
 		}
+	}
+	function affichageInfosXML(){//renvoie des infos XML
+		$reponse = '<partie numero="'.$this->numero_partie.'" nbJoueurs="'.$this->partie->nbJoueurs.'">';
+
+		for($i = 1; $i <= $this->partie->nbJoueurs; $i++) {
+			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), $_POST["mdp".$i]);
+			$reponse .= '<joueur nom="'.$this->partie->joueur[$i]->nom.'" numero="'.$i.'" couleur="'.$this->partie->joueur[$i]->couleur.'" lien="'.$url.'" />';
+			//echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
+		}
+		$reponse .= '</partie>';
+		
+		envoyerReponse($reponse);
 	}
 	
 	function ajouterJoueur(){//avec paramètres POST, seulement humain

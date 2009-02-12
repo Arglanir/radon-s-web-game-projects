@@ -89,39 +89,42 @@ function changerAffichage(quoi,comment){
 }
 
 
-
+var partiesExistantes = new Array();
 function chargerPartiesEnCours(){
-	communique("lespartiesencours.xml",function(Rxml){
+	communiqueGET("lespartiesencours.xml",function(Rxml){
 		var listeParties = Rxml.getElementsByTagName("partie");
 		var chaineAAfficher = "<b>"+listeParties.length+" parties en cours"+(listeParties.length?" :":"")+"</b><br />";
 		var partiesCachees = 0;
 		for (var i = 0; i < listeParties.length ; i++){
 			var partie = listeParties[i];
 			var numeroP = partie.getAttribute('numero');
+			var nbjoueurs = parseInt(partie.getAttribute('nbJoueurs'));
+			var nExistaitPas = (partiesExistantes[numeroP] != nbjoueurs);
+			partiesExistantes[numeroP] = nbjoueurs;
 			var cachee = parseInt(partie.getAttribute('cachee'));
-			if (cachee) {
+			if (cachee && !nExistaitPas) {
 				partiesCachees++;
 				continue;
 			}
-			chaineAAfficher += "Partie n°"+numeroP+" : ";
+			chaineAAfficher += (nExistaitPas?"<b>&#8594;":"")+"Partie n°"+numeroP+" : "; //nbjoueurs+";"+partiesExistantes[numeroP]+";"+
 			var listeJoueurs = partie.getElementsByTagName("joueur");
 			for (var j=0;j < listeJoueurs.length;j++){
 				var joueur = listeJoueurs[j];
 				var nom = joueur.getAttribute('nom');
 				var numeroJ = joueur.getAttribute('numero');
 				var couleur = joueur.getAttribute('couleur');
-				var lien = "client.html?j="+numeroJ+"&p=".numeroP;
+				var lien = "client.html?j="+numeroJ+"&p="+numeroP;
 				chaineAAfficher += '<a style="color:black;background-color:#'+couleur+';" href="'+lien+'">'+nom+'</a> ';
 			}
-			chaineAAfficher += '<span id="action-'+numeroP+'"><input type="button" value="Entrer" onclick="sajouter2(\''+numeroP+'\');" /></span><br/>';
+			chaineAAfficher += '<span id="action-'+numeroP+'"><input type="button" value="Entrer" onclick="sajouter2(\''+numeroP+'\');" /></span>'+(nExistaitPas?"</b>":"")+'<br/>';
 		}
-		if (!partiesCachees)
+		if (partiesCachees)
 			chaineAAfficher += partiesCachees+" autres parties cachées."
 		document.getElementById("parties2").innerHTML = chaineAAfficher;
 	});
 }
 function sajouter2(numeroPartie){
-	chaineaafficher = "<form action=\"<?php echo serveur_fichier; ?>?a=autrejoueur&p="+numeroPartie+"\" method='POST'>";
+	chaineaafficher = "<form action=\"<?php echo serveur_fichier; ?>?a=autrejoueur&p="+numeroPartie+"\" method='POST' target='framecreation'>";
 	chaineaafficher += "&nbsp;&nbsp;&#9495;&nbsp;<input type=\"hidden\" name=\"p\" value=\""+numeroPartie+"\" />";
 	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"text\" name=\"nom\" value=\"Votre nom\" onfocus=\"if (this.value=='Votre nom') this.value='';\" />";
 	chaineaafficher += "<?php echo addslashes(addSelectOption(
@@ -137,7 +140,7 @@ array("text" => " Couleur",
 }
 </script>
 </head>
-<body onload="bodyOnLoad()">
+<body onload="bodyOnLoad();chargerPartiesEnCours();">
 <h1><?php echo $game_name; ?></h1>
 <i>Jeu développé par Cédric, Mikaël et Erwin Mayer</i>
 <br />
@@ -185,10 +188,12 @@ Il y a 4 types de terrain :
 
 </dl>
 
-</div>
+</div><script type="text/javascript">var debut=true;</script>
 <h2><a href="" onclick="changerAffichage('creation');return false;" style="color:black;text-decoration:none;">&gt; Cr&eacute;ation d'une partie</a></h2>
+<iframe style="display:none;" id="framecreation" name="framecreation" src="" height="90" width="200" FRAMEBORDER=0 scrolling="no" onload="if (!debut) {document.getElementById('statuscreation').style.display='none';document.getElementById('parties').style.display='block';chargerPartiesEnCours();} else debut=false;"></iframe>
+<div id="statuscreation" style="display:none;">Création de la partie en cours...</div>
 <div id="creation" style="display:none;">
-<form action="creajeu.php" method=POST name=cre>
+<form action="creajeu.php" method="POST" name="cre" target="framecreation" onsubmit="document.getElementById('statuscreation').style.display='block';changerAffichage('creation');">
 <?php
 addSelectOption(
 array("text" => "Nombre de joueurs",
@@ -282,6 +287,7 @@ array("text" => "Visibilité de la partie ",
 	"idname" => "opt_partie_cachee",
 	"options" => array("Cachée" => 1,
 						"Visible" => 0),
+	"callback" => "if (this.value=='1') document.cre.opt_attente_joueurs.value='0';",
 	"default" => 0,
 	"table"=>true
 ));
@@ -298,6 +304,7 @@ array("text" => "Decor",
 addSelectOption(
 array("text" => "Attente d'autres joueurs",
 	"idname" => "opt_attente_joueurs",
+	"callback" => "if (this.value=='1') document.cre.opt_partie_cachee.value='0';",
 	"options" => array("non" => 0,
 						"oui" => 1),
 	"default_index" => 0,

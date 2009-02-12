@@ -93,14 +93,15 @@ admin.php : montre les parties en cours, permet de les supprimer
 creajeu.php : crée un jeu
 	Dans les noms des joueurs, les espaces et les \n sont remplacés par _
 	crée une partie de rien, avec des paramètre envoyés en POST
-	crée une partie à partir d'une grille de base
-	affiche le n° de la partie créée avec les liens pour les joueurs humains
+	OU crée une partie à partir d'une grille de base
+	//affiche le n° de la partie créée avec les liens pour les joueurs humains
+	renvoie un XML de partie
 
 numéros des parties dans lespartiesencours.xml
 	<parties>
-		<partie numero=numero cachee=0/1 nbjoueurs=N>
-			<joueur numero=1 nom=nom1 />
-			<joueur numero=2 nom=nom2 />
+		<partie numero=numero cachee=0/1 nbJoueurs=N>
+			<joueur numero=1 nom=nom1 couleur=RRGGBB (lien=url) />
+			<joueur numero=2 nom=nom2 couleur=RRGGBB />
 		</partie>
 		...
 	</parties>

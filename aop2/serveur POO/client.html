@@ -39,13 +39,7 @@ tableauArguments : tableau des arguments de la page
 		s	son
 		pw	optionnel : mot de passe
 		offline	arrêt des communications avec le serveur (peut être mis en route en cours de jeu) */
-var bouh = location.search.substring(1,location.search.length).split(unescape("%26"));//on enlève le ? et on sépare avec les &
-var tableauArguments = new Array();
-tableauArguments["offline"] = 0;
-for (i=0;i<bouh.length;i++){
-   var temp = bouh[i].split("=");
-    tableauArguments[temp[0]]=unescape(temp[1]);
-}
+
 tableauArguments["offline"] = parseInt(tableauArguments["offline"]);
 if (tableauArguments["j"] != "observateur")
 	tableauArguments["j"] = parseInt(tableauArguments["j"]);
@@ -55,10 +49,88 @@ tableauArguments["type"] = (tableauArguments["type"]?tableauArguments["type"]:"t
 /*** initialisation des paramètres et types ***/
 //les options d'affichage
 var tempsEntreAffichages = 1000;
-var tempsDAttenteAvantRelance = 5000;//connexion au serveur
+var tempsDAttenteAvantRelance = 8000;//connexion au serveur
+
+var quiLanceLIA = 0;//c'est l'hôte
+var demarree = 0;
 
 function CreerJeu(docXML){
+	var Xpartie = docXML.getElementsByTagName("partie").item(0);
+this.nbJoueurs = parseInt(Xpartie.getAttribute('nombredejoueurs'));
+this.joueurEnCours = parseInt(Xpartie.getAttribute('joueurencours'));
+	demarree = parseInt(Xpartie.getAttribute('demarree'));
+this.noTour = parseInt(Xpartie.getAttribute('notour'));
+this.joueurs = new Array();var Xjoueurs = Xpartie.getElementsByTagName("joueur");
+this.derniereAction = new Array();
+	for (var i in Xjoueurs){
+		var numero = parseInt(Xjoueurs.item(i).getAttribute('numero'));
+this.joueurs[numero] = new Array(Xjoueurs.item(i).getAttribute('nom'),
+										Xjoueurs.item(i).getAttribute('couleur'),"0",
+										(Xjoueurs.item(i).getAttribute('estia')=="oui"?1:(Xjoueurs.item(i).getAttribute('estnet')=="oui"?2:0)));
+		var Xaction = Xjoueurs.item(i).getElementsByTagName("derniereaction").item(0);
+this.derniereAction[numero] = new Array(Xaction.getAttribute('type'),
+										parseInt(Xaction.getAttribute('x')),
+										parseInt(Xaction.getAttribute('y')),
+										parseInt(Xaction.getAttribute('notour')));
+	}
+	for (var j=1; j<=this.nbJoueurs;j++){
+		if (this.joueurs[j][3] != 1){ //premier humain 
+			quiLanceLIA = j;
+			break;
+		}
+	}
+	if (tableauArguments["j"] != "observateur")
+		if (this.joueurs[tableauArguments["j"]][3] == 1)
+			tableauArguments["j"] = "observateur";
 
+	var Xoptions = Xpartie.getElementsByTagName("option");
+this.options = new Array();
+	for (var i in Xoptions){
+		var valeur = parseInt(Xoptions.item(i).getAttribute('valeur'));
+		switch(Xoptions.item(i).getAttribute('type')){
+		case "chateaux_actifs":this.options[0] = valeur;break;
+		case "profondeur_jeu":this.options[1] = valeur;break;
+		case "type_bords":this.options[2] = valeur;break;
+		case "ajout_diagonale":this.options[3] = valeur;break;
+		case "explosion_joueur":this.options[4] = valeur;break;
+		}
+	}
+	var Xtableaupartie = Xpartie.getElementsByTagName("tableaudejeu").item(0);
+this.tailleX = parseInt(Xtableaupartie.getAttribute('taillex'));
+this.tailleY = parseInt(Xtableaupartie.getAttribute('tailley'));
+
+this.tableauDecor = new Array();
+this.tableauJeu = new Array();
+this.tableauDesMax = new Array();
+	var Xlignes = Xtableaupartie.getElementsByTagName("ligne");
+	for(var i in Xlignes){
+		var y = parseInt(Xlignes.item(i).getAttribute('y'));
+		this.tableauDecor[y]=new Array();
+		this.tableauJeu[y]=new Array();
+		this.tableauDesMax[y] = new Array();
+		var Xcases = Xlignes.item(i).getElementsByTagName("case");
+		for(var j in Xcases){
+			var XlaCase = Xcases.item(j);
+			var x = parseInt(XlaCase.getAttribute('x'));
+			this.tableauDecor[y][x] = parseInt(XlaCase.getAttribute('decor'));
+			this.tableauJeu[y][x] = parseInt(XlaCase.getAttribute('chateau'))*10000+100*parseInt(XlaCase.getAttribute('joueur'))+parseInt(XlaCase.getAttribute('cellules'));
+			this.tableauDesMax[y][x] = parseInt(XlaCase.getAttribute('max'));
+		}
+	}
+	
+//méthodes
+this.purifie=purifie;
+this.purifieEtAffiche=purifieEtAffiche;
+this.affiche=affiche;
+this.jouable=jouable;
+this.toString=toString;
+this.joueEn=joueEn;
+this.chateauEn=chateauEn;
+this.afficheOptions=afficheOptions;
+this.existeGagnant=existeGagnant;
+this.peutJouer=peutJouer;
+this.lesJoueurs2string=lesJoueurs2string;
+this.faireJouerSuivant=faireJouerSuivant;
 }
 
 function CreerTableauJeu(chaineTexte){//constructeur d'un jeu
@@ -75,7 +147,7 @@ this.joueurs = new Array();
 	indice=2+this.nbJoueurs;
 this.derniereAction = new Array();
 	for(var i=0;i<this.nbJoueurs;i++)
-		this.derniereAction[i+1] = tabJeuT[indice+i].split("\t");//action x y
+		this.derniereAction[i+1] = tabJeuT[indice+i].split("\t");//action x y notour
 	indice+=this.nbJoueurs;
 this.options = new Array(); var nombreDOptions = 5;
 	for(var i=0;i<nombreDOptions;i++)	//chateauxactivés profondeur bordbloqués diagonale tempspasreel
@@ -243,6 +315,8 @@ var enCoursDeTraitement = false;//pour ne pas accepter deux fois la même réponse
 function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purifier totalement et afficher
 	enCoursDeTraitement = true;
 	var profondeur = (profondeur == undefined?0:profondeur);
+	if (profondeur==0 && tableauArguments["j"] == quiLanceLIA && this.joueurs[mettreEntre(this.joueurEnCours,this.nbJoueurs)+1][3] == 1)
+		lancerIA();
 	if (profondeur>=this.options[1]){//fin de la purification
 		this.joueurEnCours = mettreEntre(this.joueurEnCours,this.nbJoueurs)+1;//on passe au suivant
 		if (this.joueurEnCours == 1) this.noTour++;//augmentation du n° du tour
@@ -260,12 +334,15 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 	}
 }}
 
+
 function faireJouerSuivant(){with(this){//fait jouer les joueurs sur internet
-	document.title = "AOP2 - "+this.joueurs[this.joueurEnCours][0];
+	document.title = "AOP2 - "+this.joueurs[this.joueurEnCours][0]+(this.joueurEnCours==tableauArguments["j"]?" !":"");
 	if (tableauArguments["offline"]==1 || this.joueurs[this.joueurEnCours][3] == 0){
 		if (document.mdp.prevenu.checked) alert("C'est ton tour de jouer !");
 		return;//c'est au joueur de jouer, on le laisse
 	}
+	if (tableauArguments["j"] == quiLanceLIA && this.joueurs[this.joueurEnCours][3] == 1)//ia n'est pas sur le client 1
+		lancerIA();
 	document.getElementById("comm").innerHTML ="Demande de l'action du joueur "+this.joueurEnCours+" au serveur";
 	ouJoue(this.joueurEnCours, function(tabReponse){
 		if(tabReponse["n"] != unJeu.noTour){// && !enCoursDeTraitement)
@@ -527,7 +604,10 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		//chaineHTML += "</p>";
 		chaineHTML += "</td><tr>";
 	}
-	chaineHTML += "</td></tr></table>";
+	chaineHTML += "</td></tr></table><br />";
+	
+	if (quiLanceLIA == tableauArguments["j"] && demarree==0)
+		chaineHTML += "<input type='button' value='D&eacute;marrer' onclick='demarree=1;lancerIA();this.style.display=\"none\";' />";
 	
 	chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
@@ -598,6 +678,7 @@ function joueEn(x,y){with(this){//ajoute une cellule du joueur en cours en x,y
 	//alert("Joue en "+x+", "+y)
 	if (!this.jouable(x,y))
 		return false;
+	demarree = 1;
 	if (tableauArguments["offline"]==0 && this.joueurEnCours==tableauArguments["j"])
 		jeJoueEn(x,y,false);//on n'attend pas de savoir si c'est bon, ce client est bien programmé
 	if (case2cellules(this.tableauJeu[y][x]) >= 100 - (this.tableauDecor[y][x]==2?2:1))
@@ -619,6 +700,7 @@ function chateauEn(x,y){with(this){//ajoute une cellule du joueur en cours en x,
 		return false;
 	if (!this.jouable(x,y))
 		return false;
+	demarree = 1;
 	if (tableauArguments["offline"]==0 && this.joueurEnCours==tableauArguments["j"])
 		jeJoueEn(x,y,true);//on n'attend pas de savoir si c'est bon, ce client est bien programmé
 	if (case2cellules(this.tableauJeu[y][x]) >= 99)
@@ -740,7 +822,6 @@ function getJeu(){//demande au serveur le jeu
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
-				document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
 				traiterJeu(xhr.responseText); 
 			} else {
 				document.getElementById("jeu").innerHTML = "Jeu non re&ccedil;u, partie ou joueur inconnu ou mot de passe incorrect.";
@@ -752,8 +833,26 @@ function getJeu(){//demande au serveur le jeu
 	xhr.open("GET", chaineDAppel,  true); 
 	xhr.send(null);
 }
+function getJeuXML(){//demande de jeu au serveur
+	var tabGet = { "p": tableauArguments["p"], "a": "g", "j": tableauArguments["j"] };
+	if (tableauArguments["pw"])
+		tabGet["pw"] = tableauArguments["pw"];
+	communiqueGET( { "p": tableauArguments["p"], "a": "g", "j": tableauArguments["j"] },traiterJeu2);
+}
+function traiterJeu2(leJeuXML){//fonction de traitement après getJeu()
+	//document.getElementById('jeu').innerHTML = leJeuChaine.split('\n').join('<br/>');
+	document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
+	unJeu = new CreerJeu(leJeuXML);
+	if (!demarree)
+		window.setTimeout("getJeuXML()",tempsDAttenteAvantRelance);
+	if (tableauArguments["type"] != "texte")
+		chargeImages();//on charge les images !
+	else
+		apresChargement();
+}
 function traiterJeu(leJeuChaine){//fonction de traitement après getJeu()
 	//document.getElementById('jeu').innerHTML = leJeuChaine.split('\n').join('<br/>');
+	document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
 	unJeu = new CreerTableauJeu(leJeuChaine);
 	if (tableauArguments["type"] != "texte")
 		chargeImages();//on charge les images !
@@ -764,6 +863,10 @@ function apresChargement(){
 	unJeu.affiche(1);
 	unJeu.afficheOptions();
 	unJeu.faireJouerSuivant();
+}
+
+function lancerIA(){
+	communiqueGET( "ia.php?p="+tableauArguments["p"],null);
 }
 
 function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrête le jeu si contraire au serveur
@@ -896,10 +999,11 @@ function supprimerPartie(){
 /*** fonction principale ***/
 var unJeu;
 function main(){
-	if (!tableauArguments["p"]) return;//le jeu n'est pas chargé
-	getJeu();
+	if (!tableauArguments["p"]) return;//le jeu n'est pas précisé
+	getJeuXML();
+	//getJeu();
 	if (tableauArguments["synchroserveur"])
-		setInterval("getJeu()",7000);
+		setInterval("getJeuXML()",7000);
 	/*unJeu = new CreerTableauJeu(jeuTest);
 	unJeu.affiche(1);
 	unJeu.afficheOptions();
@@ -999,7 +1103,7 @@ function imageSuivante(){
  | 
 <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute;
  | 
-Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option></select>
+Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option><option value="cool">new age</option></select>
 <input type="button" value="OK" onclick="window.location.replace(window.location.href.split('type').join('rien')+'&type='+document.mdp.type.value);">
 </form>
 </div>

@@ -12,7 +12,7 @@ $fichier_parties = "lespartiesencours.xml";
 define ("mdpadminmd5", md5("meuhmeuh"));
 define ("serveur_fichier","serveur.php");
 define ("md5mdpIA",md5("jesuisuneiatresbelle"));
-define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"UTF-16\"?>");
+define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
 $color_array = 
 array("Bleu" => "4040FF",

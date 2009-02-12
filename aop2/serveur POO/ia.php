@@ -38,7 +38,7 @@ if (!$partie)
 
 $joueurIA = $partie->joueurEnCours;
 $forcerAJouer = (array_key_exists("pw",$_GET)?md5($_GET["pw"])==$partie->joueur[$joueurIA]->mdp:false);
-if (!$partie->joueur[$joueurIA]->isIA())
+if (!$partie->joueur[$joueurIA]->isIA() && !$forcerAJouer)
 	lancerErreur("Le joueur en cours est humain","Lancement de l'IA");
 $niveauIA = $partie->joueur[$joueurIA]->niveau;
 

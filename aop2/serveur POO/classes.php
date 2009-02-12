@@ -30,7 +30,7 @@ class Partie {
 			$this->tableauJeu->getCase(rand(0,1),rand(0,1))->placeJoueur(1);//premier joueur en 0,0
 		}
 		else{
-			$leMaxDist = 0;
+			$leMaxDist = -1;
 			$lEndroit = array(0,0);
 			for ($i=0;$i<$this->tableauJeu->tailleX;$i++) for ($j=0;$j<$this->tableauJeu->tailleY;$j++){
 				$m = $this->tableauJeu->distance($this->options,$i,$j);
@@ -879,7 +879,7 @@ class UneCase {
 	function getJoueur(){return $this->joueur;}
 	function placeJoueur($joueur){//place un joueur au début du jeu
 		$this->setDecor(0);
-		$this->setJoueur(1);
+		$this->setJoueur($joueur);
 		$this->setCellules(1);
 	}
 	

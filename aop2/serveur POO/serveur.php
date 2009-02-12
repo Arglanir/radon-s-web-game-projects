@@ -78,7 +78,7 @@ if (!$partie){
 }
 
 if ($action=="g"){//on renvoie la grille XML
-	$partie->enregistrerXML(true,true);die();
+	$partie->enregistrerXML(true,true,(strlen($joueurAppelant)>2?0:$joueurAppelant+0));die();
 }
 
 //vérification des mots de passe
@@ -120,8 +120,8 @@ if ($action == "m"){
 	if (!array_key_exists("k",$_GET))
 		lancerErreur("Commande de mise à jour requise","Mise à jour concernant un joueur");
 	if ($_GET["k"]=="0"){//on veut savoir qui joue
-		envoyerReponse("<n valeur=\"".$partie->noTour."\" signification=\"Num&eacute;ro du tour courant\" />".
-						"<k valeur=\"".$partie->joueurEnCours."\" signification=\"Joueur qui joue\" />");
+		envoyerReponse("<n valeur=\"".$partie->noTour."\"/>". // signification=\"Num&eacute;ro du tour courant\" 
+						"<k valeur=\"".$partie->joueurEnCours."\" />"); // signification=\"Joueur qui joue\"
 	}
 	else {//on veut savoir quel joueur a joué où
 		$k = 0+$_GET["k"];
@@ -130,8 +130,8 @@ if ($action == "m"){
 		envoyerReponse("<a valeur=\"".$partie->joueur[$k]->derniereAction->quoi."\" />".
 						"<x valeur=\"".$partie->joueur[$k]->derniereAction->ouX."\" />".
 						"<y valeur=\"".$partie->joueur[$k]->derniereAction->ouY."\" />".
-						"<n valeur=\"".$partie->joueur[$k]->derniereAction->quand."\" signification=\"Num&eacute;ro du tour de la derni&egrave;re action\" />".
-						"<k valeur=\"".$k."\" signification=\"Joueur qui a jou&eacute;\" />");
+						"<n valeur=\"".$partie->joueur[$k]->derniereAction->quand."\" />". //signification=\"Num&eacute;ro du tour de la derni&egrave;re action\" 
+						"<k valeur=\"".$k."\"  />"); //signification=\"Joueur qui a jou&eacute;\"
 	}
 }
 
