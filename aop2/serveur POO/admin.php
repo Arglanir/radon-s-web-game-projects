@@ -32,13 +32,14 @@ function supprimerPartie(numero){
 					document.getElementById("comm").innerHTML = 
 						"Erreur : "+leXML.getElementsByTagName("erreur").item(0).getAttribute('raison')+
 						" lors de "+leXML.getElementsByTagName("erreur").item(0).getAttribute('origine')+".";
+					window.setTimeout("window.location.reload()",5000);
 				}
 				else {
 					document.getElementById("comm").innerHTML = leXML.getElementsByTagName("action").item(0).getAttribute('type')+" r&eacute;ussie. Rechargement de la page...";
 					window.setTimeout("window.location.reload()",5000);
 				}
 			} else {
-				document.getElementById("comm").innerHTML = "partie non supprimée";
+				document.getElementById("comm").innerHTML = "partie "+numero+" non supprimée";
 			}
          }
     }; 
