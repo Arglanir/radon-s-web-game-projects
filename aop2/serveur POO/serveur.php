@@ -152,9 +152,9 @@ if (($action == "n" || $action=="c") && is_int($joueurAppelant)) {
 	
 	//action prise en compte...
 	$partie->demarree = true;//jeu commencé
-	$partie->tableauJeu->clicNormal($x,$y,$joueurAppelant,$action=="c");
+	$partie->tableauJeu->clicNormal($x,$y,$joueurAppelant,$action=="c",$partie->noTour);
 	$partie->joueur[$joueurAppelant]->derniereAction = new Action($action,$x,$y,$partie->noTour);
-	$partie->tableauJeu->purifieTotalement($partie->options,$joueurAppelant);
+	$partie->tableauJeu->purifieTotalement($partie->options,$joueurAppelant,$partie->noTour);
 	$partie->joueurSuivant();
 	
 	//est-ce qu'il y a un gagnant ?

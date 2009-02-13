@@ -144,10 +144,10 @@ règles :
 		ne peut être construite seulement sur terrain stable (0)
 	décor :
 		1 glace :
-			il faut 2 explosions pour que ça ajoute une cellule effectivement et que la case soit conquise (1 cellule ajoutée perdue)
+			il faut 2 explosions pour que ça ajoute une cellule effectivement et que la case soit conquise (1 cellule ajoutée perdue par tour de joueur)
 			on peut cliquer sur la case, ajoutant une cellule, on ne peut pas ajouter de cellule pour que la case explose
 		2 chaud :
-			ajouter une cellule en ajoute 2
+			ajouter une cellule en ajoute 2, une seule fois par tour de joueur
 			si une case explose à côté, 2 cellules sont ajoutées
 		3 obstacle :
 			on ne peut pas ajouter de cellule

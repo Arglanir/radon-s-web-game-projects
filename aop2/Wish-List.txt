@@ -6,7 +6,7 @@ Wish:
 - Problème: L'affichage est synchronisé, mais une boîte de dialogue nous disant que ce n'est pas encore à nous de jouer est encore potentiellement active 1 seconde après la synchronisation.
 	C'est pas un bug, c'est parce que l'affichage est fait avant le test pour savoir s'il y a encore des changements
 - Eviter les boîtes de dialogue pour dire que c'est pas à nous de jouer
-	c'est utilse pour faire pause, non ?
+	c'est utile pour faire pause, non ?
 - Un moyen visuel de déterminer de quelle couleur je suis
 	Ben ton nom est de cette couleur(et tu es en gras)
 - Un moyen visuel plus avancé pour voir à qui est le tour (mieux que mode: ajout de cellule)
@@ -18,5 +18,12 @@ Wish:
 	ah et aussi firefox envoie un warning quand il n'y a pas de title... donc c'est mieux pour débugger dans la console
 - Replay button pour voir les dernières actions
 
-Mik/Cédric :
-- Salle d'attente de jeu
+Cédric :
+- client avec un meilleur objet plus facile d'utilisation (pour faire les IA perso par exemple)
+- tester l'IA (trouver la bonne heuristique) - même au niveau 1 l'IA devrait être plus performante
+- dans le créateur aléatoire de décor, il faudrait vérifier que l'ensemble des cases jouables est connexe par explosion (pas seulement en diagonale), et enlever la limite d'obstacles
+- pouvoir redémarrer un jeu avec le même décor, sur le même numéro de partie
+- un joueur pourrait abandonner, remplacé par une IA de niveau 0
+- avoir des images de cellules animées
+- sur les images, avoir un endroit où le nombre de cellules est affiché
+- pouvoir faire des campagnes

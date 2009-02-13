@@ -140,13 +140,13 @@ class CreaJeu{
 			$nbDecor = $this->y * $this->x;
 			$nbDecor /= ($this->opt_avec_decor==1?10:($this->opt_avec_decor==2?4:2));
 			$nbDecor = round($nbDecor);
-			$nbDecor -= $this->partie->nbJoueurs;
+			//$nbDecor -= $this->partie->nbJoueurs;
 			$nbmaxobstacles = min($this->x,$this->y)-1;
 			$nbostacles = 0;
-			$nbmaxglace = min($this->x,$this->y)-1;
+			//$nbmaxglace = min($this->x,$this->y)-1;
 			$nbglace = 0;
 			for ($i = 0; $i < $nbDecor; $i++){
-				$unDecor = rand(($nbglace>=$nbmaxglace?1:2),($nbostacles>=$nbmaxobstacles?2:3));
+				$unDecor = rand(1,($nbostacles>=$nbmaxobstacles?2:3)); //($nbglace>=$nbmaxglace?1:2)
 				$nbostacles += ($unDecor==3?1:0);
 				$nbglace +=  ($unDecor==1?1:0);
 				$tabDecor[rand(0,$this->y-1)][rand(0,$this->x-1)] = $unDecor;
@@ -237,11 +237,16 @@ class CreaJeu{
 
 	function affichageLiensPartie(){//affiche les liens pour la partie
 		echo "Partie ".$this->numero_partie." créée !<br />\n";
-
+		$nbHumains = 0;$Lurl = 0;
 		for($i = 1; $i <= $this->partie->nbJoueurs; $i++) {
 			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), $_POST["mdp".$i]);
-			if (!$this->partie->joueur[$i]->isIA())
+			if (!$this->partie->joueur[$i]->isIA()){
 				echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
+				$nbHumains++;$Lurl = $url;
+			}
+		}
+		if ($nbHumains==1){
+			echo "<script type='text/javascript'>parent.location.replace('".$Lurl."');</script>";
 		}
 	}
 	function affichageInfosXML(){//renvoie des infos XML
@@ -280,10 +285,13 @@ class CreaJeu{
 			$PEC = new PartiesEnCours();
 			$PEC->supprimerPartie($noPartie,false);
 			$PEC->ajouterPartie($noPartie,false,$partie);
-
+			
+			$url = getUrlJoueur($noPartie, $noJoueur );
+			
 			echo "Vous avez été ajouté avec succès à la partie ".$noPartie.".<br />\n";
-			echo "<a href=\"".getUrlJoueur($noPartie, $noJoueur )."\">Cliquez ici pour rentrer</a><br />";
+			echo "<a href=\"".$url."\">Cliquez ici pour rentrer</a><br />";
 			echo "Bienvenue dans le jeu ".$_POST["nom"]." !\n";
+			echo "<script type='text/javascript'>parent.location.replace('".$url."');</script>";
 			return true;
 		}
 		echo "Action non autoris&eacute;e : \n".$raison_erreur;
