@@ -614,7 +614,7 @@ class PlateauDeJeu {
 		}
 	}
 	
-	function purifie($options,$joueurEnCours){//en fonction des options, 1 itération
+	function purifie($options,$joueurEnCours,$numtour="1-0"){//en fonction des options, 1 itération
 		$changement=false;
 		$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
 		$differences = array(); //préparation du traitement des explosions
@@ -659,8 +659,9 @@ class PlateauDeJeu {
 								break;
 							case 1: //glace
 								$differences[$y][$x]--;
-								if (!array_key_exists($nvy." ".$nvx,$ouGlaceExplosion)){//1ere fois
+								if (!array_key_exists($nvy." ".$nvx,$ouGlaceExplosion) && $autreCase->numTourUtilisee != $numtour){//1ere fois
 									$ouGlaceExplosion[$nvy." ".$nvx] = 1;
+									$autreCase->numTourUtilisee = $numtour;
 								} else {//fois après
 									//il va y avoir un BUG si 2 personnes tentent de conquérir une case de glace
 									//c'est à cause du vent, il souffle pour favoriser les joueurs x plus grands puis y
@@ -670,7 +671,8 @@ class PlateauDeJeu {
 								break;
 							case 2: //povar chaud
 								$differences[$y][$x]--;
-								$differences[$nvy][$nvx]+=2;
+								$differences[$nvy][$nvx]+= ($autreCase->numTourUtilisee != $numtour?2:1);
+								$autreCase->numTourUtilisee = $numtour;
 								$conquetes[$nvy][$nvx][count($conquetes[$nvy][$nvx])]=$cetteCase->getJoueur();
 								break;
 							case 3: //obstacle:rien !
@@ -698,26 +700,27 @@ class PlateauDeJeu {
 		}
 		return $changement;
 	}
-	function purifieTotalement($options,$joueurEnCours,$profondeur=0){
+	function purifieTotalement($options,$joueurEnCours,$numTour,$profondeur=0){
 		if ($profondeur>=$options->quelleProfondeur()){
 			return true;
 		} else {
-			$changements = $this->purifie($options,$joueurEnCours);
+			$changements = $this->purifie($options,$joueurEnCours,$numTour."-".$joueurEnCours);
 			$profondeur++;
 			if ($changements)//on arrête s'il y a pas de changements
-				$this->purifieTotalement($options,$joueurEnCours,$profondeur);
+				$this->purifieTotalement($options,$joueurEnCours,$numTour,$profondeur);
 			else
-				$this->purifieTotalement($options,$joueurEnCours,$options->quelleProfondeur());
+				$this->purifieTotalement($options,$joueurEnCours,$numTour,$options->quelleProfondeur());
 		}
 	}
-	function clicNormal($x,$y,$joueurEnCours,$chateau=false){//ajoute une cellule
+	function clicNormal($x,$y,$joueurEnCours,$chateau=false,$numTour=1){//ajoute une cellule
 		$laCase = $this->getCase($x,$y);
 		if (!$laCase) var_dump($this);
 		$laCase->setJoueur($joueurEnCours);
 		$laCase->addCellules($laCase->getDecor()==2?2:1);
+		$laCase->numTourUtilisee = $numTour."-".$joueurEnCours;
 		if ($chateau) $laCase->clicChateau();
 	}
-	function clicChateau($x,$y,$joueurEnCours){return $this->clicNormal($x,$y,$joueurEnCours,true);}
+	function clicChateau($x,$y,$joueurEnCours,$numTour=1){return $this->clicNormal($x,$y,$joueurEnCours,true,$numTour);}
 	function peutJouerEn($options,$x,$y,$joueurAppelant,$chateau=false){
 		$laCase = $this->getCase($x,$y);
 		if ($laCase->getDecor() != 0 && $chateau)
@@ -844,8 +847,10 @@ class UneCase {
 	var $chateau;//y a t il un chateau ? 
 	var $max;//maximum de cellules sur la cas
 	var $decor;//0 rien, 1 glace, 2 chaud, 3 obstacle
+	var $numTourUtilisee;
 	
 	function UneCase($decor = 0){
+		$this->numTourUtilisee = 0;
 		switch( func_num_args ()){
 			case 1:
 			case 0:
@@ -861,6 +866,7 @@ class UneCase {
 					$this->chateau = $decor->chateau;
 					$this->max = $decor->max;
 					$this->decor = $decor->decor;
+					$this->numTourUtilisee = $decor->numTourUtilisee;
 				}
 				break;
 			case 5: //joueur, cellules, chateau?, max, decor
@@ -874,6 +880,7 @@ class UneCase {
 	function copie(){//copie une cellule
 		$uneCase = new UneCase();
 		$uneCase->setJoueur($this->getJoueur());
+		$uneCase->numTourUtilisee = $this->numTourUtilisee;
 		$uneCase->setCellules($this->getCellules());
 		$uneCase->setChateau($this->getChateau());
 		$uneCase->setMax($this->getMax());

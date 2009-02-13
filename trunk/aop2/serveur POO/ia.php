@@ -56,9 +56,8 @@ function vaJouerAvant($joueurEnCours,$joueurConsidere,$joueurApres,$nbJoueurs){
 	return false;
 }
 
-function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre évaluant la position pour un joueur venant de jouer
+function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la position pour un joueur venant de jouer
 	global $partie;
-	$nbJoueurs = $partie->nbJoueurs;
 	
 	$casesPretesAExploser = 0;
 	$casesMenacees = 0;
@@ -73,7 +72,7 @@ function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre év
 	for ($x=0;$x<$plateau->tailleX;$x++){
 		for ($y=0;$y<$plateau->tailleY;$y++){
 			$c = $plateau->getCase($x,$y);
-			if ($plateau->peutJouerEn($options,$x,$y,$joueur)){
+			if ($plateau->peutJouerEn($partie->options,$x,$y,$joueur)){
 				$cellules += ($nb = $c->getCellules());
 				if ($nb==0) $casesMenacees += 1;
 				if ($nb>0) $casesControlees += 1;
@@ -88,7 +87,7 @@ function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre év
 					if ($c2->getJoueur() == $joueur){
 						if ($c2->preteAExploser()) $casesMenacees += 1;
 						if ($c->preteAExploser()) $casesASoiMenacees += 1;
-						if ($c->preteAExploser() && $c2->preteAExploser()) $resultat += (vaJouerAvant($joueur,$joueurEnnemi,$joueurIA,$nbJoueurs)?-10:10);//$frontiereBrulante += 1;
+						if ($c->preteAExploser() && $c2->preteAExploser()) $resultat += (vaJouerAvant($joueur,$joueurEnnemi,$joueurIA,$partie->nbJoueurs)?-10:10);//$frontiereBrulante += 1;
 					}
 				}
 			}
@@ -98,35 +97,39 @@ function heuristique($plateau,$joueur,$options,$joueurIA){//renvoie un nombre év
 	if ($cellulesEnnemis == 0) return 100000;//là non plus
 	$resultat += 3*$cellules;
 	//$resultat += ($tourSuivantASoi?1:-1)*10*$frontiereBrulante;
-	$resultat += -5*$casesASoiMenacees;
-	$resultat += 5*$casesMenacees;
-	$resultat += 2*$casesControlees;
+	//$resultat += -5*$casesASoiMenacees;
+	//$resultat += 5*$casesMenacees;
+	//$resultat += 2*$casesControlees;
 	$resultat += 2*$casesPretesAExploser;
 	
 	return $resultat;
 }
 //le plateau, le joueur qui va jouer
-function descente($plateau,$joueur,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur=0,$alpha=-10000000,$beta=10000000){
-	$lesPositions = melanger($plateau->ouPeutJouer($options,$joueur));
+function descente($plateau,$joueur,$joueurIA,$profondeurMax,$profondeur=0,$alpha=-10000000,$beta=10000000){
+	global $partie;
+	$nbJoueurs = $partie->nbJoueurs;
+	$options = $partie->options;
+	
+	$lesPositions = melanger($plateau->ouPeutJouer($partie->options,$joueur));
 	if (count($lesPositions) == 0)
-		return descente($plateau,mettreEntre($joueur,$nbJoueurs)+1,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur+1,$alpha,$beta);
+		return descente($plateau,mettreEntre($joueur,$nbJoueurs)+1,$joueurIA,$profondeurMax,$profondeur+1,$alpha,$beta);
 	$evaluationPositions = array();
 	$noeudMax = ($joueur == $joueurIA);
 	$meilleur = ($noeudMax ? -100000 : 100000);
 	$meilleurePos = $lesPositions[0];
 	foreach($lesPositions as $key => $pos){
 		$plateau2 = $plateau->copie();
-		$plateau2->clicNormal($pos[0],$pos[1],$joueur);
-		$plateau2->purifieTotalement($options,$joueur);
+		$plateau2->clicNormal($pos[0],$pos[1],$joueur,$partie->noTour);
+		$plateau2->purifieTotalement($partie->options,$joueur,$partie->noTour);
 		$g = $plateau2->yaGagnant();
 		if ($g){
 			if ($g==$joueurIA && $noeudMax) $evaluationPositions[$key] = 100000;
 			else if ($g!=$joueurIA && !$noeudMax) $evaluationPositions[$key] = -100000;
 		} else {
 			if ($profondeur >= $profondeurMax || tempsRestant()<3)
-				$evaluationPositions[$key] = heuristique($plateau2,$joueur,$options,$joueurIA);
+				$evaluationPositions[$key] = heuristique($plateau2,$joueur,$joueurIA);
 			else
-				$evaluationPositions[$key] = descente($plateau2,mettreEntre($joueur,$nbJoueurs)+1,$options,$joueurIA,$nbJoueurs,$profondeurMax,$profondeur+1,$alpha,$beta);
+				$evaluationPositions[$key] = descente($plateau2,mettreEntre($joueur,$nbJoueurs)+1,$joueurIA,$profondeurMax,$profondeur+1,$alpha,$beta);
 				//heuristique($plateau2,$joueurIA,$options,false);
 		}
 		$valeur = $evaluationPositions[$key];
@@ -160,7 +163,7 @@ if ($niveauIA == 0){//jeu au hasard
 	$_GET["y"] = $laPos[1];
 }
 else {
-	$lActionEn = descente($partie->tableauJeu,$joueurIA,$partie->options,$joueurIA,$partie->nbJoueurs,$niveauIA*$partie->nbJoueurs/2);
+	$lActionEn = descente($partie->tableauJeu,$joueurIA,$joueurIA,$niveauIA*$partie->nbJoueurs/2);
 	$_GET["x"] = $lActionEn[0];
 	$_GET["y"] = $lActionEn[1];
 }

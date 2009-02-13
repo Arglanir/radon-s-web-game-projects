@@ -178,7 +178,7 @@ Il y a 4 types de terrain :
 	<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=atome" />
 	<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=cellule" />
 	<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=mediev" /> Point chaud </dt>
-	<dd>Un endroit plus chaud est meilleur pour le développement des cellules. Lorsqu'une cellule arrive sur une telle case, elle se dédouble tout de suite.</dd>
+	<dd>Un endroit plus chaud est meilleur pour le développement des cellules. Lorsqu'une cellule arrive sur une telle case, elle se dédouble (une fois par tour de joueur).</dd>
 
 <dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=atome" />
 <img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=cellule" />
@@ -263,7 +263,7 @@ array("text" => "Type bordure",
 	"options" => array("Bloqués" => 1,
 						"Non bloquants" => 0,
 						"Monde torrique" => 2),
-	"default" => 1,
+	"default" => 2,
 	"table"=>true
 ));
 addSelectOption(
