@@ -148,7 +148,12 @@ class Partie {
 	}
 	function fromSXML($fichier){
 		if (!file_exists($fichier)) return false;
-		$xml_partie = new SimpleXMLElement(file_get_contents($fichier));
+		try {
+			$xml_partie = new SimpleXMLElement(file_get_contents($fichier));
+		} catch (Exception $e){
+			return false;
+		}
+		if (!$xml_partie) return false;
 		
 		$Xpartie = $xml_partie;/*->children();
 		$Xpartie = $Xpartie[0];*/

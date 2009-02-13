@@ -336,12 +336,16 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 
 
 function faireJouerSuivant(){with(this){//fait jouer les joueurs sur internet
-	document.title = "AOP2 - "+this.joueurs[this.joueurEnCours][0]+(this.joueurEnCours==tableauArguments["j"]?" !":"");
+	document.title = "AOP2 - "+html_entity_decode(this.joueurs[this.joueurEnCours][0])+(this.joueurEnCours==tableauArguments["j"]?" !":"");
+	if (demarree==0){
+		document.getElementById("comm").innerHTML = "Attente du d&eacute;marrage de la partie...";
+		return;
+	}
 	if (tableauArguments["offline"]==1 || this.joueurs[this.joueurEnCours][3] == 0){
 		if (document.mdp.prevenu.checked) alert("C'est ton tour de jouer !");
 		return;//c'est au joueur de jouer, on le laisse
 	}
-	if (tableauArguments["j"] == quiLanceLIA && this.joueurs[this.joueurEnCours][3] == 1)//ia n'est pas sur le client 1
+	if (tableauArguments["j"] == quiLanceLIA && this.joueurs[this.joueurEnCours][3] == 1)
 		lancerIA();
 	document.getElementById("comm").innerHTML ="Demande de l'action du joueur "+this.joueurEnCours+" au serveur";
 	ouJoue(this.joueurEnCours, function(tabReponse){
@@ -455,7 +459,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	
 	var statistiques = this.lesJoueurs2string();
 	//Mikaël veut que le bord de la table soit de la couleur du joueur ayant le client... Ne marche que sous Chrome !
-	var colorTable = statistiques[tableauArguments["j"]][0];
+	var colorTable = (tableauArguments["j"]=="observateur"?"FFFFFF":statistiques[tableauArguments["j"]][0]);
 	var chaineHTML = "<table><tr><td style=\"border:solid #"+versRRGGBB(colorTable)+";\">";
 	chaineHTML += (tableauArguments["type"]=="texte"?"<table cellpadding=\"0\" cellspacing=\"0\" >":"");
 	for(var y=0;y<this.tailleY;y++){
@@ -587,7 +591,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		//}
 		if (statistiques[n][2]>0)//joueur spécial
 			chaineHTML += (statistiques[n][2]==1?" (IA)":" (NET)");
-		chaineHTML += (tableauArguments["j"] == n?"( moi)</b>":"");
+		chaineHTML += (tableauArguments["j"] == n?" (moi)</b>":"");
 		
 		chaineHTML += "</td><td style=\"text-align:center;\">";
 		//chaineHTML += (this.joueurEnCours == n?"</u>":"");
@@ -606,8 +610,14 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	}
 	chaineHTML += "</td></tr></table><br />";
 	
-	if (quiLanceLIA == tableauArguments["j"] && demarree==0)
-		chaineHTML += "<input type='button' value='D&eacute;marrer' onclick='demarree=1;lancerIA();this.style.display=\"none\";' />";
+	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==1)
+		chaineHTML += "<input type='button' value='D&eacute;marrer' onclick='demarree=1;this.style.display=\"none\";unJeu.faireJouerSuivant();' />";
+
+	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==0)
+		chaineHTML += "<input type='button' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
+
+	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
+		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title='Si tu penses que l'IA n'a pas été lancée' />";
 	
 	chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
@@ -834,6 +844,8 @@ function getJeu(){//demande au serveur le jeu
 	xhr.send(null);
 }
 function getJeuXML(){//demande de jeu au serveur
+	if (demarree==1 && !tableauArguments["synchroserveur"])
+		return;
 	var tabGet = { "p": tableauArguments["p"], "a": "g", "j": tableauArguments["j"] };
 	if (tableauArguments["pw"])
 		tabGet["pw"] = tableauArguments["pw"];
@@ -843,7 +855,7 @@ function traiterJeu2(leJeuXML){//fonction de traitement après getJeu()
 	//document.getElementById('jeu').innerHTML = leJeuChaine.split('\n').join('<br/>');
 	document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
 	unJeu = new CreerJeu(leJeuXML);
-	if (!demarree)
+	if (demarree==0)
 		window.setTimeout("getJeuXML()",tempsDAttenteAvantRelance);
 	if (tableauArguments["type"] != "texte")
 		chargeImages();//on charge les images !
@@ -1012,6 +1024,7 @@ function main(){
 }
 
 /*** fonctions diverses ***/
+var typeImagesChargees = false; var nbJoueursCharges = -1;
 var listeDimages = new Array();var indiceImages = 0;var maxCellules = 0;var maxIndURL = 0;
 function chargeImages(){//charge les images
 /*image.php : crée une image de case
@@ -1027,6 +1040,13 @@ function chargeImages(){//charge les images
 			cellule	cases avec cellules
 			mediev	cases version moyen-age
 		taille	paramètre optionnel pour une taille d'atomes*/
+	if (tableauArguments["type"] == typeImagesChargees && nbJoueursCharges==unJeu.nbJoueurs){//images déjà chargées
+		apresChargement();
+		return;
+	}
+	if (tableauArguments["type"] != typeImagesChargees){//images déjà chargées mais manque des joueurs
+		nbJoueursCharges = -1;
+	}
 	var quelsDecors = new Array();
 	var quelsJoueurs = new Array();
 	for (x=0;x<4;x++) quelsDecors[x] = false;
@@ -1040,7 +1060,7 @@ function chargeImages(){//charge les images
 	if (tableauArguments["type"] != "texte"){
 		var ims = new Array();var ind=0;
 		var chaine = "";
-		for(j=0;j<=unJeu.nbJoueurs;j++)
+		for(j=nbJoueursCharges+1;j<=unJeu.nbJoueurs;j++)
 			for (d=0; d<4 && quelsJoueurs[j]; d++)
 				for (r=0;r<2;r++){//cases vides
 					if (!quelsDecors[d]) continue;
@@ -1049,7 +1069,7 @@ function chargeImages(){//charge les images
 				}
 		for (n=1; n<15; n++){
 			for (r=0;r<2;r++)
-				for(j=0;j<=unJeu.nbJoueurs;j++)
+				for(j=nbJoueursCharges+1;j<=unJeu.nbJoueurs;j++)
 					for (m=0; m<2 && quelsJoueurs[j]; m++)
 						for (h=0;h<2 && m==0;h++)
 							for (d=0;d==0 || (d<3 && h==0);d++) {
@@ -1073,6 +1093,7 @@ var lefaireunefois = false;
 function imageSuivante(){
 	url = listeDimages[indiceImages++];
 	if (!url) {
+		typeImagesChargees = tableauArguments["type"]; nbJoueursCharges = unJeu.nbJoueurs;
 		document.getElementById("imgs").innerHTML = "Chargement des images termin&eacute; !";
 	} else {
 		if (maxIndURL<indiceImages){

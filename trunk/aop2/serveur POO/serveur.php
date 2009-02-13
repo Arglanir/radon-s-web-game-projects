@@ -61,7 +61,6 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 ///on ajoute un nouveau joueur
 if ($action == "autrejoueur"){
-	include_once ("newjeux.php");
 	CreaJeu::ajouterJoueur();
 	die();
 }
@@ -72,7 +71,7 @@ $partie = Partie::ouvrirXML($fichierPartie);
 if (!$partie){
 	if ($action == "s"){//on tente la suppression dans le fichier XML
 		$parties = new PartiesEnCours();
-		$parties->supprimerPartie($p);
+		$parties->supprimerPartie($p,true);
 	}
 	lancerErreur("Partie ".$p." inconnue","Suppression de ladite partie");
 }

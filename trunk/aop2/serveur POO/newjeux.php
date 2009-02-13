@@ -271,7 +271,7 @@ class CreaJeu{
 				$raison_erreur = "Partie inconnue.";
 				break;//c'est pas autorisé
 			}
-			$noJoueur = $partie->addJoueur($_POST["nom"],$_POST["couleur"]);
+			$noJoueur = $partie->addJoueur(htmlentities($_POST["nom"]),$_POST["couleur"]);
 			if (!$noJoueur){
 				$raison_erreur = "Partie probablement déjà commencée.";
 				break;//c'est pas autorisé
