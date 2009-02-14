@@ -98,7 +98,8 @@ if (!$chateau){//atomes libres
 			if ($pos[$i][0] > $tailleimage-$tailleattome) {$pos[$i][0] = 2*($tailleimage-$tailleattome)-$pos[$i][0];$dir [$i][0] = -$dir [$i][0];}
 			if ($pos[$i][1] > $tailleimage-$tailleattome) {$pos[$i][1] = 2*($tailleimage-$tailleattome)-$pos[$i][1];$dir [$i][1] = -$dir [$i][1];}
 		}
-		dessineNumero($im,16,16,true,$coul,$fond,false,$nombre);
+		if ($nombre > 0)
+			dessineNumero($im,16,16,true,$coul,$fond,false,$nombre);
 		ob_start();
 		imagegif($im);
 		$imgs[] = ob_get_clean();

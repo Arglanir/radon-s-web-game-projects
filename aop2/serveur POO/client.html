@@ -749,24 +749,6 @@ function versRRGGBB(couleur){//retourne le bon format de couleur pour les images
 
 
 /**** fonctions de communication AJAX ****/
-function getJeu(){//demande au serveur le jeu 
-	var a="g";
-	var xhr = createXHR();
-	var chaineDAppel = serveur+"?a=g&p="+tableauArguments["p"]+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
-	xhr.onreadystatechange  = function(){ 
-		if(xhr.readyState  == 4){
-			if(xhr.status  == 200) {
-				traiterJeu(xhr.responseText); 
-			} else {
-				document.getElementById("jeu").innerHTML = "Jeu non re&ccedil;u, partie ou joueur inconnu ou mot de passe incorrect.";
-			}
-         }
-    }; 
-	document.getElementById("jeu").innerHTML = "Attente du serveur...";
-	
-	xhr.open("GET", chaineDAppel,  true); 
-	xhr.send(null);
-}
 function getJeuXML(){//demande de jeu au serveur
 	if (demarree==1 && !tableauArguments["synchroserveur"])
 		return;
@@ -781,15 +763,6 @@ function traiterJeu2(leJeuXML){//fonction de traitement après getJeu()
 	unJeu = new CreerJeu(leJeuXML);
 	if (demarree==0)
 		window.setTimeout("getJeuXML()",tempsDAttenteAvantRelance);
-	if (tableauArguments["type"] != "texte")
-		chargeImages();//on charge les images !
-	else
-		apresChargement();
-}
-function traiterJeu(leJeuChaine){//fonction de traitement après getJeu()
-	//document.getElementById('jeu').innerHTML = leJeuChaine.split('\n').join('<br/>');
-	document.getElementById("jeu").innerHTML = "Jeu re&ccedil;u, traitement en cours...";
-	unJeu = new CreerTableauJeu(leJeuChaine);
 	if (tableauArguments["type"] != "texte")
 		chargeImages();//on charge les images !
 	else
@@ -1046,7 +1019,7 @@ function mettreOnlineOffline(){
 <input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" />
 <input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" />
  | 
-<input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else window.location.replace(window.location.href+'&offline=1'); else window.location.replace(window.location.href.split('offline').join('rien'));" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />
+<input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 0;this.value='Se remettre offline';}" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />
  | 
 <input type="checkbox" name="prevenu" /> Etre pr&eacute;venu quand c'est notre tour
  | 
