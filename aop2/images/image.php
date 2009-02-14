@@ -10,6 +10,160 @@ image.php : crée une image de case
 		type	type de case (cellule, médiéval)
 
 ***************/
+function dessineNumero($image,$x,$y,$estCeCentre,$imCouleurChiffre,$imCouleurBord,$styles,$nombre){
+	//styles : array()
+	if ($nombre >= 10 ){
+		$dizaines = floor($nombre/10);
+		if ($estCeCentre){
+			dessineNumero($image,$x-2,$y,true,$imCouleurChiffre,$imCouleurBord,$styles,$dizaines);
+			dessineNumero($image,$x+2,$y,true,$imCouleurChiffre,$imCouleurBord,$styles,$nombre-$dizaines*10);
+		}
+		else {
+			dessineNumero($image,$x,$y,false,$imCouleurChiffre,$imCouleurBord,$styles,$dizaines);
+			dessineNumero($image,$x+4,$y,false,$imCouleurChiffre,$imCouleurBord,$styles,$nombre-$dizaines*10);
+		}
+		return;
+	}
+	//on se met en haut à gauche
+	if ($estCeCentre){$x -= 2; $y -= 3;}
+	for ($i=0;$i<5;$i++) for ($j=0;$j<7;$j++){
+		switch($i.$j){
+			case "00":
+			case "06":
+			case "40":
+			case "00":
+			case "46":continue;
+			case "10":switch ($nombre){
+				case 0:case 1:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "20":switch ($nombre){
+				case 4:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "30":switch ($nombre){
+				case 4:case 1:case 0:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "01":switch ($nombre){
+				case 1:case 0:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "11":switch ($nombre){
+				case 1:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "21":switch ($nombre){
+				case 4:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "31":switch ($nombre){
+				case 4:case 1:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "41":switch ($nombre){
+				case 1:case 0:case 4:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "02":switch ($nombre){
+				case 2:case 3:case 7:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "12":switch ($nombre){
+				case 2:case 3:case 7:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "22":switch ($nombre){
+				case 1:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "32":switch ($nombre){
+				case 1:case 5:case 6:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "42":switch ($nombre){
+				case 1:case 5:case 6:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "03":switch ($nombre){
+				case 1:case 3:case 7:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "04":switch ($nombre){
+				case 1:case 4:case 5:case 3:case 7:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "05":switch ($nombre){
+				case 4:case 7:case 0:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "16":switch ($nombre){
+				case 4:case 0:case 7:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "26":switch ($nombre){
+				case 4:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "36":switch ($nombre){
+				case 7:case 0:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "45":switch ($nombre){
+				case 7:case 0:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "44":switch ($nombre){
+				case 1:case 2:case 7:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "43":switch ($nombre){
+				case 1:continue;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "13":switch ($nombre){
+				case 7:continue;
+				case 1:case 3:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "23":switch ($nombre){
+				case 7:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "33":switch ($nombre){
+				case 1:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "14":switch ($nombre){
+				case 2:case 6:case 8:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "24":switch ($nombre){
+				case 1:case 7:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);
+			} break;
+			case "34":switch ($nombre){
+				case 1:case 2:case 7:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "15":switch ($nombre){
+				case 4:case 7:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "25":switch ($nombre){
+				case 4:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+			case "35":switch ($nombre){
+				case 7:case 0:imagesetpixel($image, $x+$i, $y+$j, $imCouleurBord);break;
+				default:imagesetpixel($image, $x+$i, $y+$j, $imCouleurChiffre);
+			} break;
+		}
+	}
+}
+
+
+
 if (!array_key_exists("type",$_GET))
 	$_GET["type"] = "cellule";
 

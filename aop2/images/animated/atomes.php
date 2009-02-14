@@ -85,7 +85,7 @@ if (!$chateau){//atomes libres
 	for ($j = 0; $j < $nbframes; $j++){
 		$im = imagecreatetruecolor($tailleimage, $tailleimage);
 		imagecopy($im ,$imfond,0,0,0,0, $tailleimage, $tailleimage);
-		
+		$fond = imagecolorallocate($im, 0, 0, 0);
 		$coul = imagecolorallocate($im, $rouge, $vert, $bleu);
 		for ($i = 0; $i < $nombre; $i++){
 			imagefilledrectangle($im, $pos[$i][0] ,  $pos[$i][1] , $pos[$i][0]+$tailleattome-1 ,  $pos[$i][1]+$tailleattome-1 , $coul );
@@ -98,6 +98,7 @@ if (!$chateau){//atomes libres
 			if ($pos[$i][0] > $tailleimage-$tailleattome) {$pos[$i][0] = 2*($tailleimage-$tailleattome)-$pos[$i][0];$dir [$i][0] = -$dir [$i][0];}
 			if ($pos[$i][1] > $tailleimage-$tailleattome) {$pos[$i][1] = 2*($tailleimage-$tailleattome)-$pos[$i][1];$dir [$i][1] = -$dir [$i][1];}
 		}
+		dessineNumero($im,16,16,true,$coul,$fond,false,$nombre);
 		ob_start();
 		imagegif($im);
 		$imgs[] = ob_get_clean();
