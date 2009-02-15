@@ -358,7 +358,7 @@ array("text" => " Couleur",
 		</div>
 	</div> 
 	<div id="footer"> 
-		<div class="side"> 
+		<!--div class="side"> 
 			<h2>Recherche</h2> 
 			<form method="post" action=""> 
 				<div> 
@@ -371,7 +371,7 @@ array("text" => " Couleur",
 			<h2>Petit texte</h2> 
 			<p></p> 
 		</div--> 
-		<div class="side"> 
+		<!--div class="side"> 
 			<h2>Récents</h2> 
 			<ul> 
 				<li><a href="">Home</a></li> 
@@ -380,7 +380,7 @@ array("text" => " Couleur",
 			<ul> 
 				<li><a href="">Home</a></li> 
 			</ul> 
-		</div>
+		</div-->
 		<div id="copy"><small>&copy; C&eacute;dric, Mika&euml;l & Erwin Mayer 2009 <!--Design inspired by Zwatla-->| <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
 	</div> 
 </div> 
