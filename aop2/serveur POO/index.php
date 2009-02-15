@@ -86,12 +86,15 @@ function cacherTout(){
 	document.getElementById("regles").style.display = "none";	
 }
 function changerAffichage(quoi,comment){
-	if (document.getElementById(quoi).style.display == "none")
-	document.getElementById(quoi).style.display = (comment?comment:"block");
-	else
-	document.getElementById(quoi).style.display = "none";
+	if (document.getElementById(quoi).style.display == "none") {
+		document.getElementById(quoi).style.display = (comment?comment:"block");
+		document.getElementById('menu'+quoi).style.color = "#FFF";
+	}
+	else {
+		document.getElementById(quoi).style.display = "none";
+		document.getElementById('menu'+quoi).style.color = "#AFA439";
+	}
 }
-
 
 var partiesExistantes = new Array();
 function chargerPartiesEnCours(){
@@ -142,20 +145,21 @@ array("text" => " Couleur",
 	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"submit\" value=\"OK\" /></form>";
 	document.getElementById("action-"+numeroPartie).innerHTML = chaineaafficher;
 }
+
 </script>
 </head>
 <body onload="bodyOnLoad();chargerPartiesEnCours();">
 <div id="site"> 
 	<div id="header"> 
 		<div id="bigtitle">
-			<h1><?php echo $game_name; ?></h1>
-			<small>Jeu développé par Cédric, Mikaël et Erwin Mayer</small>
+			<h1><a href="index.php" style="text-decoration:none;"><?php echo $game_name; ?></a></h1>
+			<small>Jeu développé par <a href="http://radon222.free.fr" style="text-decoration:none;">Cédric</a>, <a href="http://meak.free.fr" style="text-decoration:none;">Mikaël</a> et <a href="http://www.erwinmayer.com" style="text-decoration:none;">Erwin Mayer</a></small>
 		</div>
 		<div id="menu"> 
 			<ul> 
-			<li><a href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
-			<li><a href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
-			<li><a href="#" onclick="changerAffichage('regles');return false;" >&or; Règles</a></li> 
+			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
+			<li><a id="menucreation" href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
+			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; Règles</a></li> 
 			</ul> 
 		</div> 
 	</div> 
