@@ -95,8 +95,12 @@ $color_array = (
 $game_name = "Age Of Paramecia II";
 ?>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"> 
 <head>
+<meta name="Description" content="<?php echo $game_name; ?>" /> 
+<meta name="Keywords" content="Jeu, jeu en ligne, age of paramecia, jeu de la vie" /> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> 
+<link rel="stylesheet" type="text/css" href="css/style.css" /> 
 <title><?php echo $game_name;?></title>
 <script language="javascript">
 function bodyOnLoad() {
@@ -145,9 +149,22 @@ function changerAffichage(quoi,comment){
 </script>
 </head>
 <body onload="bodyOnLoad()">
-<h1><?php echo $game_name; ?></h1>
-<i>Jeu développé par Cédric, Mikaël et Erwin Mayer</i>
-<br />
+ 
+<div id="site"> 
+	<div id="header"> 
+		<div id="bigtitle">
+			<h1><?php echo $game_name; ?></h1>
+			<small>Jeu développé par Cédric, Mikaël et Erwin Mayer</small>
+		</div>
+		<div id="menu"> 
+			<ul> 
+			<li><a href="#">Home</a></li> 
+			<li><a href="#">Contact</a></li> 
+			</ul> 
+		</div> 
+	</div> 
+	<div id="content"> 
+		<div class="onglet">
 <h2><a href="" onclick="changerAffichage('regles');return false;" style="color:black;text-decoration:none;">&gt; Règles</a></h2>
 <div id="regles">
 <h3>Introduction</h3>
@@ -313,6 +330,39 @@ Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option v
 </form>
 
 <form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form></div>
-<div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
+		</div>
+	</div> 
+	<div id="footer"> 
+		<div class="side"> 
+			<h2>Catégories</h2> 
+			<ul> 
+				<li><a href="http://www.e-news.name/">Home</a></li> 
+			</ul> 
+			<h2>Recherche</h2> 
+			<form method="post" action=""> 
+				<div> 
+				<input type="text" class="champ"  /> 
+				<input type="submit" class="recherche" value="" /> 
+				</div> 
+			</form>  
+		</div> 
+		<div class="side"> 
+			<h2>Mon texte</h2> 
+			<p>Illum tation nulla. Feugait te et nulla praesent dignissim, autem nulla. 
+			Minim magna te nulla duis sed blandit eros hendrerit facilisi in eros, suscipit exerci ipsum dolor facilisis.</p> 
+		</div> 
+		<div class="side"> 
+			<h2>Articles récents</h2> 
+			<ul> 
+				<li><a href="http://www.e-news.name/">Home</a></li> 
+			</ul> 
+			<h2>Archives</h2> 
+			<ul> 
+				<li><a href="http://www.e-news.name/">Home</a></li> 
+			</ul> 
+		</div>
+		<div id="copy"><small>&copy; C&eacute;dric, Mika&euml;l & Erwin Mayer 2009 <!--Design inspired by Zwatla-->| <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>				 
+	</div> 
+</div> 
 </body>
 </html>

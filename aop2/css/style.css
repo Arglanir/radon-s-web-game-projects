@@ -1,0 +1,307 @@
+body {
+margin : 0 ;
+padding : 0 ; 
+background : #000 ;
+text-align : center;
+font-size : 0.9em;
+color : #575449;
+font-family : "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+}
+  
+
+/*  SITE
+********************************************************************/
+ 
+#site { 
+text-align : left  ;
+padding :  0 ; 
+background : #fff ; 
+}
+     
+     
+/*  HEADER
+********************************************************************/
+   
+
+#header {
+position : relative ; 
+height : 154px;
+background : url(img/header.jpg);
+}
+
+
+/*  HEADER >> TITRE DU SITE >> H1
+********************************************************************/
+
+#bigtitle {
+position : absolute ;
+top : 35px ; 
+left : 20px ; 
+margin : 0 0 0 0;
+padding : 0 0 0 0; 
+width : 500px;
+height : 55px;
+/* background : url(img/logo.png); */   
+}
+#bigtitle h1 {
+color: #FFFFFF;
+font-family: Georgia, "Time New Roman";
+font-size: 2.4em;
+margin : 0px 0px 5px 0px;
+padding : 0px 0px 0px 0px;
+}
+
+#bigtitle small {
+	font-style: italic;
+	font-size: 0.8em;
+	color: #DDDDDD;
+}
+   
+   
+/*  HEADER >> MENU PRINCIPAL
+********************************************************************/
+   
+   
+   
+#menu {
+position : absolute ; 
+top : 130px;
+left : 25px; 
+}
+	
+	
+#menu  ul{
+list-style : none ;
+margin : 0; 
+padding : 0 ;
+}
+
+
+#menu  li{
+float : left ;
+text-transform : uppercase ; 
+
+}
+	
+	
+
+#menu  li a{
+margin : 0 ; 
+padding : 0 10px 0 0 ; 
+text-decoration : none ;    
+color : #AFA439 ;
+font-weight : bold ;
+}
+
+#menu  li a:hover {
+color : #fff ;
+}
+	
+
+
+/*  CONTENT
+********************************************************************/
+
+#content {
+overflow : auto ;
+left: 20px;
+top: 20px;
+padding : 0;
+}
+	
+	
+/*  CONTENU
+********************************************************************/	
+	
+div.onglet {
+	margin: 10px 10px 10px 10px;
+	border-right: solid 1px #2C2B0C;
+}
+
+div.onglet 
+
+#contenu {
+width : 30% ; 
+float  : left ;
+margin : 0;
+padding : 40px 0 25px 320px  ;
+line-height : 1.4em; 
+text-align : justify ;
+letter-spacing : 1px  
+}
+
+#contenu h2 {
+color : #6F6714;
+font-size : 1.4em;
+margin : 0;
+padding : 0;
+text-transform : uppercase ; 
+
+}
+
+
+#contenu h2 + p {
+color : #D89E08;
+margin : 0; 
+padding : 0 0 17px 0; 
+font-weight : bold; 
+font-size : 110%; 
+border-bottom : 1px dotted #6F6714; 
+}
+
+
+#contenu img {
+float : left ;
+margin : 0 10px 0 0; 
+}
+
+#contenu a {
+color : #759111; 
+text-decoration : none ; 
+}
+
+#contenu a:hover {
+text-decoration : underline ; 
+}
+
+#contenu p:last-child  {
+color : #C8901B
+}
+
+
+
+   
+
+/*  CONTENU >> POST
+********************************************************************/	
+
+
+.post {
+padding : 0 0 20px 0;
+ }   
+
+
+
+/*  FOOTER
+*******************************************************************/ 
+   
+#footer { 
+min-height :271px;
+background : #000 url(img/footer.jpg);
+text-align : left ; 
+padding : 20px 0 0 0;  
+}
+
+
+#footer p { 
+color : #C8901B; 
+}
+
+#footer img { 
+float : left ;
+margin : 0 0 0 -70px ; 
+}
+
+
+#footer a { 
+color : #C8901B;
+text-decoration : none ;  
+}
+
+#footer a:hover { 
+text-decoration : underline ;  
+}
+
+#footer h2 {
+font-size : 1.6em ;
+margin : 0 ;
+padding :  0 ; 
+color : #6F6714 ; 
+font-weight : normal;  
+}
+   
+ 
+ 
+ 
+ /*  FOOTER >> SIDE
+********************************************************************/
+   
+   
+#footer .side {
+width : 220px ;
+float  : left ;
+padding :  0 0 0 20px ;
+text-align : justify; 
+}
+	
+#footer .side  ul{
+list-style : none ; 
+margin : 5px 0 15px 0 ; 
+padding : 0; 
+}
+ 
+#footer .side  li{
+margin : 0 ; 
+padding : 0 0 5px 0; 
+}
+  
+  
+#footer .side  li a{
+color : #C8901B ;
+text-decoration : none ;
+}
+
+#footer .side  li:first-child a{
+border-top: 0; 
+}
+
+
+#footer .side  li a:hover{
+color : #C8901B 
+}
+
+
+#footer .side  p{
+margin : 5px 0 0 0 ; 
+padding : 0 45px 0  0 ;  
+}
+
+
+#footer .side  form {
+margin : 0;
+padding : 5px 0 0 0;
+height : 50px;  
+}
+
+
+#footer .side  input {
+float : left ; 
+
+}
+
+
+#footer .side  .champ {
+width : 115px ;
+height : 20px;
+border : 0; 
+margin : 0;
+padding : 0;   
+ }
+
+
+#footer .side  .recherche {
+background : url(img/search-ok.jpg);
+width : 23px;
+height : 20px;
+border : 0;
+margin : 0 0 0 5px;
+padding : 0; 
+ } 
+
+
+#footer #copy {clear : left ;
+padding : 0 0 0 20px }
+ 
+
+
+
