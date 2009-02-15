@@ -81,7 +81,7 @@ function changecolor(n) {
 }
 
 function cacherTout(){
-	document.getElementById("parties").style.display = "block";
+	document.getElementById("parties").style.display = "block"; document.getElementById('menuparties').style.color = "#FFF";
 	document.getElementById("creation").style.display = "none";
 	document.getElementById("regles").style.display = "none";	
 }
