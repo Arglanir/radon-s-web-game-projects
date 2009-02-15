@@ -113,7 +113,8 @@ function addSelectOption($arrayOptions,$affichage=true) {
 		}
 	}
 	if($table) $sortie_ecran .=  "<tr><td style=\"text-align:right;\">";
-	$sortie_ecran .=  $text.' : ';
+	if($table) $sortie_ecran .= '<label style="float: right;" >'.$text.' :</label>';
+	else $sortie_ecran .= '<label>'.$text.' :</label>';
 	if($table) $sortie_ecran .=  "</td><td>";
 	$sortie_ecran .=  '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
 	$i = 1;

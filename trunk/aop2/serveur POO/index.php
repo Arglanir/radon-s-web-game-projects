@@ -193,12 +193,12 @@ array("text" => " Couleur",
 			));
 
 			foreach($array_count as $i) {
-			echo "<div id=divname".$i.">\n";
-			echo "<table border=1><tr><td>";
-			echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br />';
-			echo '<div id="divias'.$i.'" style="display:inline">Intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'"  onchange="updateIA('.$i.')" />';
-			echo '<div id="divia'.$i.'" style="display:none">Niveau : <select type=text id="nivia'.$i.'" name="nivia'.$i.'"><option value=0 selected>0</option><option value=1>1</option><option value=2>2</option></select></div></div>';
-			echo '<div id="divmdps'.$i.'" style="display:inline"> Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
+			echo "<div id=divname".$i." style=\"border: 1px dotted #CCC; width: 400px; clear: both; padding: 5px; margin: 5px 0px 5px 0px\">\n";
+			echo "<table><tr><td>";
+			echo '<label>Nom :</label><input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br />';
+			echo '<div id="divias'.$i.'" style="display:inline"><label>Intelligence artificielle :</label><input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'"  onchange="updateIA('.$i.')" />';
+			echo '<div id="divia'.$i.'" style="display:none"><label style="clear: none;">&nbsp;&nbsp;Niveau :</label><select type=text id="nivia'.$i.'" name="nivia'.$i.'"><option value=0 selected>0</option><option value=1>1</option><option value=2>2</option></select></div></div>';
+			echo '<div id="divmdps'.$i.'" style="display:inline"><label style="clear: none;">&nbsp;&nbsp;Mot de passe :</label><input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
 			echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value="" /></div></div>';
 			echo "<br />";
 			addSelectOption(
@@ -227,9 +227,9 @@ array("text" => " Couleur",
 			?>
 			<table>
 			<tr><td style="text-align:right;">
-			Taille : </td><td>
+			<label style="float: right;">Taille :</label></td><td>
 			<input type=text id="x" name="x" value="6" style="width:30px">
-			x
+			<div style="float:left;">x&nbsp;</div>
 			<input type=text id="y" name="y" value="6" style="width:30px">
 			</tr>
 
