@@ -37,7 +37,7 @@ function addSelectOption($arrayOptions) {
     }
   }
   if($table) echo "<tr><td>";
-  echo $text.' : ';
+  echo '<label>'.$text.' :</label>';
   if($table) echo "</td><td>";
   echo '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'."\n";
   $i = 1;
@@ -171,11 +171,16 @@ function changerAffichage(quoi,comment){
 			afficherParties($fichier_parties);
 			?>
 			<form method="GET" action="jeu.html">Aller dans une partie non affichée<br/><br/>
-				Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
-				Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
-				<input type="submit" value="Chercher la partie" title="clique ici" />
+				<label>Num&eacute;ro partie :</label><input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
+				<label>Num&eacute;ro du joueur :</label><select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
+				<br /><br />
+				<input type="submit" class="btn" value="Chercher la partie" title="clique ici" />
 			</form>
-			<form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form>
+			<br />
+			<form action="admin.php" method="GET">
+				<input type="text" name="pw" />
+				<input type="submit" class="btn" value="Aller à l'administration" />
+			</form>
 		</div>	
 		<div id="creation" class="onglet" style="width: 450px;">
 			<h2><a href="" onclick="changerAffichage('creation');return false;" style="text-decoration:none;">&gt; Cr&eacute;ation d'une partie</a></h2>
@@ -189,22 +194,22 @@ function changerAffichage(quoi,comment){
 			));
 
 			foreach($array_count as $i) {
-			  echo "<div id=divname".$i.">\n";
-			  echo "<table border=1><tr><td>";
-			  echo 'Nom : <input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br/>';
-			  echo ' Intelligence artificielle : <input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
-			  echo ' Mot de passe : <input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" />';
+			  echo "<div id=\"divname".$i."\" style=\"border: 1px dotted #CCC; width: 400px; padding: 5px; margin: 5px 0px 5px 0px\">\n";
+			  echo "<table><tr><td>\n";
+			  echo '<label>Nom :</label><input type=text id="no'.$i.'" name="nomJoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br />';
+			  echo '<label>Intelligence artificielle :</label><input type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" />';
+			  echo '<label>Mot de passe :</label><input type="checkbox" name="si_mdp'.$i.'" id="si_mdp'.$i.'"  onchange="updateMotDePasse('.$i.')" /><br />';
 			  echo '<div id="divmdp'.$i.'" style="display:none"><input type=text id="mdp'.$i.'" name="mdp'.$i.'" value="" /></div>';
-			  echo "<br/>";
+			  echo "<br />";
 			  addSelectOption(
-			  array("text" => " Couleur",
+			  array("text" => "Couleur",
 			      "idname" => "couleur".$i,
 			      "options" => $color_array,
 			      "callback" => "changecolor(".$i.")",
 			      "default_index" => $i,
 			      "color" => True
 			));
-			  echo "</td></tr></table>";
+			  echo "</td></tr></table>\n";
 			  echo "</div>\n";
 			}
 			?>
@@ -222,7 +227,7 @@ function changerAffichage(quoi,comment){
 			?>
 			<table>
 			<tr><td>
-			Taille : </td><td>
+			<label>Taille :</label></td><td>
 			<input type=text id="x" name="x" value="6" style="width:30px">
 			x
 			<input type=text id="y" name="y" value="6" style="width:30px">
@@ -281,7 +286,7 @@ function changerAffichage(quoi,comment){
 			</td></tr>
 			</table>
 
-			<input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
+			<input type="submit" class="btn" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 			</form>
 		</div>
 		<div id="regles" class="onglet" style="width: 600px;">
