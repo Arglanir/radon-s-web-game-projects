@@ -306,7 +306,7 @@ array("text" => " Couleur",
 			));
 			?>
 			<tr><td style="text-align:right;">
-			Profondeur de jeu : </td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
+			<label style="float: right;">Profondeur de jeu :</label></td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
 			</td></tr>
 			<tr><td style="text-align:center;" colspan=2>
 			<input type="submit" class="btn" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
