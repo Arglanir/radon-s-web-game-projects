@@ -56,7 +56,13 @@ padding : 0px 0px 0px 0px;
 	font-size: 0.8em;
 	color: #DDDDDD;
 }
-   
+
+#bigtitle h1 a {
+color: #FFFFFF;
+}
+#bigtitle small a{
+	color: #DDDDDD;
+}
    
 /*  HEADER >> MENU PRINCIPAL
 ********************************************************************/
@@ -122,21 +128,20 @@ div.onglet {
 #content h2 {
 color : #6F6714;
 font-size : 1.4em;
-margin : 0;
-padding : 0;
+margin : 2px 0px 5px 0px;
+padding : 0px;
 text-transform : uppercase ; 
-
 }
 
 
-#content h2 + p {
+/* #content h2 + p {
 color : #D89E08;
 margin : 0; 
 padding : 0 0 17px 0; 
 font-weight : bold; 
 font-size : 110%; 
 border-bottom : 1px dotted #6F6714; 
-}
+} */
 
 #content a {
 color : #759111; 
@@ -144,7 +149,7 @@ text-decoration : none ;
 }
 
 #content a:hover {
-text-decoration : underline ; 
+text-decoration : underline; 
 }
 
 #content p:last-child  {
@@ -172,7 +177,7 @@ color : #C8901B
 	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
 } 
 #content input.btn:hover { 
-	color:#C0C793; 
+	color:#DDD; 
 	background-color: #636246;
 	border: 1px solid #C8901B; 
 	cursor: hand;
