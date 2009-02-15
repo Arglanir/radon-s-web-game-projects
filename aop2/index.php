@@ -136,9 +136,9 @@ function changecolor(n) {
 }
 
 function cacherTout(){
+	document.getElementById("parties").style.display = "block";
 	document.getElementById("creation").style.display = "none";
 	document.getElementById("regles").style.display = "none";
-	document.getElementById("parties").style.display = "none";
 }
 function changerAffichage(quoi,comment){
 	if (document.getElementById(quoi).style.display == "none")
@@ -158,56 +158,26 @@ function changerAffichage(quoi,comment){
 		</div>
 		<div id="menu"> 
 			<ul> 
-			<li><a href="#" onclick="changerAffichage('regles');return false;" >&or; Règles</a></li> 
+			<li><a href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
 			<li><a href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
-			<li><a href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li> 
+			<li><a href="#" onclick="changerAffichage('regles');return false;" >&or; Règles</a></li> 
 			</ul> 
 		</div> 
 	</div> 
 	<div id="content">
-		<div id="regles" class="onglet">
-			<h2><a href="" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; Règles</a></h2>
-			<h3>Introduction</h3>
-			<?php echo $game_name;?> est un jeu hautement instable où vous devez lutter pour la survie de votre colonie de cellules sans cesse grandissante. C'est la dure loi de l'évolution : seuls les plus forts gagneront cette course pour la Vie !
-
-			<h3>Objectif</h3>
-			Votre colonie doit finir seule sur le plateau de jeu.
-
-			<h3>D&eacute;roulement</h3>
-			Chaque joueur à son tour ajoute une cellule à lui dans une case qui lui appartient ou qui lui est proche<sup><a href="" onclick="changerAffichage('option4expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option4expl" style="display:none;">Options changeables dans "Ajout diagonal"</span></sup>. Puis cette action peut générer des réactions en chaine selon la règle suivante : si le nombre C de cellules dans une case est supérieur ou égal au nombre N de cases autour de cette case (situées en croix), N cellules de cette case vont aller chacune dans une case différente autour (évènement nommé ci-après "explosion"), et cela jusqu'à ce que le jeu redevienne stable<sup><a href="" onclick="changerAffichage('option7expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option7expl" style="display:none;">Option changeable dans "Profondeur de jeu"</span></sup>.<br />
-			Si lors d'une explosion, une de vos cellules arrive dans une case contrôlée par un autre joueur, les cellules de cette case deviennent les vôtres.
-			<h4><img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=atome" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=cellule" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=mediev" /> Les membranes ou chateaux<sup><a href="" onclick="changerAffichage('option7expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option7expl" style="display:none;">Option changeable dans "Chateaux"</span></sup></h4>
-			L'exception à cette règle d'explosion est lorsque vous tentez de créer quelque chose de plus solidaire avec vos cellules. Pour cela, changez le mode d'addition en mode de création de chateau lors de votre tour de jeu. La cellule que vous créerez sera la messagère et organisera le début de cette membrane avec les autres cellules présentes dans la case. Toute cellule ensuite ajoutée par vous normalement ou par explosion viendra grandir et solidifier l'ensemble.<br />
-			Si la membrane est attaquée (par explosion d'un autre joueur), et que les cellules la composant sont trop peu nombreuses (nombre inférieur ou égal à 9), elles se désolidarisent et de plus appartiennent au joueur attaquant. Attention aux réactions en chaine ! Par contre, si elles sont fortes (au moins 10), alors le joueur attaquant perd une cellule et vous aussi, sans que le reste soit affecté.<br />
-			Pour désolidariser par vous-même une de vos membranes, il suffit de vous remettre dans le mode de création/destruction de membrane, et d'envoyer une cellule faire le travail. Attention aux réactions en chaine !
-
-			<h3>Effet du décor</h3>
-			Il y a 4 types de terrain :
-			<dl>
-			    <dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=atome" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=cellule" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=mediev" /> Stable </dt>
-				<dd>Terrain de base du jeu. Une membrane ne peut être construite que sur ce type de terrain.</dd>
-			    
-				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=atome" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=cellule" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=mediev" /> Glace </dt>
-				<dd>Un endroit plus froid est moins propice au développement de la vie. Vous ne pouvez pas y envoyer de cellule si elle y sera seule, et ni si ensuite elle doit repartir de suite (explosion juste après). Dans ces cas, la seule manière de conquérir une telle case sera par les explosions des cellules d'à côté (au moins 2 explosions, car les cellules ont tendance à mourrir en arrivant sur un endroit froid).</dd>
-			    
-				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=atome" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=cellule" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=mediev" /> Point chaud </dt>
-				<dd>Un endroit plus chaud est meilleur pour le développement des cellules. Lorsqu'une cellule arrive sur une telle case, elle se dédouble tout de suite.</dd>
-			    
-				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=atome" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=cellule" />
-				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=mediev" /> Obstacle </dt>
-				<dd>Les cellules ne peuvent s'y développer. Ce sera donc une cellule de moins dans la limite de population sans explosion des cases d'à-côté.</dd>
-			</dl>
-		</div>
-		<div id="creation" class="onglet">
+		<div id="parties" class="onglet" style="width: 350px;">
+		<h2><a href="" onclick="changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>		
+			<?php
+			afficherParties($fichier_parties);
+			?>
+			<form method="GET" action="jeu.html">Aller dans une partie non affichée<br/><br/>
+				Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
+				Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
+				<input type="submit" value="Chercher la partie" title="clique ici" />
+			</form>
+			<form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form>
+		</div>	
+		<div id="creation" class="onglet" style="width: 450px;">
 			<h2><a href="" onclick="changerAffichage('creation');return false;" style="text-decoration:none;">&gt; Cr&eacute;ation d'une partie</a></h2>
 			<form action="creajeu.php" method=POST name=cre>
 			<?php
@@ -314,17 +284,47 @@ function changerAffichage(quoi,comment){
 			<input type="submit" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 			</form>
 		</div>
-		<div id="parties" class="onglet">
-		<h2><a href="" onclick="changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>		
-			<?php
-			afficherParties($fichier_parties);
-			?>
-			<form method="GET" action="jeu.html">Aller dans une partie non affichée<br/><br/>
-				Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
-				Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
-				<input type="submit" value="Chercher la partie" title="clique ici" />
-			</form>
-			<form action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" value="Aller à l'administration" /></form>
+		<div id="regles" class="onglet" style="width: 600px;">
+			<h2><a href="" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; Règles</a></h2>
+			<h3>Introduction</h3>
+			<?php echo $game_name;?> est un jeu hautement instable où vous devez lutter pour la survie de votre colonie de cellules sans cesse grandissante. C'est la dure loi de l'évolution : seuls les plus forts gagneront cette course pour la Vie !
+
+			<h3>Objectif</h3>
+			Votre colonie doit finir seule sur le plateau de jeu.
+
+			<h3>D&eacute;roulement</h3>
+			Chaque joueur à son tour ajoute une cellule à lui dans une case qui lui appartient ou qui lui est proche<sup><a href="" onclick="changerAffichage('option4expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option4expl" style="display:none;">Options changeables dans "Ajout diagonal"</span></sup>. Puis cette action peut générer des réactions en chaine selon la règle suivante : si le nombre C de cellules dans une case est supérieur ou égal au nombre N de cases autour de cette case (situées en croix), N cellules de cette case vont aller chacune dans une case différente autour (évènement nommé ci-après "explosion"), et cela jusqu'à ce que le jeu redevienne stable<sup><a href="" onclick="changerAffichage('option7expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option7expl" style="display:none;">Option changeable dans "Profondeur de jeu"</span></sup>.<br />
+			Si lors d'une explosion, une de vos cellules arrive dans une case contrôlée par un autre joueur, les cellules de cette case deviennent les vôtres.
+			<h4><img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=atome" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=cellule" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=10&d=0&h=1&type=mediev" /> Les membranes ou chateaux<sup><a href="" onclick="changerAffichage('option7expl','inline');return false;" style="text-decoration:none;">&gt;</a><span id="option7expl" style="display:none;">Option changeable dans "Chateaux"</span></sup></h4>
+			L'exception à cette règle d'explosion est lorsque vous tentez de créer quelque chose de plus solidaire avec vos cellules. Pour cela, changez le mode d'addition en mode de création de chateau lors de votre tour de jeu. La cellule que vous créerez sera la messagère et organisera le début de cette membrane avec les autres cellules présentes dans la case. Toute cellule ensuite ajoutée par vous normalement ou par explosion viendra grandir et solidifier l'ensemble.<br />
+			Si la membrane est attaquée (par explosion d'un autre joueur), et que les cellules la composant sont trop peu nombreuses (nombre inférieur ou égal à 9), elles se désolidarisent et de plus appartiennent au joueur attaquant. Attention aux réactions en chaine ! Par contre, si elles sont fortes (au moins 10), alors le joueur attaquant perd une cellule et vous aussi, sans que le reste soit affecté.<br />
+			Pour désolidariser par vous-même une de vos membranes, il suffit de vous remettre dans le mode de création/destruction de membrane, et d'envoyer une cellule faire le travail. Attention aux réactions en chaine !
+
+			<h3>Effet du décor</h3>
+			Il y a 4 types de terrain :
+			<dl>
+			    <dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=atome" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=cellule" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=0&type=mediev" /> Stable </dt>
+				<dd>Terrain de base du jeu. Une membrane ne peut être construite que sur ce type de terrain.</dd>
+			    
+				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=atome" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=cellule" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=1&type=mediev" /> Glace </dt>
+				<dd>Un endroit plus froid est moins propice au développement de la vie. Vous ne pouvez pas y envoyer de cellule si elle y sera seule, et ni si ensuite elle doit repartir de suite (explosion juste après). Dans ces cas, la seule manière de conquérir une telle case sera par les explosions des cellules d'à côté (au moins 2 explosions, car les cellules ont tendance à mourrir en arrivant sur un endroit froid).</dd>
+			    
+				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=atome" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=cellule" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=2&type=mediev" /> Point chaud </dt>
+				<dd>Un endroit plus chaud est meilleur pour le développement des cellules. Lorsqu'une cellule arrive sur une telle case, elle se dédouble tout de suite.</dd>
+			    
+				<dt><img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=atome" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=cellule" />
+				<img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=mediev" /> Obstacle </dt>
+				<dd>Les cellules ne peuvent s'y développer. Ce sera donc une cellule de moins dans la limite de population sans explosion des cases d'à-côté.</dd>
+			</dl>
 		</div>
 	</div> 
 	<div id="footer"> 
