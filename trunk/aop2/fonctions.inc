@@ -15,15 +15,22 @@ define ("md5mdpIA",md5("jesuisuneiatresbelle"));
 define ("XMLHeader", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
 $color_array = 
-array("Bleu" => "4040FF",
-"Rouge"  => "FF0000",
+array(
+"Blanc" => "FEFEFE",
+"Gris" => "A0A0A0",
+"Bleu" => "4040FF",
+"Bleu clair" => "8080FF",
+"Cyan" => "00FFFF",
+"Emeraude" => "00FF80",
 "Vert" => "00FF00",
+"Vert kaki" => "80FF00",
+"Vert clair" => "80FF80",
 "Jaune" => "FFFF00",
 "Orange" => "FF8000",
-"Cyan" => "00FFFF",
+"Rouge"  => "FF0000",
 "Violet" => "FF00FF",
-"Emeraude" => "00FF80",
-"Gris" => "808080",
+"Violet clair" => "FF80FF",
+"Rose saumon" => "FF8080",
 "Autre..." => ".....");
 
 function entre($avant,$puis,$ensuite){//renvoie vrai si ils sont dans l'ordre
