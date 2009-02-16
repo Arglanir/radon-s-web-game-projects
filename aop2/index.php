@@ -215,7 +215,7 @@ array("text" => " Couleur",
 				"idname" => "couleur".$i,
 				"options" => $color_array,
 				"callback" => "changecolor(".$i.")",
-				"default_index" => $i,
+				"default_index" => floor(fmod($i*4-1,15)),
 				"color" => True
 			));
 			echo "</td></tr></table>";
