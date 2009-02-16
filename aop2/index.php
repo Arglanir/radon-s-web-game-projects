@@ -96,6 +96,7 @@ function changerAffichage(quoi,comment){
 	}
 }
 
+var premierLancement = true;//comme Erwin affiche les parties en cours de suite
 var partiesExistantes = new Array();
 function chargerPartiesEnCours(){
 	communiqueGET("lespartiesencours.xml",function(Rxml){
@@ -106,7 +107,7 @@ function chargerPartiesEnCours(){
 			var partie = listeParties[i];
 			var numeroP = partie.getAttribute('numero');
 			var nbjoueurs = parseInt(partie.getAttribute('nbJoueurs'));
-			var nExistaitPas = (partiesExistantes[numeroP] != nbjoueurs);
+			var nExistaitPas = (partiesExistantes[numeroP] != nbjoueurs && !premierLancement);
 			partiesExistantes[numeroP] = nbjoueurs;
 			var cachee = parseInt(partie.getAttribute('cachee'));
 			if (cachee && !nExistaitPas) {
@@ -128,6 +129,10 @@ function chargerPartiesEnCours(){
 		if (partiesCachees)
 			chaineAAfficher += partiesCachees+" autres parties cachées."
 		document.getElementById("parties2").innerHTML = chaineAAfficher;
+		premierLancement = false;
+	},
+	function (){
+		document.getElementById("parties2").innerHTML = "Aucune partie répertoriée.";
 	});
 }
 function sajouter2(numeroPartie){
@@ -153,7 +158,7 @@ array("text" => " Couleur",
 	<div id="header"> 
 		<div id="bigtitle">
 			<h1><a href="index.php" style="text-decoration:none;"><?php echo $game_name; ?></a></h1>
-			<small>Jeu développé par <a href="http://radon222.free.fr" style="text-decoration:none;">Cédric</a>, <a href="http://meak.free.fr" style="text-decoration:none;">Mikaël</a> et <a href="http://www.erwinmayer.com" style="text-decoration:none;">Erwin Mayer</a></small>
+			<small>Jeu développé par <a href="http://radon222.free.fr" style="text-decoration:none;">C&eacute;dric</a>, <a href="http://meak.free.fr" style="text-decoration:none;">Mika&euml;l</a> et <a href="http://www.erwinmayer.com" style="text-decoration:none;">Erwin Mayer</a></small>
 		</div>
 		<div id="menu"> 
 			<ul> 

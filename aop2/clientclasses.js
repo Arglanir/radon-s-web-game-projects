@@ -170,7 +170,7 @@ function patiente(millis) {
 }
 
 //fonction de communication avec le serveur
-function communiqueGET(tableauArgs,callback){
+function communiqueGET(tableauArgs,callback,callbackerreur){
 	var xhr = createXHR();
 	var chaineDAppel = "";
 	if (typeof(tableauArgs)=='string'){
@@ -198,10 +198,20 @@ function communiqueGET(tableauArgs,callback){
 						callback(xhr.responseXML);
 				}
 				else {
-					document.getElementById("comm").innerHTML = "Erreur lors du chargement du XML";
+					if (callbackerreur){
+						document.getElementById("comm").innerHTML = "";
+						callbackerreur();
+					}
+					else
+						document.getElementById("comm").innerHTML = "Erreur lors du chargement du XML";
 				}
 			} else {
-				document.getElementById("comm").innerHTML = "La communication "+chaineDAppel+" n'a pas abouti.";
+				if (callbackerreur){
+					document.getElementById("comm").innerHTML = "";
+					callbackerreur();
+				}
+				else
+					document.getElementById("comm").innerHTML = "La communication "+chaineDAppel+" n'a pas abouti.";
 			}
          }
     }; 
