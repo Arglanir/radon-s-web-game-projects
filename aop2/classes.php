@@ -57,7 +57,7 @@ class Partie {
 	function joueurSuivant(){//met le joueur en cours au joueur suivant
 		$this->joueurEnCours = mettreEntre($this->joueurEnCours,$this->nbJoueurs)+1;//on passe au suivant
 		if ($this->joueurEnCours == 1) $this->noTour++;//augmentation du n° du tour
-		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) $this->joueurSuivant();
+		if (!$this->tableauJeu->peutJouer($this->options,$this->joueurEnCours)) $this->joueurSuivant();
 		return true;
 	}
 	function getJoueurEnCours(){
@@ -758,7 +758,8 @@ class PlateauDeJeu {
 					$positions[] = array($x,$y);
 		return $positions;
 	}
-	function peutJouer($joueurAppelant){//vérifie si le joueur appelant peut jouer
+	function peutJouer($options,$joueurAppelant){//vérifie si le joueur appelant peut jouer
+		return count(ouPeutJouer($options,$joueurAppelant)) > 0;
 		for ($x=0;$x<$this->tailleX;$x++)
 			for ($y=0;$y<$this->tailleY;$y++)
 				if ($this->getCase($x, $y)->getJoueur()==$joueurAppelant && $this->getCase($x, $y)->getCellules()>0)
