@@ -363,15 +363,17 @@ function peutJouer(quelJoueur){with(this){//vérifie si le joueur en cours peut j
 }}
 
 function existeGagnant(){with(this){//renvoie le numéro du joueur gagnant ! false sinon
-	var leGagnant = 0;var nb = 0;
-	for (var n = 1; n<=this.nbJoueurs;n++){
-		if (this.peutJouer(n)){
-			if (nb >=1) //déjà un !
-				return false;
-			nb++;
-			leGagnant = n;
-		}
-	}
+	var leGagnant = 0;var nb = 0;var qui = new Array();
+	for (var x=0;x<this.tailleX;x++)
+		for (var y=0;y<this.tailleY;y++)
+			if (case2joueur(this.tableauJeu[y][x])>0 && case2cellules(this.tableauJeu[y][x])>0)
+				if (!qui[case2joueur(this.tableauJeu[y][x])]){
+					if (nb >=1) //déjà un !
+						return false;
+					qui[case2joueur(this.tableauJeu[y][x])] = true;
+					nb++;
+					leGagnant = case2joueur(this.tableauJeu[y][x]);
+				}
 	return leGagnant;
 }}
 
