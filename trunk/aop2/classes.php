@@ -759,7 +759,7 @@ class PlateauDeJeu {
 		return $positions;
 	}
 	function peutJouer($options,$joueurAppelant){//vérifie si le joueur appelant peut jouer
-		return count(ouPeutJouer($options,$joueurAppelant)) > 0;
+		return count($this->ouPeutJouer($options,$joueurAppelant)) > 0;
 		for ($x=0;$x<$this->tailleX;$x++)
 			for ($y=0;$y<$this->tailleY;$y++)
 				if ($this->getCase($x, $y)->getJoueur()==$joueurAppelant && $this->getCase($x, $y)->getCellules()>0)
