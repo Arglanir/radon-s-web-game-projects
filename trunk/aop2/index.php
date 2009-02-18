@@ -177,7 +177,7 @@ array("text" => " Couleur",
 			//$lesParties->afficherParties(false);
 			?>
 			<div id="parties2"></div><div id="comm"></div>
-			<form method="GET" action="jeu.html"><h3>Aller dans une partie non affichée</h3>
+			<form method="GET" action="client.html"><h3>Aller dans une partie non affichée</h3>
 				<label>Num&eacute;ro partie :</label><input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br />
 				<label>Num&eacute;ro du joueur :</label><select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
 				<br /><br />
