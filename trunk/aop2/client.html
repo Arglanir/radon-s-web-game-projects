@@ -237,7 +237,7 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 	enCoursDeTraitement = true;
 	var profondeur = (profondeur == undefined?0:profondeur);
 	if (profondeur==0 && tableauArguments["j"] == quiLanceLIA && this.joueurs[mettreEntre(this.joueurEnCours,this.nbJoueurs)+1][3] == 1)
-		lancerIA();
+		lancerIA();//on lance l'IA avant d'afficher, pour accélérer le processus
 	if (profondeur>=this.options[1]){//fin de la purification
 		this.joueurEnCours = mettreEntre(this.joueurEnCours,this.nbJoueurs)+1;//on passe au suivant
 		if (this.joueurEnCours == 1) this.noTour++;//augmentation du n° du tour
@@ -247,11 +247,13 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 		this.faireJouerSuivant();
 	} else {
 		var changement = this.purifie();
-		this.affiche(0);profondeur++;
-		if (changement)//on arrête s'il y a pas de changements
+		if (changement){//on arrête s'il y a pas de changements
+			window.setTimeout("if (enCoursDeTraitement) unJeu.affiche(0); else unJeu.affiche();",tempsEntreAffichages-500);profondeur++;
 			window.setTimeout("unJeu.purifieEtAffiche("+profondeur+")",tempsEntreAffichages);
-		else
+		}else {
+			//this.affiche();
 			this.purifieEtAffiche(this.options[1]);
+		}
 	}
 }}
 
@@ -349,7 +351,9 @@ function peutJouer(quelJoueur){with(this){//vérifie si le joueur en cours peut j
 	var quelJoueur = (quelJoueur==undefined || !quelJoueur? this.joueurEnCours : quelJoueur);
 	for (var x=0;x<this.tailleX;x++)
 		for (var y=0;y<this.tailleY;y++)
-			if (case2joueur(this.tableauJeu[y][x])==quelJoueur && case2cellules(this.tableauJeu[y][x])>0)
+			if (this.jouable(x,y) && quelJoueur == this.joueurEnCours)
+				return true;
+			else if (quelJoueur != this.joueurEnCours && case2joueur(this.tableauJeu[y][x])==quelJoueur && case2cellules(this.tableauJeu[y][x])>0)
 				return true;
 	if (changerJoueur){
 		this.joueurEnCours = mettreEntre(this.joueurEnCours,this.nbJoueurs)+1;
