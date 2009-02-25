@@ -668,7 +668,7 @@ function jouable(x,y){with(this){//vérifie si le joueur en cours peut jouer en x
 			return false // mais glace et limite atteinte
 		else
 			return true; // pas de problème
-	if (this.tableauDecor[y][x] == 1 && case2joueur(this.tableauJeu[y][x]) != this.joueurEnCours)
+	if (this.tableauDecor[y][x] == 1 && (case2joueur(this.tableauJeu[y][x]) != this.joueurEnCours || case2cellules(this.tableauJeu[y][x])==0))
 		return false; // glace et case non controlée
 	if (this.tableauDecor[y][x] == 3)//obstacle
 		return false;
@@ -800,7 +800,7 @@ function jeJoueEn(x,y,chateau,fonctionALancer){//dit au serveur où on joue, arrê
 			} else {
 				document.getElementById("comm").innerHTML = "Information non re&ccedil;ue.<br />";
 				document.getElementById("comm").innerHTML += "Info envoy&eacute;e :" + chaineDAppel;
-				alert("Erreur");
+				alert("Erreur de connexion au serveur");
 			}
          }
     }; 
