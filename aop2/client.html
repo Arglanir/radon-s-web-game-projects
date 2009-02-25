@@ -379,6 +379,7 @@ function existeGagnant(){with(this){//renvoie le numéro du joueur gagnant ! fals
 
 function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la fenêtre, jouable 0non/1oui/2chat
 	//argument : 0 non jouable, 1 jouable, 2 chateau, 254 non jouable joueur externe 255 non jouable gagnant
+	var mettreLesOnload = true;
 	var nGagnant = this.existeGagnant();
 	if (!tableauArguments["offline"] && this.joueurs[this.joueurEnCours][3] != 0) typeJouable = 254;//joueur ailleurs
 	if (nGagnant) typeJouable = 255;
@@ -488,8 +489,9 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			chaineHTML += " value=\""+cellules+"\" "+onclick_string+" />";
 			chaineHTML += "</td>";
 			
-			} else {// border=\"0\" 
-				chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+cellules+"\" alt=\""+cellules+"\" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
+			} else {// border=\"0\"
+				onload_string = (mettreLesOnload?'onload="chargementImageJeu('+zonePouvantCharger+');"':'');
+				chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+cellules+"\" alt=\""+cellules+"\" "+onload_string+" src=\"images/image.php?c="+versRRGGBB(couleur)+"&n="+cellules+"&h="+(chateau?1:0)+"&d="+decor+"&type="+tableauArguments["type"]+"&m="+(cellules >= this.tableauDesMax[y][x]?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
 			}
 		}
 		chaineHTML += (tableauArguments["type"]=="texte"?"</tr>\n":"<br />\n");
@@ -580,9 +582,30 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 			alert("Argument de affiche() non reconnu : "+typeJouable);
 	}
 		
-	document.getElementById("jeu").innerHTML = chaineHTML;
+	if (tableauArguments["type"]=="texte" || !mettreLesOnload){
+		document.getElementById("jeu").innerHTML = chaineHTML;
+	} else {
+		document.getElementById("jeu").style.display = "none";
+		RAZZone(zonePouvantCharger);
+		document.getElementById("jeu"+zonePouvantCharger).innerHTML = chaineHTML;
+	}
 	
+
 }}
+
+var nbImagesChargeesZone = new Array(0,0,0);
+var zoneVisible = 1; var zonePouvantCharger = 2;
+function RAZZone(zone){	nbImagesChargeesZone[zone] = 0;}
+function chargementImageJeu(zone){//appelé quand une image se charge
+	nbImagesChargeesZone[zone]++;
+	if (nbImagesChargeesZone[zone] == unJeu.tailleX*unJeu.tailleY){//fin du chargement des images : zone de jeu affichée
+		var zone2 = 3-zone;
+		document.getElementById("jeu"+zone2).style.display = "none";
+		document.getElementById("jeu"+zone).style.display = "block";
+		zonePouvantCharger = zone2;
+		zoneVisible = zone;
+	}
+}
 
 function toString(){with(this){//recrée une string de jeu
 	var chaine = ""+this.nbJoueurs+"\n";
@@ -1036,10 +1059,10 @@ Format : <select name="type"><option value="texte">texte</option><option value="
 </form>
 </div>
 
-<div name="Jeu" id="jeu">
-
-</div>
-<div name="Jeu" id="options">
+<div name="Jeu" id="jeu"></div><br />
+<div name="Jeu1" id="jeu1" style="display:block;"></div>
+<div name="Jeu2" id="jeu2" style="display:none;"></div>
+<div name="options" id="options">
 <form method="GET">
 Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
 Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
