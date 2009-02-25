@@ -176,7 +176,7 @@ array("text" => " Couleur",
 			//$lesParties = new PartiesEnCours();
 			//$lesParties->afficherParties(false);
 			?>
-			<div id="parties2"></div><div id="comm"></div>
+			<div id="parties2">Chargement des parties en cours...</div><div id="comm"></div>
 			<form method="GET" action="client.html"><h3>Aller dans une partie non affichée</h3>
 				<label>Num&eacute;ro partie :</label><input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br />
 				<label>Num&eacute;ro du joueur :</label><select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
@@ -240,6 +240,9 @@ array("text" => " Couleur",
 			<input type=text id="x" name="x" value="6" style="width:30px">
 			<div style="float:left;">x&nbsp;</div>
 			<input type=text id="y" name="y" value="6" style="width:30px">
+			<input class="btn" type="button" value="." onclick="document.cre.x.value=5;document.cre.y.value=5;" />
+			<input class="btn" type="button" value="o" onclick="document.cre.x.value=9;document.cre.y.value=9;" />
+			<input class="btn" type="button" value="O" onclick="document.cre.x.value=15;document.cre.y.value=15;" />
 			</tr>
 
 			<?php
@@ -276,17 +279,8 @@ array("text" => " Couleur",
 			addSelectOption(
 			array("text" => "Explosions ",
 				"idname" => "opt_explosion_joueur",
-				"options" => array("Seulement pour le joueur en cours" => 1,
-									"Tous les joueurs sont affectés" => 0),
-				"default" => 1,
-				"table"=>true
-			));
-			addSelectOption(
-			array("text" => "Visibilité de la partie ",
-				"idname" => "opt_partie_cachee",
-				"options" => array("Cachée" => 1,
-									"Visible" => 0),
-				"callback" => "if (this.value=='1') document.cre.opt_attente_joueurs.value='0';",
+				"options" => array("Tous les joueurs sont affectés" => 0,
+									"Seulement pour le joueur en cours" => 1),
 				"default" => 0,
 				"table"=>true
 			));
@@ -301,6 +295,15 @@ array("text" => " Couleur",
 				"table"=>true
 			));
 			addSelectOption(
+			array("text" => "Visibilité de la partie ",
+				"idname" => "opt_partie_cachee",
+				"options" => array("Cachée" => 1,
+									"Visible" => 0),
+				"callback" => "if (this.value=='1') document.cre.opt_attente_joueurs.value='0';",
+				"default" => 0,
+				"table"=>true
+			));
+			addSelectOption(
 			array("text" => "Attente d'autres joueurs",
 				"idname" => "opt_attente_joueurs",
 				"callback" => "if (this.value=='1') document.cre.opt_partie_cachee.value='0';",
@@ -312,9 +315,14 @@ array("text" => " Couleur",
 			?>
 			<tr><td style="text-align:right;">
 			<label style="float: right;">Profondeur de jeu :</label></td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
+			<input class="btn" type="button" value="&infin;" onclick="document.cre.opt_profondeur_jeu.value=100;" />
+			<input class="btn" type="button" value="&#8635;" onclick="document.cre.opt_profondeur_jeu.value=parseInt(document.cre.x.value)+parseInt(document.cre.y.value);" />
+			<input class="btn" type="button" value="&#8645;" onclick="document.cre.opt_profondeur_jeu.value=Math.floor((parseInt(document.cre.x.value)+parseInt(document.cre.y.value))/2);" />
 			</td></tr>
 			<tr><td style="text-align:center;" colspan=2>
 			<input type="submit" class="btn" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
+			<input type="submit" class="btn" name="Envoi" value="Lancer une partie solo" title="Clique ici pour créer la partie avec les options actuelles et le premier joueur humain"
+				onclick="for(var i=2;i<=parseInt(document.cre.nbJoueurs.value);i++){eval('document.cre.is_ia'+i).checked=true;updateIA(i);eval('document.cre.nivia'+i).value=Math.floor(3*Math.random());document.cre.opt_partie_cachee.value=1;} return confirm('Continuer avec les options actuelles ?');" /> 
 			</td></tr>
 			</table>
 			</form>

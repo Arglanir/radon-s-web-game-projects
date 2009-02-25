@@ -733,7 +733,7 @@ class PlateauDeJeu {
 				return false; // mais glace et limite atteinte
 			else
 				return true; // pas de problème
-		if ($laCase->getDecor() == 1 && $laCase->getJoueur() != $joueurAppelant)
+		if ($laCase->getDecor() == 1 && ($laCase->getJoueur() != $joueurAppelant || $laCase->getCellules() > 0))
 			return false; // glace et case non controlée
 		if ($laCase->getDecor() == 3)//obstacle
 			return false;
