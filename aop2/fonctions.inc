@@ -123,21 +123,21 @@ function addSelectOption($arrayOptions,$affichage=true) {
 	if($table) $sortie_ecran .= '<label style="float: right;" >'.$text.' :</label>';
 	else $sortie_ecran .= '<label>'.$text.' :</label>';
 	if($table) $sortie_ecran .=  "</td><td>";
-	$sortie_ecran .=  '<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
+	$sortie_ecran .=  "\n".'<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
 	$i = 1;
 	foreach($options as $value => $text) {
 		if(isset($value)) {
-			$sortie_ecran .= "<option";
+			$sortie_ecran .= "\n  <option";
 			if(isset($value)) $sortie_ecran .= ' value="'.$text.'"';
 			if($color) $sortie_ecran .= ' style="background-color:#'.$text.'"';
-			if($value == $default or $text == $default or $i == $default_index) $sortie_ecran .= ' selected';
+			if($value === $default or $text === $default or $i === $default_index) $sortie_ecran .= ' selected';
 			$sortie_ecran .= ">".$value."</option> ";
 		} else {
-			$sortie_ecran .= "<option>".$text."</option> ";
+			$sortie_ecran .= "\n  <option>".$text."</option> ";
 		}
 		$i += 1;
 	}
-	$sortie_ecran .= '</select>';
+	$sortie_ecran .= '</select>\n';
 	if($table) $sortie_ecran .= "</td></tr>";
 	else $sortie_ecran .= '';
 	if ($affichage)
