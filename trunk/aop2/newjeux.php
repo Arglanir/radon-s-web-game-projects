@@ -25,8 +25,13 @@ class CreaJeu{
 	var $erreur;//indique s'il y a une erreur
 
 		
-	function CreaJeu(){
+	function CreaJeu($creerunenouvellepartie = true){
 		$this->erreur = false;
+		$this->numero_partie = getNumeroPartie();
+		$this->nomfichier = getNomFichier($this->numero_partie);
+		
+		if (!$creerunenouvellepartie) return true;
+		
 		$this->partie = new Partie();
 		
 		//chargement de tous les paramètres
@@ -35,7 +40,6 @@ class CreaJeu{
 		
 		//création du plateau de jeu
 		$this->partie->tableauJeu = new PlateauDeJeu($this->x,$this->y,true);
-		
 		
 		$tabDecor = $this->creationDecor();
 		$positionsJoueurs = $this->positionnementJoueurs();
@@ -48,10 +52,12 @@ class CreaJeu{
 		$this->partie->tableauJeu->poseDecor($tabDecor);
 		$this->partie->tableauJeu->metsLesMax($this->partie->options);
 		
-		$this->numero_partie = getNumeroPartie();
-		$this->nomfichier = getNomFichier($this->numero_partie);
 		$this->partie->demarree = ($this->opt_attente_joueurs == 0);
 		
+		$this->enregistrerPartie();
+	}
+	
+	function enregistrerPartie(){//enregistre dans les parties en cours et dans le système
 		$partiesEnCours = new PartiesEnCours();
 		$partiesEnCours->ajouterPartie($this->numero_partie, $this->opt_partie_cachee, $this->partie);
 		
@@ -59,6 +65,10 @@ class CreaJeu{
 	}
 	
 	function getPartie(){return $this->partie;}
+	
+	function checkCouleurs(){//vérifie que les couleurs ne sont pas en conflit. Change en priorité la couleur des IA, puis du dernier joueur
+		
+	}
 	
 	function loadParameters() {
 		$this->opt_chateaux_actifs=1;
@@ -296,7 +306,7 @@ class CreaJeu{
 		}
 		echo "Action non autoris&eacute;e : \n".$raison_erreur;
 		return false;
-	}	
+	}
 }
 
 class PartiesEnCours {

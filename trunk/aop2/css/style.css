@@ -182,6 +182,23 @@ color : #C8901B
 	border: 1px solid #C8901B; 
 	cursor: hand;
 }
+#content input.btno {/* boutons d'options*/
+	color:#48472B; 
+	font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+	background-color:#C0C793; 
+	border: 1px solid #FFF;
+	margin: 0px;
+	/* font-variant: small-caps; */
+	/*border-color: #696 #363 #363 #696; */
+	filter:progid:DXImageTransform.Microsoft.Gradient 
+	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
+} 
+#content input.btno:hover { 
+	color:#636246; 
+	background-color: #C0C793;
+	border: 1px solid #C8901B; 
+	cursor: hand;
+}
 
 /*  CONTENU >> POST
 ********************************************************************/	

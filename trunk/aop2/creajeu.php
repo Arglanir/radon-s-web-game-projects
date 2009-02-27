@@ -6,7 +6,7 @@ include_once ("newjeux.php");
 
 $jeu = new CreaJeu();
 if (array_key_exists("enxml",$_GET))
-	if ($_GET["enxml"]=="1"){
+	if ($_GET["enxml"]!="0"){
 		$jeu->affichageInfosXML();
 		die();
 	}

@@ -13,6 +13,8 @@ class Partie {
 	var $demarree;
 	var $gagnant;
 	
+	var $commentaires;
+	
 	//fonctions de création
 	function Partie(){
 		$this->demarree = false;
@@ -143,6 +145,8 @@ class Partie {
 		$partie->options = $Xpartie->get_elements_by_tagname( "options" );
 		$partie->options = Options::fromXML($partie->options[0]);
 		$partie->tableauJeu = $Xpartie->get_elements_by_tagname( "tableaudejeu" );
+		$partie->commentaires = $Xpartie->get_elements_by_tagname( "commentaire" );
+		$partie->commentaires = $partie->commentaires[0]->get_content();
 		$partie->tableauJeu = PlateauDeJeu::fromXML($partie->tableauJeu[0]);
 		return $partie;
 	}
@@ -164,6 +168,7 @@ class Partie {
 		$partie->setJoueurEnCours(0+$Xpartie["joueurencours"]);
 		$partie->nbJoueurs = 0+$Xpartie["nombredejoueurs"];
 		$partie->gagnant = 0+$Xpartie["gagnant"];
+		$partie->commentaires = $Xpartie->commentaire->asXML();
 		$partie->demarree = ($Xpartie["demarree"]=="1");
 		
 		foreach($Xpartie->children() as $Xelement){
@@ -191,6 +196,7 @@ class Partie {
 		$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->addAttribute("notour", $this->noTour);
 		$Xpartie->addAttribute("gagnant", $this->gagnant);
+		$Xpartie->addChild("commentaire", $this->commentaires);
 		$Xpartie->addAttribute("joueurencours", $this->joueurEnCours);
 		$Xpartie->addAttribute("demarree", ($this->demarree?1:0));
 		
@@ -210,6 +216,9 @@ class Partie {
 		$xml_partie = domxml_new_doc("1.0");
 		$Xpartie = $xml_partie->create_element( "partie" );
 		$xml_partie->append_child($Xpartie);
+		$Xcommentaire = $xml_partie->create_element( "commentaire" );
+		$Xcommentaire->set_content($this->commentaires);
+		$Xpartie->append_child($Xcommentaire);
 		$Xpartie->set_attribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->set_attribute("notour", $this->noTour);
 		$Xpartie->set_attribute("gagnant", $this->gagnant);
