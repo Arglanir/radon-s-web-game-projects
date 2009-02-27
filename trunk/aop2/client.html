@@ -166,6 +166,9 @@ function purifie(){with(this){//renvoie true s'il y a eu un changement, false si
 				  case 0: perteBord=true; //on ne regarde pas au bord mais on perd une cellule
 				  case 1: //on regarde pas après les bords
 					if (entre(0,nvy,this.tailleY-1) && entre(0,nvx,this.tailleX-1)){
+						if (this.options[4]==0 && case2cellules(this.tableauJeu[nvy][nvx])>=this.tableauDesMax[nvy][nvx] && case2joueur(nbSurCase)!=case2joueur(this.tableauJeu[nvy][nvx])){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+							true;
+						} else
 						switch(this.tableauDecor[nvy][nvx]){
 						case 0: //case normale
 							differences[y][x]--;
