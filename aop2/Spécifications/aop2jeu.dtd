@@ -1,4 +1,4 @@
-<!ELEMENT partie (joueurs, options, tableaudejeu) >
+<!ELEMENT partie (joueurs, options, tableaudejeu, commentaire?) >
 <!ATTLIST partie 
 		nombredejoueurs NMTOKEN #REQUIRED
 		demarree (0|1) #REQUIRED
@@ -15,14 +15,14 @@
 		niveau NMTOKEN  "0"
 		estnet (oui | non) non
 		mdp CDATA "0">
-<!ELEMENT derniereaction EMPTY>
+<!ELEMENT derniereaction (EMPTY)>
 <!ATTLIST derniereaction 
 		type (n|c) #REQUIRED
 		x NMTOKEN #REQUIRED
 		y NMTOKEN  #REQUIRED
 		notour NMTOKEN #REQUIRED>
 <!ELEMENT options (option*) >
-<!ELEMENT option EMPTY >
+<!ELEMENT option (EMPTY) >
 <!ATTLIST option 
 		type (chateaux_actifs | type_bords | ajout_diagonale | explosion_joueur | profondeur_jeu) #REQUIRED
 		valeur NMTOKEN #REQUIRED>
@@ -33,7 +33,7 @@
 <!ELEMENT ligne (case*)>
 <!ATTLIST ligne 
 		y NMTOKEN #REQUIRED>
-<!ELEMENT case  EMPTY >
+<!ELEMENT case  (EMPTY) >
 <!ATTLIST case 
 		x NMTOKEN #REQUIRED
 		y NMTOKEN #REQUIRED
@@ -42,3 +42,12 @@
 		cellules NMTOKEN  "0"
 		max NMTOKEN  "4"
 		chateau (0 | 1) "0">
+<!ELEMENT commentaire (#PCDATA,parametrescampagne?) >
+<!ELEMENT parametrescampagne (#PCDATA)>
+<!ATTLIST parametrescampagne
+		c NMTOKEN #REQUIRED //numéro de campagne
+		m CDATA #REQUIRED //mission de la campage
+		titre CDATA #REQUIRED //Titre de la mission
+		infosucces CDATA #REQUIRED //message de succès (genre mot de passe partie suivante)
+		suivante CDATA "fin">//mission suivante
+		

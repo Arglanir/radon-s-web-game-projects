@@ -4,13 +4,14 @@ var serveur = "serveur.php";
 var bouh = location.search.substring(1,location.search.length).split(unescape("%26"));//on enlève le ? et on sépare avec les &
 var tableauArguments = new Array();
 tableauArguments["offline"] = 0;
-for (i=0;i<bouh.length;i++){
+for(var i=0;i<bouh.length;i++){
    var temp = bouh[i].split("=");
     tableauArguments[temp[0]]=unescape(temp[1]);
 }
 
-function createXHR() 
-{
+
+function createXHR() {
+
     var request = false;
         try {
             request = new ActiveXObject('Msxml2.XMLHTTP');
@@ -20,13 +21,14 @@ function createXHR()
                 request = new ActiveXObject('Microsoft.XMLHTTP');
             }
             catch (err3) {
-		try {
-			request = new XMLHttpRequest();
-		}
-		catch (err1) 
-		{
-			request = false;
-		}
+				try {
+					request = new XMLHttpRequest();
+				}
+				catch (err1) 
+				{
+					alert("Votre client n'autorise pas les connexions Ajax.");
+					request = false;
+				}
             }
         }
     return request;
@@ -277,6 +279,658 @@ function envoieFormulaire(tableauArgsGET,formulaire,callback){
 	communiquePOST(tableauArgsGET,tableauPOST,callback);
 }
 
+
+//la classe de partie
 function Partie(){
 	
+	this.nbJoueurs = 0;
+	this.joueur = new Array();//tableau de Joueurs, commence par 1
+	this.noTour = 0;
+	this.joueurEnCours = 0;
+	this.options = new Options();//objet Options
+	this.tableauJeu = 0;//objet PlateauDeJeu
+	this.demarree = false;
+	this.gagnant = 0;
+	
+	this.fromXML = function(Xpartie){
+		partie = new Partie();
+		partie.demarree = (Xpartie.getAttribute("demarree")=="1");
+		partie.noTour = parseInt(Xpartie.getAttribute("notour"));
+		partie.joueurEnCours = parseInt(Xpartie.getAttribute("joueurencours"));
+		partie.gagnant = parseInt(Xpartie.getAttribute("gagnant"));
+		partie.nbJoueurs = parseInt(Xpartie.getAttribute("nombredejoueurs"));
+		var joueurs_array = Xpartie.getElementsByTagName( "joueur" );
+		for( var i in joueurs_array)
+			partie.joueur[parseInt(Xjoueur.get_attribute("numero"))] = Joueur.fromXML(joueurs_array[i]);
+		partie.options = Xpartie.getElementsByTagName( "options" );
+		partie.options = Options.fromXML(partie.options[0]);
+		partie.tableauJeu = Xpartie.getElementsByTagName( "tableaudejeu" );
+		partie.tableauJeu = PlateauDeJeu.fromXML(partie.tableauJeu[0]);
+		return partie;
+	}
+	
+}
+
+function Joueur(nom,couleur,mdp,type,niveau){
+/*		var nom;
+	var couleur;//var de couleur
+	var mdp;
+	var type;//0 : joueur humain 1 : ia (client : 2 : net)
+	var niveau;//niveau IA : 0 jeu aléatoire, n meilleur coup profondeur n-1
+	var derniereAction;*/
+	
+	mdp = (undefined==mdp?"0":mdp);
+	type = (undefined==type?0:type);
+	niveau = (undefined==niveau?"0":niveau);
+	
+	this.nom = nom;
+	this.couleur = couleur;
+	this.mdp = mdp;
+	this.type = parseInt(type);
+	this.niveau = parseInt(niveau);
+	this.derniereAction = { "quoi": "n", "ouX": 0, "ouY": 0, "quand": 0 };
+	
+	this.isIA = function isIA(){
+		return (this.type == 1);
+	}
+	
+	this.setDerniereAction = function (Xaction){
+		var quoi = 0;
+		try{ quoi = Xaction.getAttribute("type"); 
+			if (!quoi) quoi = Xaction.getAttribute("a"); 
+		} catch (err){ quoi = Xaction.getAttribute("a"); 
+		}
+		var quand = 0;
+		try{ quand = Xaction.getAttribute("notour"); 
+			if (!quand) quand = Xaction.getAttribute("n"); 
+		} catch (err){ quand = Xaction.getAttribute("n"); 
+		}
+		this.derniereAction = { "quoi": quoi,
+							"ouX": parseInt(Xaction.getAttribute("x")),
+							"ouY": parseInt(Xaction.getAttribute("y")),
+							"quand": parseInt(quand)};
+	}
+	
+	this.aPourDerniereAction = function (Xaction){//teste la dernière action du joueur avec un noeud XML d'action
+		var temp = this.derniereAction;
+		this.setDerniereAction(Xaction);
+		var aRenvoyer = false;
+		if (temp.quoi == this.derniereAction.quoi && temp.ouX == this.derniereAction.ouX
+				&& temp.ouY == this.derniereAction.ouY && temp.quand == this.derniereAction.quand){
+			aRenvoyer = true;
+		}
+		this.derniereAction = temp;
+		return aRenvoyer;
+	}
+	
+	this.ouDerniereAction = function (){
+		return {"x" : this.derniereAction["ouX"],"y" : this.derniereAction["ouY"]};
+	}
+		
+	this.fromXML = function fromXML(Xjoueur){
+		var joueur = new Joueur(Xjoueur.getAttribute("nom"),
+							Xjoueur.getAttribute("couleur"),
+							Xjoueur.getAttribute("mdp"),
+							(Xjoueur.getAttribute("estia")=="oui"?1:
+								(Xjoueur.get_attribute("estnet")=="oui"?2:0)),
+							parseInt(Xjoueur.get_attribute("niveau")));
+		
+		joueur.derniereAction = Xjoueur.getElementsByTagName("derniereaction");
+		joueur.setDerniereAction(joueur.derniereAction[0]);
+		return joueur;
+	}
+
+}
+
+
+function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
+	/*var chateauxPermis;//	Options : chateaux activés ? true/false
+	var profondeur;	//Profondeur de jeu
+	var typeBord;	//Bord bloqués ?	1/0/2:monde rond
+	var ajoutDiag;	//Ajout diagonale ? true/false  (peut-on cliquer en diagonale ou seulement à côté ?)
+	var explosionJoueur;//Explosion slt pour joueur en cours ? true/false*/
+	
+	this.chateauxPermis = (chateauPermis==undefined?0:(chateauxPermis?true:false));
+	this.profondeur = (profondeur==undefined?100:profondeur);
+	this.typeBord = (typeBord==undefined?1:typeBord);
+	this.ajoutDiag = (ajoutDiag==undefined?1:(ajoutDiag?true:false));
+	this.explosionJoueur = (explosionJoueur==undefined?0:(explosionJoueur?true:false));
+
+	this.setPermissionChateau = function (chateauxPermis){this.chateauxPermis = (chateauxPermis?true:false);}
+	this.setProfondeur = function (profondeur){this.profondeur = profondeur;}
+	this.setTypeBord = function (typeBord){this.typeBord = typeBord;}
+	this.setPlacementDiag = function (ajoutDiag){this.ajoutDiag = (ajoutDiag?true:false);}
+	this.setExplosionJoueur = function (explosionJoueur){this.explosionJoueur = (explosionJoueur?true:false);}
+
+	this.yaPermissionChateau = function (){return this.chateauxPermis;}
+	this.quelleProfondeur = function (){return this.profondeur;}
+	this.quelTypeBord = function (){return this.typeBord;}
+	this.yaPlacementDiag = function (){return this.ajoutDiag;}
+	this.yaExplosionJoueur = function (){return this.explosionJoueur;}
+	
+	this.fromXML = function (Xoptions){
+		options = new Options();
+
+		options_array = Xoptions.getElementsByTagName( "option" );
+		
+		for (var i in options_array){
+			var Xoption = options_array[i];
+			var valeur = parseInt(Xoption.getAttribute("valeur"));
+			switch(Xoption.getAttribute("type")){
+				case "chateaux_actifs": options.setPermissionChateau(valeur);
+					break;
+				case "profondeur_jeu": options.setProfondeur(valeur);
+					break;
+				case "type_bords": options.setTypeBord(valeur);
+					break;
+				case "ajout_diagonale": options.setPlacementDiag(valeur);
+					break;
+				case "explosion_joueur": options.setExplosionJoueur(valeur);
+					break;
+			}
+		}
+		return options;
+	}
+	
+}
+
+function Aafficher(nomDeThis){//crée une liste de plateaux à afficher
+	var compteur = 0;
+	var compteurAffichage = 0;
+	var liste = new Array();
+	var fonctionAppelee = null;//fonction appelée s'il y a d'autres images à afficher après
+	var fonctionAppeleeFin = null;//fonction appelée si c'est la fin des images disponibles
+	var maxImages = 1000;
+	
+	var nomVar = nomDeThis;
+	
+	this.lance = false;
+	
+	this.ajouter = function(unTableau){
+		liste[compteur++] = unTableau;
+		if (compteur = maxImages)
+			compteur = 0;
+	}
+	
+	function estCeDerniere(){//regarde si c'est le dernier plateau à afficher
+		if (compteur-1 == compteurAffichage) return true;//juste avant
+		if (compteur == 0 && compteurAffichage==maxImages-1) return true;
+		return false;
+	}
+		
+	this.afficher = function afficher(){
+		if (!fonctionAppelee || !fonctionAppeleeFin) return;
+		if (compteur != compteurAffichage){
+			if (estCeDerniere())
+				fonctionAppeleeFin(liste[compteurAffichage]);
+			else
+				fonctionAppelee(liste[compteurAffichage]);
+			liste[compteurAffichage] = null;
+			compteurAffichage++;
+			if (compteurAffichage = maxImages)
+				compteurAffichage = 0;
+		}
+	}
+	
+	this.lancer = function (tempsEntre,fonctionAppelee2,fonctionAppeleeFin2){//lance 
+		fonctionAppelee = fonctionAppelee2;
+		fonctionAppeleeFin = fonctionAppeleeFin2;
+		if (this.lance) return;
+		window.setInterval(nomVar+".afficher()",tempsEntre);
+		this.lance = true;
+	}
+	
+}
+
+var tableauAAfficher = new Aafficher("tableauAAfficher");
+
+
+//classe de plateau de jeu
+function PlateauDeJeu() {
+	this.plateau = new Array();//tableau bi dim de UneCase
+	this.tailleX = 0;
+	this.tailleY = 0;
+	this.partie = new Object();
+		this.partie.options = new Options();
+
+	var tableauPlein = true;
+	switch( arguments.length){
+		case 1:
+		  if ('object' == typeof (arguments[0])){//c'est un objet similaire à copier
+			ancienPlateau = arguments[0];
+			this.tailleX = ancienPlateau.tailleX;
+			this.tailleY = ancienPlateau.tailleY;
+			this.partie = ancienPlateau.partie;
+			for(var i = 0; i < this.tailleY; i++){
+				this.plateau[i] = new Array();
+				for(var j = 0; j < this.tailleX; j++)
+					this.plateau[i][j] = ancienPlateau.plateau[i][j].copie();
+			}
+		  }
+			break;
+		case 3://paramètre optionnel spécifiant si on construit les cases déjà (tableau non vide ?)
+			tableauPlein = arguments[2];
+		case 2://juste les paramètres tailleX et tailleY
+			this.tailleX = arguments[0];
+			this.tailleY = arguments[1];
+			for(var i = 0; i < this.tailleY; i++){
+				this.plateau[i] = new Array();
+				if (tableauPlein) for(var j = 0; j < this.tailleX; j++)
+					this.plateau[i][j] = new UneCase();
+			}
+			break;
+	}
+	
+	this.copie = function (){//crée une copie du plateau
+		var leNouveau = new PlateauDeJeu(this.tailleX, this.tailleY, false);
+		leNouveau.partie = this.partie;
+		for(var i = 0; i < this.tailleY; i++)
+			for(var j = 0; j < this.tailleX; j++)
+				leNouveau.plateau[i][j] = this.plateau[i][j].copie();
+		return leNouveau;
+	}
+	this.setPartie = function (partie){
+		this.partie = partie;
+		for(var i = 0; i < this.tailleY; i++)
+			for(var j = 0; j < this.tailleX; j++)
+				this.plateau[i][j].partie = partie;
+	}
+	
+	this.getCase = function (x, y){
+		if (x>=0 && x<this.tailleX && y>=0 && y<this.tailleY) return this.plateau[y][x];
+		else return false;
+	}
+	
+	this.distance = function (x,y,x2,y2){//renvoie un flottant
+		if (x2 == undefined) x2 = -1;
+		if (y2 == undefined) y2 = -1;
+		if (x2>=0 && y2>=0){//entre 2 cases
+			var dx=x2-x; var dy=y2-y;
+			switch(this.partie.options.quelTypeBord()){
+				case 0:case 1:
+					if (this.partie.options.yaPlacementDiag())
+						return	distN0(dx,dy);//max(abs(dx),abs(dy));
+								//round(sqrt(pow(dx,2)+pow(dy,2)),1);
+					else
+						return Math.abs(dx)+Math.abs(dy);
+				case 2://torrique
+					var d = this.tailleX + this.tailleY;
+					if (this.partie.options.yaPlacementDiag())
+						for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
+							d = min(d,distN0(dx+i*this.tailleX,dy+j*this.tailleY));//sqrt(pow(dx+i*this.tailleX,2)+pow(dy+j*this.tailleY,2));
+					else
+						for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
+							d = min(d,abs(dx+i*this.tailleX)+abs(dy+j*this.tailleY));
+					return d;
+			}
+		}
+		else {//entre la case et les joueurs existants
+			var posJoueurs = new Array();
+			for(var j = 0;j < this.tailleY;j++) for(var i = 0;i < this.tailleX;i++){
+				//recherche des positions des joueurs
+				if (c = this.getCase(i,j))
+					if (jou = c.getJoueur())
+						posJoueurs[jou] = new Array(i,j);
+			}
+			var d = this.tailleX + this.tailleY;
+			for(var i in posJoueurs){
+				var pos = posJoueurs[i];
+				d = min(d,this.distance(options,x,y,pos[0],pos[1]));
+			}
+			return d;
+		}
+	}
+	
+	this.purifie = function (joueurEnCours){//en fonction des options, 1 itération
+		var changement=false;
+		var ouGlaceExplosion = new Array();//var indiceGlace=0;//préparation des endroits glacés
+		var differences = new Array(); //préparation du traitement des explosions
+		var conquetes = new Array();
+		for(var y=0;y<this.tailleY;y++){
+			differences[y] = new Array();
+			conquetes[y] = new Array();
+			for(var x=0;x<this.tailleX;x++){
+				differences[y][x] = 0;
+				conquetes[y][x] = new Array();
+			}
+		}
+		var numtour = this.partie.noTour+"-"+this.partie.joueurEnCours;
+		//parcours du plateau pour traiter les explosions
+		for(var x=0;x<this.tailleX;x++) for(var y=0;y<this.tailleY;y++){
+			var cetteCase = this.getCase(x,y);
+			if ((this.partie.options.yaExplosionJoueur() && cetteCase.getJoueur()==joueurEnCours) || !this.partie.options.yaExplosionJoueur())
+			if (cetteCase.vaExploser() && !cetteCase.getChateau()){//explosion !
+				changement = true;			//va sur les cases d'à côté
+				for(var ii=-1;ii<2;ii++) for(var jj=-1;jj<2;jj++) if (Math.abs(ii)+Math.abs(jj)==1){//pas diagonale
+					var nvx = x+jj; var nvy = y+ii;
+					var perteBord = false;
+					switch(this.partie.options.quelTypeBord()){
+					  case 2: //on regarde après les bords
+						nvx = mettreEntre(x+jj,this.tailleX); nvy = mettreEntre(y+ii,this.tailleY);
+					  case 0: perteBord=true; //on ne regarde pas au bord mais on perd une cellule
+					  case 1: //on regarde pas après les bords
+						if (entre(0,nvy,this.tailleY-1) && entre(0,nvx,this.tailleX-1)){
+							var autreCase=this.getCase(nvx,nvy);
+							switch(autreCase.getDecor()){
+							case 0: //case normale
+								differences[y][x]--;
+								if (autreCase.getChateau()&&(cetteCase.getJoueur()!=autreCase.getJoueur())&&autreCase.getCellules()>=10){//traitement si membrane adverse protgée
+									differences[nvy][nvx]--;
+								} else {//jeu normal ou destruction de la membrane et conquète des cellules
+									//il va y avoir un bug si attaque et défense en même temps d'un chateau
+									//on va dire que les attaquants ont toujours priorité... C'est un jeu !
+									differences[nvy][nvx]++;
+									if (autreCase.getChateau()&&(cetteCase.getJoueur()!=autreCase.getJoueur())&&autreCase.getCellules()<10)
+										autreCase.setChateau(false);
+									conquetes[nvy][nvx][conquetes[nvy][nvx].length]=cetteCase.getJoueur();
+								}
+								break;
+							case 1: //glace
+								differences[y][x]--;
+								if (!ouGlaceExplosion[nvy+" "+nvx] && autreCase.numTourUtilisee != numtour){//1ere fois
+									ouGlaceExplosion[nvy+" "+nvx] = 1;
+									autreCase.numTourUtilisee = numtour;
+								} else {//fois après
+									//il va y avoir un BUG si 2 personnes tentent de conquérir une case de glace
+									//c'est à cause du vent, il souffle pour favoriser les joueurs x plus grands puis y
+									differences[nvy][nvx]++;
+								}
+								conquetes[nvy][nvx][conquetes[nvy][nvx].length]=cetteCase.getJoueur();
+								break;
+							case 2: //point chaud
+								differences[y][x]--;
+								differences[nvy][nvx] = (autreCase.numTourUtilisee != numtour?2:1);
+								autreCase.numTourUtilisee = numtour;
+								conquetes[nvy][nvx][conquetes[nvy][nvx].length]=cetteCase.getJoueur();
+								break;
+							case 3: //obstacle:rien !
+								break;
+							}
+						  } else if (perteBord) {
+							differences[y][x]--;
+						  }
+						break;
+					}
+				}
+			}
+		}
+		//post traitement des explosions
+		for(var x=0;x<this.tailleX;x++) for(var y=0;y<this.tailleY;y++){
+			cetteCase = this.getCase(x,y);
+			nbcellules = cetteCase.getCellules();
+			cetteCase.addCellules(differences[y][x]);
+			if (conquetes[y][x].length > 1){ //qui gagne la case ?
+				gagnant = mettreEntre(x+this.tailleX*y, conquetes[y][x].length);
+				cetteCase.setJoueur(conquetes[y][x][gagnant]);
+			} else if (conquetes[y][x].length == 1){
+				cetteCase.setJoueur(conquetes[y][x][0]);
+			}
+		}
+		return changement;
+	}
+	this.purifieTotalement = function (afficher,joueurEnCours,profondeur){
+		if (profondeur == undefined) profondeur=0;
+		if (profondeur>=this.partie.options.quelleProfondeur()){
+			return true;
+		} else {
+			changements = this.purifie(joueurEnCours);
+			if (afficher) tableauAAfficher.ajouter(this.copie());
+			profondeur++;
+			if (changements)//on arrête s'il y a pas de changements
+				this.purifieTotalement(afficher,joueurEnCours,profondeur);
+			else
+				this.purifieTotalement(afficher,joueurEnCours,this.partie.options.quelleProfondeur());
+		}
+	}
+	this.clicNormal = function (x,y,joueurEnCours,chateau){//ajoute une cellule
+		if (chateau == undefined) chateau=false;
+		laCase = this.getCase(x,y);
+		//if (!laCase) var_dump(this);
+		laCase.setJoueur(joueurEnCours);
+		laCase.decorAjouter1Cellule();
+		//laCase.addCellules(laCase.getDecor()==2?2:1);
+		//laCase.numTourUtilisee = thisnumTour."-".joueurEnCours;
+		if (chateau) laCase.clicChateau();
+	}
+	this.clicChateau = function (x,y,joueurEnCours){return this.clicNormal(x,y,joueurEnCours,true);}
+	this.peutJouerEn = function (x,y,joueurAppelant,chateau){
+		if (chateau == undefined) chateau=false;
+		var laCase = this.getCase(x,y);
+		if (laCase.getDecor() != 0 && chateau)
+			return false; // chateau et case instable
+		if (laCase.getJoueur() != joueurAppelant && laCase.getCellules() > 0)
+			return false; //case déjà controlée par joueur adverse
+		if (laCase.getJoueur() == joueurAppelant && laCase.getCellules() > 0)
+		//case controlée par ce joueur
+			if (laCase.getDecor() == 1 && laCase.getCellules() >= laCase.getMax() - 1)
+				return false; // mais glace et limite atteinte
+			else
+				return true; // pas de problème
+		if (laCase.getDecor() == 1 && (laCase.getJoueur() != joueurAppelant || laCase.getCellules()==0))
+			return false; // glace et case non controlée
+		if (laCase.getDecor() == 3)//obstacle
+			return false;
+		for(var i=-1;i<2;i++) for(var j=-1;j<2;j++){//on va regarder si une case autour appartient au joueur
+			if (i==0 && j==0) continue; // on a déjà testé la case centrale
+			if (!this.partie.options.yaPlacementDiag() && Math.abs(i)+Math.abs(j)==2) continue;//pas en diagonale
+			var nvx = x+i; var nvy = y+j;
+			if (this.partie.options.quelTypeBord() != 2 && (!entre(0,nvx,this.tailleX-1) || !entre(0,nvy,this.tailleY-1)))
+				continue;//après le bord
+			nvx = mettreEntre(nvx,this.tailleX);nvy = mettreEntre(nvy,this.tailleY);//au cas où le monde est rond
+			autreCase = this.getCase(nvx,nvy);
+			if (autreCase.getJoueur() == joueurAppelant && autreCase.getCellules() > 0)
+				return true; //case controlée par ce joueur
+		}
+		return false;
+	}
+	this.ouPeutJouer = function (joueurAppelant,chateau){//renvoie un tableau des positions jouables
+		if (chateau == undefined) chateau=false;
+		var positions = new Array();
+		for (var x=0;x<this.tailleX;x++)
+			for (var y=0;y<this.tailleY;y++)
+				if (this.peutJouerEn(x,y,joueurAppelant,chateau))
+					positions[positions.length] = new Array(x,y);
+		return positions;
+	}
+	
+	this.peutJouer = function (joueurAppelant){//vérifie si le joueur appelant peut jouer
+		return ouPeutJouer(joueurAppelant).length > 0;
+	}
+	
+	this.yaGagnant = function (){//regarde s'il n'y a qu'un type de joueur sur la carte
+		var joueursRestants = new Array();var gagnant = 0;
+		for (var x=0;x<this.tailleX;x++) for (var y=0;y<this.tailleY;y++){
+			var j = this.getCase(x,y).getJoueur();
+			var c = this.getCase(x,y).getCellules();
+			if (c>0 && j>0) {
+				joueursRestants[j] = 1; var gagnant = j;
+				if (joueursRestants.length>=2) return false;
+			}
+		}
+		if (joueursRestants.length>=2) return false;
+		return j;
+	}
+	this.RAZ = function (){//remet à zéro les cellules, prêts à une nouvelle purification
+		for (var x=0;x<this.tailleX;x++) for(var y=0;y<this.tailleY;y++) this.getCase(x,y).RAZ();
+	}
+	
+	this.fromXML = function (Xplateau){
+		var lePlateau = new PlateauDeJeu(parseInt(Xplateau.getAttribute("taillex")),
+								parseInt(Xplateau.get_attribute("tailley")),
+								false);//pour que les cases ne soient pas initialisées
+		var lignes_array = Xplateau.getElementsByTagName( "ligne" );
+		for(var i in lignes_array){
+			Xligne = lignes_array[i];
+			var y = parseInt(Xligne.getAttribute("y"));
+			cases_array = Xligne.getElementsByTagName( "case" );
+			for(var j in cases_array){
+				var Xcase = cases_array[i];
+				var x = parseInt(Xcase.get_attribute("x"));
+				lePlateau.plateau[y][x] = UneCase.fromXML(Xcase);
+			}
+		}
+		return lePlateau;
+	}
+	
+/*	this.toXML = function (xml_partie){//renvoie un DOMNode
+		var Xtableau = xml_partie.createElement("tableaudejeu");
+		Xtableau.setAttribute("taillex", this.tailleX);
+		Xtableau.setAttribute("tailley", this.tailleY);
+
+		for(var i=0;i<this.tailleY;i++){
+			var Xligne = Xtableau.createElement("ligne");
+			Xligne.setAttribute("y", i);
+			for(var j=0;j<this.tailleX;j++){
+				var Xcase = this.getCase(j,i).toXML(xml_partie,j,i);
+				Xligne.appendChild(Xcase);
+			}
+			Xtableau.appendChild(Xligne);
+		}
+		return Xtableau;
+	}*/
+}
+
+
+//classe de Cases
+function UneCase(){
+/*	var joueur;//à qui appartient la case
+	var nbcellules;//combien de cellules sont sur la case
+	var chateau;//y a t il un chateau ? 
+	var max;//maximum de cellules sur la cas
+	var decor;//0 rien, 1 glace, 2 chaud, 3 obstacle
+	var numTourUtilisee;*/
+	
+	//la construction
+	this.numTourUtilisee = "0-0";
+	this.utilisee = false;
+	arguments[0] = (arguments[0]?arguments[0]:0);
+	var decor = arguments[0]; cEstObjet = ('object' == typeof decor);
+	switch(arguments.length){
+		case 1:
+		case 0:
+			if (!cEstObjet){
+				this.joueur = 0;
+				this.nbcellules = 0;
+				this.chateau = false;
+				this.max = 4;
+				this.decor = decor;
+			} else if (cEstObjet){ //copie d'une case existante
+				this.joueur = decor.joueur;
+				this.nbcellules = decor.nbcellules;
+				this.chateau = decor.chateau;
+				this.max = decor.max;
+				this.decor = decor.decor;
+				this.numTourUtilisee = decor.numTourUtilisee;
+				this.utilisee = decor.utilisee;
+				this.partie = decor.partie;
+			}
+			break;
+		case 5: //joueur, cellules, chateau?, max, decor
+			this.joueur = arguments[0];
+			this.nbcellules = arguments[1];
+			this.chateau = (arguments[2]?true:false);
+			this.max = arguments[3];
+			this.decor = arguments[4];
+	}
+	
+	this.copie = function copie(){//copie une cellule
+		uneCase = new UneCase();
+		uneCase.setJoueur(this.getJoueur());
+		uneCase.numTourUtilisee = this.numTourUtilisee;
+		uneCase.utilisee = this.utilisee;
+		uneCase.partie = this.partie;
+		uneCase.setCellules(this.getCellules());
+		uneCase.setChateau(this.getChateau());
+		uneCase.setMax(this.getMax());
+		uneCase.setDecor(this.getDecor());
+		return uneCase;
+	}
+	
+	if (!this.partie){//on crée une partie bidon
+		this.partie=new Object();
+		this.partie.noTour = 1;
+		this.partie.joueurEnCours = 1;
+	}
+	this.decorAjouter1Cellule = function decorAjouter1Cellule(){//en fonction du décor lors du jeu d'un joueur
+		switch(this.decor){
+			case 3: return false;//pas le droit de jouer là
+			case 1: if (this.getCellules() == 0 || this.presquePreteAExploser()) return false;//pas le droit non plus
+			case 2: if (!this.utilisee && this.numTourUtilisee != this.partie.noTour+"-"+this.partie.joueurEnCours){
+				this.numTourUtilisee = this.partie.noTour+"-"+this.partie.joueurEnCours;
+				this.utilisee = true;
+				if (this.decor == 2) this.addCellules(2);
+				nb--;
+			}
+			case 0:
+				this.addCellules(nb);
+		}
+		return true;
+	}
+	this.decorAjouterCellules2 = function decorAjouterCellules2(nb){//en fonction du décor lors de la purification
+		switch(this.decor){
+			case 1:case 2: if (!this.utilisee && this.numTourUtilisee != this.partie.noTour+"-"+this.partie.joueurEnCours){
+				this.numTourUtilisee = this.partie.noTour+"-"+this.partie.joueurEnCours;
+				this.utilisee = true;
+				if (this.decor == 2) this.addCellules(2);
+				nb--;
+			}
+			case 0:
+				this.addCellules(nb);
+		}
+	}
+	this.RAZ = function RAZ(){this.utilisee = false;}
+	
+	this.setJoueur = function setJoueur(joueur){this.joueur = joueur;}
+	this.getJoueur = function getJoueur(){return this.joueur;}
+	this.placeJoueur = function placeJoueur(joueur){//place un joueur au début du jeu
+		this.setDecor(0);
+		this.setJoueur(joueur);
+		this.setCellules(1);
+	}
+	
+	
+	this.getCellules = function getCellules(){return this.nbcellules;}
+	this.setCellules = function setCellules(nb){this.nbcellules = nb;}
+	this.addCellules = function addCellules(nb){this.nbcellules += nb;this.checkCellule();}
+	this.remCellules = function remCellules(nb){this.nbcellules -= nb;	this.checkCellule();}
+	this.checkCellule = function checkCellule(){this.nbcellules = min(max(0,this.nbcellules),99);}
+	
+	this.getChateau = function getChateau(){return this.chateau;}
+	this.clicChateau = function clicChateau(){this.chateau = !this.chateau;}
+	this.setChateau = function setChateau(mettreChateau){this.chateau = (mettreChateau?true:false);}
+	
+	this.getMax = function getMax(){return this.max;}
+	this.setMax = function setMax(leMax){this.max = leMax;}
+	this.vaExploser = function vaExploser(){return (this.nbcellules >= this.max);}
+	this.preteAExploser = function preteAExploser(){return (this.nbcellules >= this.max-(this.decor==2?2:1));}
+	this.presquePreteAExploser = function presquePreteAExploser(){return (this.nbcellules >= this.max-(this.decor==2?2:1)-1);}
+	
+	this.getDecor = function getDecor(){return this.decor;}
+	this.setDecor = function setDecor(decor){if (decor!=3 || this.nbcellules==0) this.decor = decor;}
+	
+	this.toInt = function toInt(){return (this.getChateau()?10000:0)+this.getJoueur()*100+this.getCellules();}
+	
+	this.fromXML = function fromXML(Xcase){
+		//joueur, cellules, chateau?, max, decor
+		laCase = new UneCase(parseInt(Xcase.get_attribute("joueur")),
+								parseInt(Xcase.get_attribute("cellules")),
+								parseInt(Xcase.get_attribute("chateau")),
+								parseInt(Xcase.get_attribute("max")),
+								parseInt(Xcase.get_attribute("decor"))
+							);
+		return laCase;
+	}
+	
+	/*this.toXML = function toXML(xml_partie,x,y){//renvoie un DOMNode
+		Xcase = xml_partie.createElement("case");
+		Xcase.setAttribute("x", x);
+		Xcase.setAttribute("y", y);
+		Xcase.setAttribute("decor", this.getDecor());
+		Xcase.setAttribute("joueur", this.getJoueur());
+		Xcase.setAttribute("cellules", this.getCellules());
+		Xcase.setAttribute("max", this.getMax());
+		Xcase.setAttribute("chateau", this.getChateau()?1:0);
+		return Xcase;
+	}*/
+
 }

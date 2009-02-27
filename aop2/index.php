@@ -152,12 +152,20 @@ array("text" => " Couleur",
 	"options" => $GLOBALS["color_array"],
 	"callback" => "",//"changecolor(".$i.")",
 	"default_index" => 0,
+	"saut_ligne" => false,
 	"color" => True
 ),false)); ?>";
 	chaineaafficher += "<input style=\"vertical-align:bottom;\" type=\"submit\" value=\"OK\" /></form>";
 	document.getElementById("action-"+numeroPartie).innerHTML = chaineaafficher;
 }
 
+function metsLesIA(jusqua,niveau,debut){
+	debut = (debut==undefined?2:debut);//premier joueur humain
+	for(var i=debut;i<=jusqua;i++){
+		eval('document.cre.is_ia'+i).checked=true;updateIA(i);
+		eval('document.cre.nivia'+i).value=(niveau==undefined || niveau<0?Math.floor(3*Math.random()):niveau);
+	}
+}
 </script>
 </head>
 <body onload="bodyOnLoad();chargerPartiesEnCours();">
@@ -230,6 +238,7 @@ array("text" => " Couleur",
 			}
 			?>
 			<h3>Options </h3>
+			<div id="options_jeu"></div>
 			<?php
 			// Script to list the files named aopMMMMMM.lvl
 			/*if ($handle = opendir('.')) {
@@ -244,12 +253,12 @@ array("text" => " Couleur",
 			<table>
 			<tr><td style="text-align:right;">
 			<label style="float: right;">Taille :</label></td><td>
+			<input class="btno" type="button" value="." onclick="document.cre.x.value=5;document.cre.y.value=5;" title="petit : 5x5" />
+			<input class="btno" type="button" value="o" onclick="document.cre.x.value=9;document.cre.y.value=9;" title="moyen : 9x9" />
+			<input class="btno" type="button" value="O" onclick="document.cre.x.value=15;document.cre.y.value=15;" title="grand : 15x15" />
 			<input type=text id="x" name="x" value="6" style="width:30px">
 			<div style="float:left;">x&nbsp;</div>
 			<input type=text id="y" name="y" value="6" style="width:30px">
-			<input class="btn" type="button" value="." onclick="document.cre.x.value=5;document.cre.y.value=5;" title="petit : 5x5" />
-			<input class="btn" type="button" value="o" onclick="document.cre.x.value=9;document.cre.y.value=9;" title="moyen : 9x9" />
-			<input class="btn" type="button" value="O" onclick="document.cre.x.value=15;document.cre.y.value=15;" title="grand : 15x15" />
 			</tr>
 
 			<?php
@@ -321,19 +330,70 @@ array("text" => " Couleur",
 			));
 			?>
 			<tr><td style="text-align:right;">
-			<label style="float: right;">Profondeur de jeu :</label></td><td><input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
-			<input class="btn" type="button" value="&infin;" title="Aller au bout des explosions" onclick="document.cre.opt_profondeur_jeu.value=100;" />
-			<input class="btn" type="button" value="&#8635;" title="Les explosions peuvent traverser le plateau dans 2 dimensions" onclick="document.cre.opt_profondeur_jeu.value=parseInt(document.cre.x.value)+parseInt(document.cre.y.value);" />
-			<input class="btn" type="button" value="&#8645;" title="Les explosions peuvent traverser le plateau en verticla ou en horizontal" onclick="document.cre.opt_profondeur_jeu.value=Math.floor((parseInt(document.cre.x.value)+parseInt(document.cre.y.value))/2);" />
+			<label style="float: right;">Profondeur de jeu :</label></td><td>
+			<input class="btno" type="button" value="&infin;" title="Aller au bout des explosions" onclick="document.cre.opt_profondeur_jeu.value=100;" />
+			<input class="btno" type="button" value="&#8635;" title="Les explosions peuvent traverser le plateau dans 2 dimensions" onclick="document.cre.opt_profondeur_jeu.value=parseInt(document.cre.x.value)+parseInt(document.cre.y.value);" />
+			<input class="btno" type="button" value="&#8645;" title="Les explosions peuvent traverser le plateau en verticla ou en horizontal" onclick="document.cre.opt_profondeur_jeu.value=Math.floor((parseInt(document.cre.x.value)+parseInt(document.cre.y.value))/2);" />
+			<input type=text id="opt_profondeur_jeu" name="opt_profondeur_jeu" value="100" style="width:35px" />
 			</td></tr>
 			<tr><td style="text-align:center;" colspan=2>
 			<input type="submit" class="btn" name="Envoi" value="Créer une partie !" title="Clique ici pour créer la partie avec les options actuelles" /> 
 			<input type="submit" class="btn" name="Solo" value="Lancer une partie solo" title="Clique ici pour créer la partie avec les options actuelles et le premier joueur humain"
-				onclick="for(var i=2;i<=parseInt(document.cre.nbJoueurs.value);i++){eval('document.cre.is_ia'+i).checked=true;updateIA(i);eval('document.cre.nivia'+i).value=Math.floor(3*Math.random());document.cre.opt_partie_cachee.value=1;} return confirm('Continuer avec les options actuelles ?');" /> 
-			</td></tr>
+				onclick="metsLesIA(parseInt(document.cre.nbJoueurs.value));document.cre.opt_partie_cachee.value=1;return confirm('Continuer avec les options actuelles ?');" /> 
+
+				</td></tr>
 			</table>
+			<!--center><input type="button" class="btn" onclick="lancerPopupJeuReseau()" value="Lancer une partie réseau" /></center-->
 			</form>
 		</div>		
+
+<script type="text/javascript"><!--
+/** pour lancer le popup de création de partie réseau **/
+function lancerPopupJeuReseau(){
+	var chaineAAfficher = "";
+	chaineAAfficher += "<form name='rez'>Nom de l'h&ocirc;te : <input type=\"text\" value=\""+document.cre.nomJoueur1.value+"\" onfocus=\"if (this.value=='"+document.cre.nomJoueur1.value+"') this.value='';\" onchange=\"document.cre.nomJoueur1.value=this.value;\" /> ";
+	var couleurDu1 = document.cre.couleur1.value;
+	var leCouleurSelect = "<?php echo addslashes(addSelectOption(
+array("text" => " couleur de l'h&ocirc;te",
+	"idname" => "couleur",
+	"options" => $GLOBALS["color_array"],
+	"callback" => "document.cre.couleur1.value=this.value;",//"changecolor(".$i.")",
+	"default" => "Ilnenaurapas",
+	"saut_ligne" => false,
+	"table" => false,
+	"color" => True
+),false)); ?>";
+	leCouleurSelect = leCouleurSelect.split("value=\""+couleurDu1+"\"").join("value=\""+couleurDu1+"\" selected");
+	chaineAAfficher += leCouleurSelect + "<br />";
+	chaineAAfficher += "Nombre d'IA : <select onchange=\"document.cre.nbJoueurs.value=parseInt(this.value)+1;\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option></select>" + "<br />";
+	// metsLesIA(jusqua,niveau,debut){
+	chaineAAfficher += "Nombre d'IA : " + "<br />";
+	chaineAAfficher += "<input type=\"button\" class=\"btn\" value=\"Lancer\" onclick=\"document.getElementById('popupreseaucontent').innerHTML='Lancement de la partie en cours...';document.cre.submit();\" /> </form>";
+	document.getElementById("popupreseaucontent").innerHTML = chaineAAfficher;
+	document.getElementById("popupreseau").style.display = "block";
+}
+
+
+function fermePopupReseau(){
+	document.getElementById("popupreseau").style.display="none";
+}
+//--></script>
+<div style="z-index: 99; display: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%" id="popupreseau">
+	<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 100%;"><!-- background: url('css/img/footer.jpg')-->
+		<tr>
+			<td align="center">
+				<div style="width: 400px; height: 400px; border: 1px solid #C0C793; background: #FFFFFF">
+				<input class="btn" style="align:center;font-size:6px;height:12px;width:12px;padding:0;float:right;right:0;top:0;" value="x" onclick="fermePopupReseau()" />
+					<h2>Démarrer une partie réseau</h2>
+					<p id="popupreseaucontent"></p>
+				
+				
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
 		<div id="regles" class="onglet" style="width: 600px; display: none;">
 			<h2><a href="#" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; Règles</a></h2>
 			<h3>Introduction</h3>
@@ -376,7 +436,9 @@ array("text" => " Couleur",
 			<dd>Les cellules ne peuvent s'y développer. Ce sera donc une cellule de moins dans la limite de population sans explosion des cases d'à-côté.</dd>
 			</dl>
 		</div>
-	</div> 
+	</div>
+
+
 	<div id="footer"> 
 		<!--div class="side"> 
 			<h2>Recherche</h2> 

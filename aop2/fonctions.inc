@@ -107,6 +107,7 @@ function addSelectOption($arrayOptions,$affichage=true) {
 	$table = False;
 	$color = False;
 	$sortie_ecran = "";
+	$saut_ligne = true;
 	foreach($arrayOptions as $key => $value) {
 		switch($key) {
 		case "text": $text = $value; break;
@@ -117,27 +118,28 @@ function addSelectOption($arrayOptions,$affichage=true) {
 		case "default_index": $default_index = $value; break;
 		case "color": $color = $value; break;//booleen
 		case "table": $table = $value; break;//booleen
+		case "saut_ligne": $saut_ligne = $value; break;//booleen
 		}
 	}
 	if($table) $sortie_ecran .=  "<tr><td style=\"text-align:right;\">";
 	if($table) $sortie_ecran .= '<label style="float: right;" >'.$text.' :</label>';
 	else $sortie_ecran .= '<label>'.$text.' :</label>';
 	if($table) $sortie_ecran .=  "</td><td>";
-	$sortie_ecran .=  "\n".'<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
+	$sortie_ecran .=  ($saut_ligne?"\n":"").'<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
 	$i = 1;
 	foreach($options as $value => $text) {
 		if(isset($value)) {
-			$sortie_ecran .= "\n  <option";
+			$sortie_ecran .= ($saut_ligne?"\n":"")."  <option";
 			if(isset($value)) $sortie_ecran .= ' value="'.$text.'"';
 			if($color) $sortie_ecran .= ' style="background-color:#'.$text.'"';
 			if($value === $default or $text === $default or $i === $default_index) $sortie_ecran .= ' selected';
 			$sortie_ecran .= ">".$value."</option> ";
 		} else {
-			$sortie_ecran .= "\n  <option>".$text."</option> ";
+			$sortie_ecran .= ($saut_ligne?"\n":"")."  <option>".$text."</option> ";
 		}
 		$i += 1;
 	}
-	$sortie_ecran .= '</select>\n';
+	$sortie_ecran .= '</select>'.($saut_ligne?"\n":"");
 	if($table) $sortie_ecran .= "</td></tr>";
 	else $sortie_ecran .= '';
 	if ($affichage)
