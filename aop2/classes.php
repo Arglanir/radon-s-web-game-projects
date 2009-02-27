@@ -652,6 +652,9 @@ class PlateauDeJeu {
 					  case 1: //on regarde pas après les bords
 						if (entre(0,$nvy,$this->tailleY-1) && entre(0,$nvx,$this->tailleX-1)){
 							$autreCase=$this->getCase($nvx,$nvy);
+							if (!$options->yaExplosionJoueur() && $autreCase->vaExploser() && $autreCase->getJoueur() != $cetteCase->getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+								true;
+							} else
 							switch($autreCase->getDecor()){
 							case 0: //case normale
 								$differences[$y][$x]--;
