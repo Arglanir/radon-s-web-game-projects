@@ -701,8 +701,18 @@ class PlateauDeJeu {
 			$nbcellules = $cetteCase->getCellules();
 			$cetteCase->addCellules($differences[$y][$x]);
 			if (count($conquetes[$y][$x]) > 1){ //qui gagne la case ?
-				$gagnant = mettreEntre($x+$this->tailleX*$y, count($conquetes[$y][$x]));
-				$cetteCase->setJoueur($conquetes[$y][$x][$gagnant]);
+				$joueursConcernes = array();$leMax = 1;
+				for ($nbc=0;$nbc<count($conquetes[$y][$x]);$nbc++){//on cherche s'il y a une personne qui a plus de prétentions
+					$joueursConcernes[$conquetes[$y][$x][$nbc]] = (array_key_exists($conquetes[$y][$x][$nbc],$joueursConcernes)?$joueursConcernes[$conquetes[$y][$x][$nbc]]+1:1);
+					$leMax = max($joueursConcernes[$conquetes[$y][$x][$nbc]],$leMax);
+				}
+				$lesGagnants = array();
+				foreach($joueursConcernes as $joueur => $pretention){
+					if ($pretention < $leMax) continue;
+					$lesGagnants[count($lesGagnants)] = $joueur;
+				}
+				$gagnant = mettreEntre($x+$this->tailleX*$y, count($lesGagnants));
+				$cetteCase->setJoueur($lesGagnants[$gagnant]);
 			} else if (count($conquetes[$y][$x]) == 1){
 				$cetteCase->setJoueur($conquetes[$y][$x][0]);
 			}

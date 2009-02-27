@@ -660,8 +660,18 @@ function PlateauDeJeu() {
 			nbcellules = cetteCase.getCellules();
 			cetteCase.addCellules(differences[y][x]);
 			if (conquetes[y][x].length > 1){ //qui gagne la case ?
-				gagnant = mettreEntre(x+this.tailleX*y, conquetes[y][x].length);
-				cetteCase.setJoueur(conquetes[y][x][gagnant]);
+				var joueursConcernes = new Array(); var leMax = 1;
+				for (var nbc=0;nbc<conquetes[y][x].length;nbc++){//on cherche s'il y a une personne qui a plus de prétentions
+					joueursConcernes[conquetes[y][x][nbc]] = (joueursConcernes[conquetes[y][x][nbc]]?joueursConcernes[conquetes[y][x][nbc]]+1:1);
+					leMax = Math.max(joueursConcernes[conquetes[y][x][nbc]],leMax);
+				}
+				var lesGagnants = new Array();
+				for (var joueur in joueursConcernes){
+					if (joueursConcernes[joueur] < leMax) continue;
+					lesGagnants[lesGagnants.length] = joueur;
+				}
+				var gagnant = mettreEntre(x+this.tailleX*y, lesGagnants.length);
+				cetteCase.setJoueur(lesGagnants[gagnant]);
 			} else if (conquetes[y][x].length == 1){
 				cetteCase.setJoueur(conquetes[y][x][0]);
 			}
