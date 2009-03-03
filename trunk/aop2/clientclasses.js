@@ -34,6 +34,104 @@ function createXHR() {
     return request;
 }
 
+function lecteurXML(atester){
+	atester = (typeof atester == "undefined"?false:atester);
+	this.doc = false;
+	try //Internet Explorer
+	{
+		this.doc=new ActiveXObject("Microsoft.XMLDOM");
+	}
+	catch(e)
+	{
+		try //Firefox, Mozilla, Opera, etc.
+		{
+			this.doc=document.implementation.createDocument("","",null);
+		}
+		catch(e) {alert(e.message)}
+	}
+	
+	
+	this.chargeFichier = function (fichier){//charge un fichier local
+		try 
+		{
+			this.doc.async=false;
+			this.doc.load(fichier);
+			return true;
+		}
+		catch(e) {
+			try{
+				//alert("ici");
+				var xmlhttp = new window.XMLHttpRequest();
+				xmlhttp.open("GET",fichier,false);
+				xmlhttp.send(null);
+				if (xmlhttp.responseXML)
+					this.doc = xmlhttp.responseXML;
+				else 
+					this.chargeChaine(xmlhttp.responseText);
+				//alert(xmlhttp.responseText);
+				return true;
+			}
+			catch(e){
+				return false;
+			}
+		}
+	}
+	
+	this.chargeChaine = function (chaineXML){//charge une chaine
+		try{
+			this.doc.async=false;
+			this.doc.loadXML(chaineXML);
+			return true;			
+		}
+		catch(e){
+			try{
+				var parser=new DOMParser();
+				this.doc=parser.parseFromString(chaineXML,"text/xml");
+				return true;
+			}
+			catch (e){
+				//alert(e);
+				return false;
+			}
+		}
+	}
+	
+	this.chargeNoeud = function (noeud){
+		try{
+			this.doc.appendChild(noeud);
+			return true;
+		} catch(e){
+			return false;
+		}
+	}
+	
+	this.asXML = function (){//transforme en string
+		try{
+			var serializer = new XMLSerializer();
+            return serializer.serializeToString(this.doc);
+		}
+		catch(e){
+			try{
+				var xmlSerializer = document.implementation.createLSSerializer();
+                return xmlSerializer.writeToString(this.doc);
+			}
+			catch(e){
+			try{
+				return this.doc.xml;
+			}
+			catch(e){
+				return false;
+			}
+			}
+		}
+	}
+	
+	if (atester){
+		if (this.chargeNoeud(atester)) alert(this.asXML());
+	}
+	//on accède aux méthodes DOM avec truc.doc. ...
+}
+
 function HTMLentities(texte) {
 	texte = texte.replace(/"/g,'&quot;'); // 34 22
 	texte = texte.replace(/&/g,'&amp;'); // 38 26
@@ -279,6 +377,18 @@ function envoieFormulaire(tableauArgsGET,formulaire,callback){
 	communiquePOST(tableauArgsGET,tableauPOST,callback);
 }
 
+//autre fonctions de calcul répétitif
+function entre(avant,puis,ensuite){//renvoie vrai si ils sont dans l'ordre
+	return (avant<=puis) && (puis<=ensuite);
+}
+
+function mettreEntre(nombre,base){//fonction permettant le modulo
+	while(nombre < 0)
+		nombre+=base;
+	while(nombre >= base)
+		nombre-=base;
+	return nombre;
+}
 
 //la classe de partie
 function Partie(){
@@ -291,22 +401,74 @@ function Partie(){
 	this.tableauJeu = 0;//objet PlateauDeJeu
 	this.demarree = false;
 	this.gagnant = 0;
+	this.histoire = false;//texte
+	this.params = false;//reste un DOMNode <parametrescampagne>...</parametrescampagne>
 	
 	this.fromXML = function(Xpartie){
-		partie = new Partie();
+		var partie = new Partie();
 		partie.demarree = (Xpartie.getAttribute("demarree")=="1");
 		partie.noTour = parseInt(Xpartie.getAttribute("notour"));
 		partie.joueurEnCours = parseInt(Xpartie.getAttribute("joueurencours"));
 		partie.gagnant = parseInt(Xpartie.getAttribute("gagnant"));
 		partie.nbJoueurs = parseInt(Xpartie.getAttribute("nombredejoueurs"));
 		var joueurs_array = Xpartie.getElementsByTagName( "joueur" );
-		for( var i in joueurs_array)
-			partie.joueur[parseInt(Xjoueur.get_attribute("numero"))] = Joueur.fromXML(joueurs_array[i]);
+		for( var i = 0; i< partie.nbJoueurs;i++)
+			partie.joueur[parseInt(joueurs_array.item(i).getAttribute("numero"))] = (new Joueur()).fromXML(joueurs_array[i]);
 		partie.options = Xpartie.getElementsByTagName( "options" );
-		partie.options = Options.fromXML(partie.options[0]);
+		partie.options = (new Options()).fromXML(partie.options[0]);
 		partie.tableauJeu = Xpartie.getElementsByTagName( "tableaudejeu" );
-		partie.tableauJeu = PlateauDeJeu.fromXML(partie.tableauJeu[0]);
+		partie.tableauJeu = (new PlateauDeJeu()).fromXML(partie.tableauJeu[0]);
+		//alert(partie.tableauJeu);
+		partie.tableauJeu.setPartie(partie);
+		/*partie.commentaire = Xpartie.getElementsByTagName( "commentaire" );
+		if (partie.commentaire.length>0) partie.commentaire = partie.commentaire[0];
+		else partie.commentaire = false;*/
+		//new lecteurXML(partie.commentaire);
+		partie.histoire = Xpartie.getElementsByTagName( "histoire" );
+		if (partie.histoire.length>0) partie.histoire = partie.histoire[0].firstChild.nodeValue;
+		else partie.histoire = false;
+		//new lecteurXML(partie.histoire);
+		partie.params = Xpartie.getElementsByTagName( "parametrescampagne" );
+		if (partie.params.length>0) partie.params = partie.params[0];
+		else partie.params = false;
+		//new lecteurXML(partie.params);
 		return partie;
+	}
+	
+	this.toXML = function (){
+		var Xjeu = new lecteurXML();
+		Xjeu.chargeChaine("<?xml version=\"1.0\" encoding=\"UTF-8\"?><partie></partie>");
+		var Xpartie = Xjeu.doc.getElementsByTagName("partie");
+		//alert(Xpartie.length);
+		Xpartie = Xpartie[0];
+		Xpartie.setAttribute("nombredejoueurs",this.nbJoueurs);
+		Xpartie.setAttribute("demarree",(this.demarree?1:0));
+		Xpartie.setAttribute("notour",this.noTour);
+		Xpartie.setAttribute("gagnant",this.gagnant);
+		Xpartie.setAttribute("joueurencours",this.joueurEnCours);
+		
+		var Xjoueurs = Xjeu.doc.createElement("joueurs");
+		for (var n = 1;n <= this.nbJoueurs;n++){
+			var Xjoueur = this.joueur[n].toXML(Xjeu.doc,n);
+			Xjoueurs.appendChild(Xjoueur);
+		}
+		Xpartie.appendChild(Xjoueurs);
+		Xpartie.appendChild(this.options.toXML(Xjeu.doc));
+		Xpartie.appendChild(this.tableauJeu.toXML(Xjeu.doc));
+		var Xcommentaire = Xjeu.doc.createElement("commentaire");
+		var Xhistoire = Xjeu.doc.createElement("histoire");
+		var Xhistoire2 = Xjeu.doc.createTextNode(this.histoire);
+		Xhistoire.appendChild(Xhistoire2);
+		Xcommentaire.appendChild(Xhistoire);
+		var Xparams = Xjeu.doc.createElement("parametrescampagne");
+		Xparams.setAttribute("c",this.params.getAttribute("c"));
+		Xparams.setAttribute("m",this.params.getAttribute("m"));
+		Xparams.setAttribute("titre",this.params.getAttribute("titre"));
+		Xparams.setAttribute("infosucces",this.params.getAttribute("infosucces"));
+		Xparams.setAttribute("suivante",this.params.getAttribute("suivante"));
+		Xcommentaire.appendChild(Xparams);
+		Xpartie.appendChild(Xcommentaire);
+		return Xjeu;
 	}
 	
 }
@@ -319,9 +481,9 @@ function Joueur(nom,couleur,mdp,type,niveau){
 	var niveau;//niveau IA : 0 jeu aléatoire, n meilleur coup profondeur n-1
 	var derniereAction;*/
 	
-	mdp = (undefined==mdp?"0":mdp);
-	type = (undefined==type?0:type);
-	niveau = (undefined==niveau?"0":niveau);
+	mdp = ((typeof mdp=="undefined")?"0":mdp);
+	type = ((typeof type=="undefined")?0:type);
+	niveau = ((typeof niveau=="undefined")?"0":niveau);
 	
 	this.nom = nom;
 	this.couleur = couleur;
@@ -372,16 +534,39 @@ function Joueur(nom,couleur,mdp,type,niveau){
 							Xjoueur.getAttribute("couleur"),
 							Xjoueur.getAttribute("mdp"),
 							(Xjoueur.getAttribute("estia")=="oui"?1:
-								(Xjoueur.get_attribute("estnet")=="oui"?2:0)),
-							parseInt(Xjoueur.get_attribute("niveau")));
+								(Xjoueur.getAttribute("estnet")=="oui"?2:0)),
+							parseInt(Xjoueur.getAttribute("niveau")));
 		
 		joueur.derniereAction = Xjoueur.getElementsByTagName("derniereaction");
 		joueur.setDerniereAction(joueur.derniereAction[0]);
 		return joueur;
 	}
 
+	this.toXML = function (xml_partie,numero){
+		var Xjoueur = xml_partie.createElement("joueur");
+		/*		numero NMTOKEN #REQUIRED
+		nom CDATA #REQUIRED
+		couleur CDATA #REQUIRED
+		estia (oui | non)  #REQUIRED
+		niveau NMTOKEN  "0"
+		estnet (oui | non) non
+		mdp CDATA "0">*/
+		Xjoueur.setAttribute("nom",this.nom);
+		Xjoueur.setAttribute("numero",numero);
+		Xjoueur.setAttribute("couleur",this.couleur);
+		Xjoueur.setAttribute("estia",(this.type==1?"oui":"non"));
+		Xjoueur.setAttribute("niveau",this.niveau);
+		Xjoueur.setAttribute("estnet",(this.type==2?"oui":"non"));
+		Xjoueur.setAttribute("mdp",this.mdp);
+		var Xderniere = xml_partie.createElement("derniereaction");
+		Xderniere.setAttribute("type",this.derniereAction.quoi);
+		Xderniere.setAttribute("x",this.derniereAction.ouX);
+		Xderniere.setAttribute("y",this.derniereAction.ouY);
+		Xderniere.setAttribute("notour",this.derniereAction.quand);
+		Xjoueur.appendChild(Xderniere);		
+		return Xjoueur;
+	}
 }
-
 
 function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 	/*var chateauxPermis;//	Options : chateaux activés ? true/false
@@ -390,11 +575,11 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 	var ajoutDiag;	//Ajout diagonale ? true/false  (peut-on cliquer en diagonale ou seulement à côté ?)
 	var explosionJoueur;//Explosion slt pour joueur en cours ? true/false*/
 	
-	this.chateauxPermis = (chateauPermis==undefined?0:(chateauxPermis?true:false));
-	this.profondeur = (profondeur==undefined?100:profondeur);
-	this.typeBord = (typeBord==undefined?1:typeBord);
-	this.ajoutDiag = (ajoutDiag==undefined?1:(ajoutDiag?true:false));
-	this.explosionJoueur = (explosionJoueur==undefined?0:(explosionJoueur?true:false));
+	this.chateauxPermis = ((typeof chateauPermis=="undefined")?0:(chateauxPermis?true:false));
+	this.profondeur = ((typeof profondeur=="undefined")?100:profondeur);
+	this.typeBord = ((typeof typeBord=="undefined")?1:typeBord);
+	this.ajoutDiag = ((typeof ajoutDiag=="undefined")?1:(ajoutDiag?true:false));
+	this.explosionJoueur = ((typeof explosionJoueur=="undefined")?0:(explosionJoueur?true:false));
 
 	this.setPermissionChateau = function (chateauxPermis){this.chateauxPermis = (chateauxPermis?true:false);}
 	this.setProfondeur = function (profondeur){this.profondeur = profondeur;}
@@ -413,7 +598,7 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 
 		options_array = Xoptions.getElementsByTagName( "option" );
 		
-		for (var i in options_array){
+		for (var i = 0; i<5;i++){//in options_array
 			var Xoption = options_array[i];
 			var valeur = parseInt(Xoption.getAttribute("valeur"));
 			switch(Xoption.getAttribute("type")){
@@ -431,7 +616,27 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 		}
 		return options;
 	}
-	
+	this.toXML = function (xml_partie){
+		var Xoptions = xml_partie.createElement("options");
+		var Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","chateaux_actifs");
+		Xoption.setAttribute("valeur",(this.yaPermissionChateau()?1:0));
+		Xoptions.appendChild(Xoption);
+		Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","profondeur_jeu");Xoption.setAttribute("valeur",this.quelleProfondeur());
+		Xoptions.appendChild(Xoption);
+		Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","type_bords");Xoption.setAttribute("valeur",this.quelTypeBord());
+		Xoptions.appendChild(Xoption);
+		Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","ajout_diagonale");Xoption.setAttribute("valeur",(this.yaPlacementDiag()?1:0));
+		Xoptions.appendChild(Xoption);
+		Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","explosion_joueur");Xoption.setAttribute("valeur",(this.yaExplosionJoueur()?1:0));
+		Xoptions.appendChild(Xoption);
+		
+		return Xoptions;
+	}	
 }
 
 function Aafficher(nomDeThis){//crée une liste de plateaux à afficher
@@ -484,7 +689,6 @@ function Aafficher(nomDeThis){//crée une liste de plateaux à afficher
 
 var tableauAAfficher = new Aafficher("tableauAAfficher");
 
-
 //classe de plateau de jeu
 function PlateauDeJeu() {
 	this.plateau = new Array();//tableau bi dim de UneCase
@@ -531,10 +735,53 @@ function PlateauDeJeu() {
 	}
 	this.setPartie = function (partie){
 		this.partie = partie;
+		//alert(this.plateau);
 		for(var i = 0; i < this.tailleY; i++)
-			for(var j = 0; j < this.tailleX; j++)
-				this.plateau[i][j].partie = partie;
+			for(var j = 0; j < this.tailleX; j++){
+				this.getCase(j,i).partie = partie;
+			}
 	}
+	
+	this.nouveau = function (taillex,tailley){//crée un nouveau plateau
+		this.tailleX = ((typeof taillex=="undefined")?this.tailleX:taillex);
+		this.tailleY = ((typeof tailley=="undefined")?this.tailleY:tailley);
+		var ancienPlateau = this.plateau;
+		this.plateau = new Array();
+		for(var y = 0; y < this.tailleY; y++){
+			this.plateau[y] = new Array();
+			for (var x = 0; x < this.tailleX;x++){
+				if (typeof ancienPlateau[y] != "undefined") if (typeof ancienPlateau[y][x] != "undefined"){
+					this.plateau[y][x] = ancienPlateau[y][x];continue;
+				}
+				this.plateau[y][x] = new UneCase();
+			}
+		}
+	}
+	
+	this.metsLesMax = function (){//en fonction du plateau et des options
+		for(var i=0;i<this.tailleY;i++) for(var j=0;j<this.tailleX;j++){
+			var k = 4;
+			if (this.partie.options.quelTypeBord() == 1){//on compte les bords
+					if (i==0 || i==this.tailleY-1) k--;
+					if (j==0 || j==this.tailleX-1) k--;
+			}
+			for (var ii=-1;ii<2;ii++) for(var jj=-1;jj<2;jj++)//on regarde les obstacles
+					if (Math.abs(ii)+Math.abs(jj)==1){//pas diagonale
+						switch(this.partie.options.quelTypeBord()){
+						case 1: //on regarde pas après les bords
+						case 0:
+							if (entre(0,ii+i,this.tailleY-1)&&entre(0,jj+j,this.tailleX-1))
+								if (this.getCase(j+jj,i+ii).getDecor()==3) k--;
+							break;
+						case 2://on regarde après le bord
+							if (this.getCase(mettreEntre(j+jj,this.tailleX),mettreEntre(i+ii,this.tailleY)).getDecor()==3) k--;
+							break;
+						}
+					}
+			this.getCase(j,i).setMax(k);
+		}
+	}
+
 	
 	this.getCase = function (x, y){
 		if (x>=0 && x<this.tailleX && y>=0 && y<this.tailleY) return this.plateau[y][x];
@@ -542,8 +789,8 @@ function PlateauDeJeu() {
 	}
 	
 	this.distance = function (x,y,x2,y2){//renvoie un flottant
-		if (x2 == undefined) x2 = -1;
-		if (y2 == undefined) y2 = -1;
+		if (typeof x2 == "undefined") x2 = -1;
+		if (typeof y2 == "undefined") y2 = -1;
 		if (x2>=0 && y2>=0){//entre 2 cases
 			var dx=x2-x; var dy=y2-y;
 			switch(this.partie.options.quelTypeBord()){
@@ -557,10 +804,10 @@ function PlateauDeJeu() {
 					var d = this.tailleX + this.tailleY;
 					if (this.partie.options.yaPlacementDiag())
 						for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
-							d = min(d,distN0(dx+i*this.tailleX,dy+j*this.tailleY));//sqrt(pow(dx+i*this.tailleX,2)+pow(dy+j*this.tailleY,2));
+							d = Math.min(d,distN0(dx+i*this.tailleX,dy+j*this.tailleY));//sqrt(pow(dx+i*this.tailleX,2)+pow(dy+j*this.tailleY,2));
 					else
 						for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
-							d = min(d,abs(dx+i*this.tailleX)+abs(dy+j*this.tailleY));
+							d = Math.min(d,Math.abs(dx+i*this.tailleX)+Math.abs(dy+j*this.tailleY));
 					return d;
 			}
 		}
@@ -575,7 +822,7 @@ function PlateauDeJeu() {
 			var d = this.tailleX + this.tailleY;
 			for(var i in posJoueurs){
 				var pos = posJoueurs[i];
-				d = min(d,this.distance(options,x,y,pos[0],pos[1]));
+				d = Math.min(d,this.distance(options,x,y,pos[0],pos[1]));
 			}
 			return d;
 		}
@@ -682,7 +929,7 @@ function PlateauDeJeu() {
 		return changement;
 	}
 	this.purifieTotalement = function (afficher,joueurEnCours,profondeur){
-		if (profondeur == undefined) profondeur=0;
+		if (typeof profondeur == "undefined") profondeur=0;
 		if (profondeur>=this.partie.options.quelleProfondeur()){
 			return true;
 		} else {
@@ -696,7 +943,7 @@ function PlateauDeJeu() {
 		}
 	}
 	this.clicNormal = function (x,y,joueurEnCours,chateau){//ajoute une cellule
-		if (chateau == undefined) chateau=false;
+		if (typeof chateau == "undefined") chateau=false;
 		laCase = this.getCase(x,y);
 		//if (!laCase) var_dump(this);
 		laCase.setJoueur(joueurEnCours);
@@ -707,7 +954,7 @@ function PlateauDeJeu() {
 	}
 	this.clicChateau = function (x,y,joueurEnCours){return this.clicNormal(x,y,joueurEnCours,true);}
 	this.peutJouerEn = function (x,y,joueurAppelant,chateau){
-		if (chateau == undefined) chateau=false;
+		if (typeof chateau == "undefined") chateau=false;
 		var laCase = this.getCase(x,y);
 		if (laCase.getDecor() != 0 && chateau)
 			return false; // chateau et case instable
@@ -737,7 +984,7 @@ function PlateauDeJeu() {
 		return false;
 	}
 	this.ouPeutJouer = function (joueurAppelant,chateau){//renvoie un tableau des positions jouables
-		if (chateau == undefined) chateau=false;
+		if (typeof chateau == "undefined") chateau=false;
 		var positions = new Array();
 		for (var x=0;x<this.tailleX;x++)
 			for (var y=0;y<this.tailleY;y++)
@@ -769,29 +1016,36 @@ function PlateauDeJeu() {
 	
 	this.fromXML = function (Xplateau){
 		var lePlateau = new PlateauDeJeu(parseInt(Xplateau.getAttribute("taillex")),
-								parseInt(Xplateau.get_attribute("tailley")),
+								parseInt(Xplateau.getAttribute("tailley")),
 								false);//pour que les cases ne soient pas initialisées
+		//alert(typeof lePlateau.tailleX+","+typeof lePlateau.tailleY)
 		var lignes_array = Xplateau.getElementsByTagName( "ligne" );
-		for(var i in lignes_array){
+		for(var i in lignes_array){// =0; i<this.tailleY;i++
 			Xligne = lignes_array[i];
+			if (typeof Xligne != "object") continue;
 			var y = parseInt(Xligne.getAttribute("y"));
 			cases_array = Xligne.getElementsByTagName( "case" );
-			for(var j in cases_array){
-				var Xcase = cases_array[i];
-				var x = parseInt(Xcase.get_attribute("x"));
-				lePlateau.plateau[y][x] = UneCase.fromXML(Xcase);
+			for(var j in cases_array){ //= 0;j< this.tailleX;j++
+				var Xcase = cases_array[j];
+				if (typeof Xcase != "object") continue;
+				var x = parseInt(Xcase.getAttribute("x"));
+				var y2 = parseInt(Xcase.getAttribute("y"));
+				var laCase = (new UneCase()).fromXML(Xcase);
+				//alert(x+","+y+","+y2+":"+laCase.toInt());
+				lePlateau.plateau[y][x] = laCase;
 			}
 		}
+		//alert(lePlateau.plateau[0][0].toInt());
 		return lePlateau;
 	}
 	
-/*	this.toXML = function (xml_partie){//renvoie un DOMNode
+	this.toXML = function (xml_partie){//renvoie un DOMNode
 		var Xtableau = xml_partie.createElement("tableaudejeu");
 		Xtableau.setAttribute("taillex", this.tailleX);
 		Xtableau.setAttribute("tailley", this.tailleY);
 
 		for(var i=0;i<this.tailleY;i++){
-			var Xligne = Xtableau.createElement("ligne");
+			var Xligne = xml_partie.createElement("ligne");
 			Xligne.setAttribute("y", i);
 			for(var j=0;j<this.tailleX;j++){
 				var Xcase = this.getCase(j,i).toXML(xml_partie,j,i);
@@ -800,9 +1054,8 @@ function PlateauDeJeu() {
 			Xtableau.appendChild(Xligne);
 		}
 		return Xtableau;
-	}*/
+	}
 }
-
 
 //classe de Cases
 function UneCase(){
@@ -906,7 +1159,7 @@ function UneCase(){
 	this.setCellules = function setCellules(nb){this.nbcellules = nb;}
 	this.addCellules = function addCellules(nb){this.nbcellules += nb;this.checkCellule();}
 	this.remCellules = function remCellules(nb){this.nbcellules -= nb;	this.checkCellule();}
-	this.checkCellule = function checkCellule(){this.nbcellules = min(max(0,this.nbcellules),99);}
+	this.checkCellule = function checkCellule(){this.nbcellules = Math.min(Math.max(0,this.nbcellules),99);}
 	
 	this.getChateau = function getChateau(){return this.chateau;}
 	this.clicChateau = function clicChateau(){this.chateau = !this.chateau;}
@@ -925,16 +1178,16 @@ function UneCase(){
 	
 	this.fromXML = function fromXML(Xcase){
 		//joueur, cellules, chateau?, max, decor
-		laCase = new UneCase(parseInt(Xcase.get_attribute("joueur")),
-								parseInt(Xcase.get_attribute("cellules")),
-								parseInt(Xcase.get_attribute("chateau")),
-								parseInt(Xcase.get_attribute("max")),
-								parseInt(Xcase.get_attribute("decor"))
+		laCase = new UneCase(parseInt(Xcase.getAttribute("joueur")),
+								parseInt(Xcase.getAttribute("cellules")),
+								parseInt(Xcase.getAttribute("chateau")),
+								parseInt(Xcase.getAttribute("max")),
+								parseInt(Xcase.getAttribute("decor"))
 							);
 		return laCase;
 	}
 	
-	/*this.toXML = function toXML(xml_partie,x,y){//renvoie un DOMNode
+	this.toXML = function toXML(xml_partie,x,y){//renvoie un DOMNode
 		Xcase = xml_partie.createElement("case");
 		Xcase.setAttribute("x", x);
 		Xcase.setAttribute("y", y);
@@ -944,6 +1197,6 @@ function UneCase(){
 		Xcase.setAttribute("max", this.getMax());
 		Xcase.setAttribute("chateau", this.getChateau()?1:0);
 		return Xcase;
-	}*/
+	}
 
 }

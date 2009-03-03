@@ -106,7 +106,7 @@ numéros des parties dans lespartiesencours.xml
 		...
 	</parties>
 	
-grilles de base sous le nom xaopCMMMMMM.lvl
+grilles de base sous le nom campagnes/xaopCMMMMMM.lvl
 	Comme un jeu, le joueur humain (1) doit être changé
 
 parties sous le nom aopNNNNNNbacteries.par, délimiteurs : \t et \n
@@ -149,4 +149,5 @@ règles :
 			on ne peut pas ajouter de cellule
 			une case à côté explose à -1 (pas de cellules ajoutées)
 	temps réel : si une case (x,y) est conquise par n joueurs en même temps, elle appartiendra au joueur (entre 0 et n-1, à replacer) x+TX*y modulo n
+		sauf si la case est convoité majoritairement par un joueur (nombre d'explosions à côté)
 	
