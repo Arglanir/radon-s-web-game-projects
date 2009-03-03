@@ -196,7 +196,6 @@ class Partie {
 		$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->addAttribute("notour", $this->noTour);
 		$Xpartie->addAttribute("gagnant", $this->gagnant);
-		$Xpartie->addChild("commentaire", $this->commentaires);
 		$Xpartie->addAttribute("joueurencours", $this->joueurEnCours);
 		$Xpartie->addAttribute("demarree", ($this->demarree?1:0));
 		
@@ -210,15 +209,13 @@ class Partie {
 		
 		$Xtableau = $this->tableauJeu->toSXML($Xpartie);
 
+		$Xpartie->addChild("commentaire", $this->commentaires);
 		return $Xpartie;
 	}
 	function toXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document XML de partie
 		$xml_partie = domxml_new_doc("1.0");
 		$Xpartie = $xml_partie->create_element( "partie" );
 		$xml_partie->append_child($Xpartie);
-		$Xcommentaire = $xml_partie->create_element( "commentaire" );
-		$Xcommentaire->set_content($this->commentaires);
-		$Xpartie->append_child($Xcommentaire);
 		$Xpartie->set_attribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->set_attribute("notour", $this->noTour);
 		$Xpartie->set_attribute("gagnant", $this->gagnant);
@@ -238,6 +235,10 @@ class Partie {
 		
 		$Xtableau = $this->tableauJeu->toXML($xml_partie);
 		$Xpartie->append_child($Xtableau);
+
+		$Xcommentaire = $xml_partie->create_element( "commentaire" );
+		$Xcommentaire->set_content($this->commentaires);
+		$Xpartie->append_child($Xcommentaire);
 
 		return $xml_partie;
 

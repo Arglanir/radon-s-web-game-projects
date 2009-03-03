@@ -42,12 +42,13 @@
 		cellules NMTOKEN  "0"
 		max NMTOKEN  "4"
 		chateau (0 | 1) "0">
-<!ELEMENT commentaire (#PCDATA,parametrescampagne?) >
-<!ELEMENT parametrescampagne (#PCDATA)>
+<!ELEMENT commentaire (parametrescampagne?,histoire?) >
+<!ELEMENT histoire (#PCDATA)>
+<!ELEMENT parametrescampagne (EMPTY)>
 <!ATTLIST parametrescampagne
 		c NMTOKEN #REQUIRED //numéro de campagne
 		m CDATA #REQUIRED //mission de la campage
 		titre CDATA #REQUIRED //Titre de la mission
 		infosucces CDATA #REQUIRED //message de succès (genre mot de passe partie suivante)
-		suivante CDATA "fin">//mission suivante
+		suivante CDATA "fin">// numero mission suivante
 		

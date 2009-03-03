@@ -20,7 +20,7 @@ if (!array_key_exists("n",$_GET)){lancerErreur("Niveau non transmis","Recherche 
 if (!array_key_exists("joueur",$_GET)){lancerErreur("Nom du joueur non transmis","Recherche des parametres");}
 if (!array_key_exists("couleur",$_GET)){lancerErreur("Couleur du joueur non transmise","Recherche des parametres");}
 
-$fichierSource = "xaop".$_GET["c"].$_GET["m"].".lvl";
+$fichierSource = "campagnes/xaop".$_GET["c"].$_GET["m"].".lvl";
 if (!file_exists($fichierSource)){lancerErreur("Mission ".$_GET["c"].$_GET["m"]." inconnue","Recherche de la mission");}
 
 $createur = new CreaJeu(false);
