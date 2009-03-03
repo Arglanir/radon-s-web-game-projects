@@ -1058,7 +1058,7 @@ function mettreOnlineOffline(){
 <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute;
  | 
 Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option><option value="cool">new age</option></select>
-<input type="button" value="OK" onclick="window.location.replace(window.location.href.split('type').join('rien')+'&type='+document.mdp.type.value);">
+<input type="button" value="OK" onclick="window.location.replace(window.location.href.replace(/&type=\w*/g, '').replace(/type=\w*&/g, '') +'&type='+document.mdp.type.value);">
 </form>
 </div>
 

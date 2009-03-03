@@ -11,7 +11,9 @@ editeur.html : contient une interface de jeu pour créer, éditer et générer des c
 <meta http-equiv="Content-language" content="fr" />
 <title>AOP2 Editeur de carte</title>
 <!--script type="text/javascript" src="ajax.js" ></script-->
+<script type="text/javascript" src="clientclasses.js" ></script>
 <script type="text/javascript">
+var decor_type = tableauArguments["type"] ? tableauArguments["type"] : "cool"
 var decor = new Array();
 var last_panel = 0;
 var current_decor = 0;
@@ -20,7 +22,7 @@ var DimX = 0;
 var DimY = 0;
 
 function image_case(typedecor) {
-	return "images/image.php?n=0&h=0&m=0&type=cool&d="+typedecor;
+	return "images/image.php?n=0&h=0&m=0&type="+decor_type+"&d="+typedecor;
 }
 
 function creeTableau(n, m) {

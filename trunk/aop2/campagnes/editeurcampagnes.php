@@ -10,6 +10,8 @@
 
 include_once("../fonctions.inc");
 
+$type_graphisme = isset($_GET["type"])?$_GET["type"]:"atome";
+
 $messagePHP = "";
 $fichierExistant = false;
 if (array_key_exists("c",$_GET) && array_key_exists("m",$_GET)){
@@ -41,6 +43,12 @@ for($i=1; $i<=$max_joueurs; $i++) {
 var partie = false;
 var md5mdpIA = "<?php echo md5mdpIA; ?>";
 
+var current_decor = 0; //Utilisé par la palette
+var default_decor = 0; //idem
+
+var current_joueur = 0; //Utilisé par choix_joueur
+var default_joueur = 0; //idem
+
 function demarrer(){
 	//chargement de la partie de base
 	lectXML = new lecteurXML();
@@ -57,6 +65,8 @@ function demarrer(){
 	//alert(partie.joueur[2]);
 	
 	chargerLesDiv();
+	chargerPalette();
+	ChargerChoixJoueur();
 }
 
 function finaliser(){//appelé avant l'envoi de la partie à l'enregistreur
@@ -79,19 +89,37 @@ function finaliser(){//appelé avant l'envoi de la partie à l'enregistreur
 var mode="ajoutercellule";//mode d'action quand on clique sur une case
 //différents modes : ajoutercellule enlevercellule setjoueurN setdecorD setderniereactionN clicchateau
 
-function action(x,y){//fonction appelée quand on clique sur une case
-	var nb = parseInt(mode.substring(mode.length-1,mode.length));
-	switch(mode.substring(0,mode.length-1)){
-		case "ajoutercellul":partie.tableauJeu.getCase(x,y).addCellules(1);break;
-		case "enlevercellul":partie.tableauJeu.getCase(x,y).remCellules(1);break;
-		case "setjoueur":partie.tableauJeu.getCase(x,y).setJoueur(nb);break;
-		case "setdecor":partie.tableauJeu.getCase(x,y).setDecor(nb);break;
-		case "setderniereaction":partie.joueur[nb].derniereAction.ouX = x;partie.joueur[nb].derniereAction.ouY = y;break;
-		case "clicchatea":partie.tableauJeu.getCase(x,y).clicChateau();break;
-		case "retreci":partie.tableauJeu.nouveau(x+1,y+1);document.options.x.value=x;document.options.y.value=y;break;
+function action(x, y){//fonction appelée quand on clique sur une case
+	//var nb = parseInt(document.modes.nb.value);
+	var nb = current_joueur;
+	//En attendant de faire mieux...
+	//parseInt(mode.substring(mode.length-1,mode.length));
+	switch(mode) {//mode.substring(0,mode.length-1)){
+		case "ajoutercellule":partie.tableauJeu.getCase(x,y).addCellules(1);
+			if( nb != 0) partie.tableauJeu.getCase(x,y).setJoueur( nb);
+			break;
+		case "enlevercellule":partie.tableauJeu.getCase(x,y).remCellules(1);break;
+		case "setjoueur":partie.tableauJeu.getCase(x,y).setJoueur( nb);break;
+		case "setdecor":changeCase(x, y);break;//partie.tableauJeu.getCase(x,y).setDecor(2);break;
+		case "setderniereaction":partie.joueur[ nb].derniereAction.ouX = x;partie.joueur[ nb].derniereAction.ouY = y;break;
+		case "clicchateau":partie.tableauJeu.getCase(x,y).clicChateau();break;
+		case "retrecir":partie.tableauJeu.nouveau(x+1,y+1);document.options.x.value=x;document.options.y.value=y;break;
 	}
 	afficherPlateau();
 }
+
+function changeCase(x, y) {
+	var decor_avant = partie.tableauJeu.getCase(x, y).getDecor()
+	var decor_nouveau = 0
+	if(decor_avant == current_decor) {
+		decor_nouveau = default_decor;
+	} else {
+		default_decor = decor_avant;
+		decor_nouveau = current_decor;
+	}
+	partie.tableauJeu.getCase(x, y).setDecor(decor_nouveau);
+}
+
 
 function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeur
 	seulementJoueurs = (typeof seulementJoueurs == "undefined"?false:seulementJoueurs);
@@ -117,9 +145,9 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 		document.camp.missionsuivante.value=params.getAttribute("suivante");
 		document.camp.histoire.value=partie.histoire;
 	}
-
   }
 	//joueurs
+	chargerPalette()
 	document.joueurs.opt_nb_joueurs.value = partie.nbJoueurs;
 	for (var j=1;j<=partie.nbJoueurs;j++){
 		eval("document.joueurs.nomjoueur"+j).value=partie.joueur[j].nom;
@@ -127,9 +155,9 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 		eval("document.joueurs.mdp"+j).value=partie.joueur[j].mdp;
 		eval("document.joueurs.nivia"+j).value=partie.joueur[j].niveau;
 	}
-	updateNumberPlayers(false);
-	
-	
+	if (!seulementJoueurs){ //TODO: To verify that this addition does not break anything
+		updateNumberPlayers(false);
+	}
 }
 
 function nomIA(){//génère un nom d'IA
@@ -167,6 +195,15 @@ function changecolor(n) {
 	}
 }
 
+function image_case_type(typedecor) {
+	return image_case(0, 0, 0, typedecor, 0, 0)
+}
+function image_case_couleur(nojoueur) {
+	return image_case((nojoueur == 0?"D0D0FF":partie.joueur[nojoueur].couleur), 7, 0, 0, 0, 0)
+}
+function image_case(couleur, cellules, chateau, typedecor, va_exploser, dernier) {
+	return "../images/image.php?c="+couleur+"&n="+cellules+"&h="+chateau+"&m="+va_exploser+"&type=<?php echo $type_graphisme;?>&d="+typedecor+"&r="+dernier;
+}
 function afficherPlateau(){
 	var chaineHTML = "";
 	for (var y = 0; y<partie.tableauJeu.tailleY;y++){for (var x = 0; x<partie.tableauJeu.tailleX;x++){
@@ -177,13 +214,14 @@ function afficherPlateau(){
 		var dernier = (nojoueur == 0?false:partie.joueur[nojoueur].derniereAction.ouX == x && partie.joueur[nojoueur].derniereAction.ouY == y );
 		onclick_string = 'onclick="action('+x+','+y+');"';
 		onload_string = 'onload="chargementImageJeu('+zonePouvantCharger+');"';
-		chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+x+","+y+":"+cellules+"\" alt=\""+x+","+y+":"+cellules+"\" "+onload_string+" src=\"../images/image.php?c="+couleur+"&n="+cellules+"&h="+(laCase.getChateau()?1:0)+"&d="+laCase.getDecor()+"&type=atome&m="+(laCase.vaExploser()?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
+		chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+x+","+y+":"+cellules+"\" alt=\""+x+","+y+":"+cellules+"\" "+onload_string+" src=\"../images/image.php?c="+couleur+"&n="+cellules+"&h="+(laCase.getChateau()?1:0)+"&d="+laCase.getDecor()+"&type=<?php echo $type_graphisme;?>&m="+(laCase.vaExploser()?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
 	}
 		chaineHTML += "<br />";
 	}
 	document.getElementById("texteremplacement").style.display = "block";
 	RAZZone(zonePouvantCharger);
 	document.getElementById("plat"+zonePouvantCharger).innerHTML = chaineHTML;
+	AfficherChoixJoueur();
 }
 
 var nbImagesChargeesZone = new Array(0,0,0);
@@ -212,6 +250,51 @@ function changerAffichage(quoi,comment){
 	}
 }
 
+// Fonctions palette
+function chargerPalette() {
+	var paletteHTML = ""
+	for(i = 0; i <= 3; i++) {
+		paletteHTML += "<img id=\"palette_"+i+"\" width=33 height=33 alt=\"\" src=\""+image_case_type(i)+"\" border=2 onClick=\"select_palette('palette_"+i+"', "+i+")\"/>&nbsp;";
+	}
+	document.getElementById("palette").innerHTML = paletteHTML;
+	select_palette('palette_3', 3);
+}
+
+function select_palette(id, i) {
+	for(j = 0; j <= 3; j++) {
+		if(j != i) document.getElementById("palette_"+j).style.borderColor = "white";
+	}
+	document.getElementById(id).style.borderColor = "black";
+	current_decor = i;
+}
+
+// Fonction choix joueur
+function id_choix_joueur(i) {
+	return "choix_joueur_"+i;
+}
+
+function AfficherChoixJoueur() {
+	var choix_joueurHTML = ""
+	for(i = 0; i <= partie.nbJoueurs; i++) {
+		choix_joueurHTML += "<img id=\""+id_choix_joueur(i)+"\" width=33 height=33 alt=\"\" src=\""+image_case_couleur(i)+"\" border=2 onClick=\"select_choix_joueur("+i+")\"/>&nbsp;";
+	}
+	document.getElementById("choix_joueur").innerHTML = choix_joueurHTML;
+	select_choix_joueur(current_joueur);
+}
+
+function ChargerChoixJoueur() {
+	current_joueur = 0;
+	AfficherChoixJoueur();
+}
+
+function select_choix_joueur(i) {
+	if(document.modes.m.value == 'setderniereaction' && i==0) i = 1;
+	for(j = 0; j <= partie.nbJoueurs; j++) {
+		if(j != i) document.getElementById(id_choix_joueur(j)).style.borderColor = "white";
+	}
+	document.getElementById(id_choix_joueur(i)).style.borderColor = "black";
+	current_joueur = i;
+}
 
 </script>
 </head>
@@ -229,7 +312,28 @@ function changerAffichage(quoi,comment){
 	<div id="plat2"></div>
 	<div id="texteremplacement">Chargement du plateau...</div>
 	<div id="modes" style="align:center;"><form name="modes"><!--//différents modes : ajoutercellule enlevercellule setjoueurN setdecorD setderniereactionN clicchateau-->
-		Mode : <select style="display:inline;" name="m" onchange="if (this.value=='setjoueur' || this.value=='setdecor' || this.value=='setderniereaction') {document.modes.nb.value=1;document.modes.nb.style.display='inline'; mode=this.value+document.modes.nb.value;}else {document.modes.nb.style.display='none'; mode=this.value;}">
+<script type="text/javascript">
+function onchange_mode(sel) {
+	//if (sel.value=='setjoueur' || sel.value=='setderniereaction') {
+		//document.modes.nb.value=1;
+		//document.modes.nb.style.display='inline';
+	//	mode=sel.value;//+document.modes.nb.value;
+	//} else {
+		//document.modes.nb.style.display='none';
+		mode=sel.value;
+	//}
+	document.getElementById("palette").style.display = (sel.value=='setdecor') ? 'inline':'none';
+	document.getElementById("choix_joueur").style.display = (sel.value=='ajoutercellule' || sel.value=='setjoueur' || sel.value=='setderniereaction') ? 'inline':'none';
+	select_choix_joueur(current_joueur); //Pour être sûr que le joueur sélectionné est bien valide.
+}
+/*function onchange_nb(sel) {
+	var unmin = document.modes.m.value=='setderniereaction' ? 1 : 0;
+	var unmax = (document.modes.m.value=='setjoueur'||document.modes.m.value=='setderniereaction'?partie.nbJoueurs:3);
+	sel.value=Math.min(unmax,Math.max(parseInt(sel.value),unmin));
+	mode = document.modes.m.value;
+}*/
+</script>
+		Mode : <select style="display:inline;" name="m" onchange="onchange_mode(this)">
 			<option value="ajoutercellule">Ajouter une cellule</option>
 			<option value="enlevercellule">Enlever une cellule</option>
 			<option value="setjoueur">Mettre joueur</option>
@@ -238,7 +342,7 @@ function changerAffichage(quoi,comment){
 			<option value="clicchateau">Activer/désactiver chateau</option>
 			<option value="retrecir">R&eacute;tr&eacute;cir le plateau</option>
 		</select>
-		<select name="nb" style="display:none;" onchange="var unmin=(document.modes.m.value=='setderniereaction'?1:0);var unmax=(document.modes.m.value=='setjoueur'||document.modes.m.value=='setderniereaction'?partie.nbJoueurs:3);this.value=Math.min(unmax,Math.max(parseInt(this.value),unmin));mode=document.modes.m.value+this.value;">
+		<!--select name="nb" style="display:none;" onchange="onchange_nb(this)">
 			<option value=0>0</option>
 			<option value=1>1</option>
 			<option value=2>2</option>
@@ -248,8 +352,13 @@ function changerAffichage(quoi,comment){
 			<option value=6>6</option>
 			<option value=7>7</option>
 			<option value=8>8</option>
-		</select>
-	</form></div>
+		</select-->
+	</form>
+		<div id="palette" style="display:none">
+		</div>
+		<div id="choix_joueur" style="display:inline">
+		</div>
+	</div>
 </div>
 <div id="divjoueurs" class="ccontent" style="display:inline;"><form name="joueurs">
 <?php
