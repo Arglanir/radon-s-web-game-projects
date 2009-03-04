@@ -3,6 +3,7 @@
 /*** paramètres GET :
 	c numéro de la campagne
 	m numéro de la mission
+	pw mot de passe administrateur
 
 	save	Enregistre la partie sous le bon format de fichier
 		paramètre POST : la partie XML est sous "fichier"
@@ -10,7 +11,7 @@
 
 include_once("../fonctions.inc");
 
-$type_graphisme = isset($_GET["type"])?$_GET["type"]:"atome";
+if (@md5($_GET["pw"]) != mdpadminmd5){	header("HTTP/1.0 404 Not found",true,404);die();	die("Vous n'êtes pas autorisés à venir ici.");}$type_graphisme = isset($_GET["type"])?$_GET["type"]:"atome";
 
 $messagePHP = "";
 $fichierExistant = false;
@@ -21,10 +22,11 @@ if (array_key_exists("c",$_GET) && array_key_exists("m",$_GET)){
 }
 
 if (array_key_exists("save",$_GET) && array_key_exists("fichier",$_POST)){//sauvegarde de fichier
+	$laction = (file_exists($fichierExistant)?"modifi&eacute;":"cr&eacute;&eacute;");
 	$fi = fopen($fichierExistant,"w");
 	fwrite($fi,$_POST["fichier"]);
 	fclose($fi);
-	$messagePHP .= $fichierExistant." cr&eacute;&eacute;";
+	$messagePHP .= $fichierExistant." ".$laction;
 }
 
 $max_joueurs = 8;
@@ -137,6 +139,7 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 
 	//optionscampagne
 	if (partie.params){
+		//alert("ici");
 		var params = partie.params;
 		document.camp.campagne.value=params.getAttribute("c");
 		document.camp.mission.value=params.getAttribute("m");
@@ -155,10 +158,7 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 		eval("document.joueurs.mdp"+j).value=partie.joueur[j].mdp;
 		eval("document.joueurs.nivia"+j).value=partie.joueur[j].niveau;
 	}
-	if (!seulementJoueurs){ //TODO: To verify that this addition does not break anything
-		updateNumberPlayers(false);
-	}
-}
+  if (!seulementJoueurs)	updateNumberPlayers(false);		}
 
 function nomIA(){//génère un nom d'IA
 	var syllabes = new Array("kel","gal","mot","juh","syd","fek","péd","van","fort","bel","jol");
@@ -308,8 +308,8 @@ function select_choix_joueur(i) {
 	| <a href="#" id="menudivautres" onclick="changerAffichage('divautres')" style="text-decoration:none;color:#AFA439;font-weight:bold;">Autres</a>
 </div>
 <div id="divplateau" class="ccontent" style="display:inline;">
-	<div id="plat1"></div>
-	<div id="plat2"></div>
+	<div id="plat1" style="display:none;"></div>
+	<div id="plat2" style="display:none;"></div>
 	<div id="texteremplacement">Chargement du plateau...</div>
 	<div id="modes" style="align:center;"><form name="modes"><!--//différents modes : ajoutercellule enlevercellule setjoueurN setdecorD setderniereactionN clicchateau-->
 <script type="text/javascript">
@@ -373,7 +373,7 @@ function onchange_mode(sel) {
 			foreach($array_count as $i) {
 			echo "<div id=\"divname".$i."\" style=\"display:none;background-color:#FFFFFF;border: 1px dotted #CCC; width: 400px; clear: both; padding: 5px; margin: 5px 0px 5px 0px\">\n";
 			echo "<table><tr><td>";
-			echo '<label>Nom : </label><input type=text id="no'.$i.'" name="nomjoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF"><br />';
+			echo '<label>Nom : </label><input type=text id="no'.$i.'" name="nomjoueur'.$i.'" value="Joueur'.$i.'" onfocus="if (this.value.indexOf(\'Joueur\') != -1) this.value=\'\';" style="background-color:#0000FF" onchange="partie.joueur['.$i.'].nom = this.value;"><br />';
 			if ($i == 1) echo '<div id="divias'.$i.'" style="display:inline"><label>Joueur humain</label><input style="display:none;" type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'"  onchange="updateIA('.$i.')" />';
 			else echo '<div id="divias'.$i.'" style="display:inline"><label>Intelligence artificielle</label><input style="display:none;" type="checkbox" name="is_ia'.$i.'" id="is_ia'.$i.'" checked  onchange="updateIA('.$i.')" />';
 			if ($i == 1) echo '<div id="divia'.$i.'" style="display:none"><label style="clear: none;">&nbsp;&nbsp;Niveau :</label><select type=text id="nivia'.$i.'" name="nivia'.$i.'"><option value=0 selected>0</option><option value=1>1</option><option value=2>2</option></select></div></div>';
@@ -443,7 +443,7 @@ function onchange_mode(sel) {
 				"callback" => "partie.options.setExplosionJoueur(parseInt(this.value));",
 				"table"=>true
 			));
-
+;
 ?>
 	<tr><td style="text-align:right;">
 			<label style="float: right;">Profondeur de jeu :</label></td><td>
@@ -458,7 +458,7 @@ function onchange_mode(sel) {
 	<form name="camp">
 	Campagne/mission : <input type="text" name="campagne" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="mission" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" /> ->
-	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?c='+document.camp.campagne.value+'m='+document.camp.missionsuivante.value;"> mission suivante</a> : 
+	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.missionsuivante.value;"> mission suivante</a> : 
 	<input type="text" name="missionsuivante" value="fin" style="width:60px" /><br />
 	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" /><br />
 	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';" /><br />
@@ -467,16 +467,26 @@ function onchange_mode(sel) {
 </div>
 <div id="divautres" class="ccontent"  style="diplay:none;">
 <form name="sauv" method="POST" action="editeurcampagnes.php">
-<input type="submit" class="btn" value="Recharger" onclick="document.sauv.action='editeurcampagnes.php?c='+document.camp.campagne.value+'&m='+document.camp.mission.value;" />
+<input type="submit" class="btn" value="Recharger" onclick="document.sauv.action='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.mission.value;" />
 <input type="hidden" value="" name="fichier" />
-<input type="button" class="btn" value="Enregistrer" onclick="document.sauv.action='editeurcampagnes.php?save=1&c='+document.camp.campagne.value+'&m='+document.camp.mission.value;finaliser();document.sauv.submit();" /> <!--//-->
+<input type="button" class="btn" value="Enregistrer" onclick="document.sauv.action='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&save=1&c='+document.camp.campagne.value+'&m='+document.camp.mission.value;finaliser();document.sauv.submit();" /> <!--//-->
+<script type="text/javascript"><!--
+function lancerTesteur(){
+	var lURL = "../creajeucampagne.php?c="+document.camp.campagne.value+"&m="+document.camp.mission.value+"&n=0&joueur=Testeur&couleur=0000FF";
+	//alert(lURL);
+	document.getElementById("framelancement").src = lURL;
+}
+//--></script>
+<input type="button" class="btn" value="Tester" onclick="lancerTesteur();" title="Tester la mission cr&eacute;&eacute;e" />
 </form>
 <form name="charg" method="GET" action="editeurcampagnes.php"><!-- style="display:none;"-->
 Charger une mission existante : <input type="text" name="c" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="m" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" />
+	<input type="hidden" name="pw" value="<?php echo $_GET['pw']; ?>" />
 <input class="btn" type="submit" value="Charger !">
 </form>
 </div>
 <textarea id="resultat" style="<?php if (!array_key_exists("fichier",$_POST)) echo "display:none;";?>"><?php echo $_POST["fichier"]; ?></textarea>
+<iframe name="framelancement" id="framelancement" style="display:none;"></iframe><!--   -->
 </body>
 </html>

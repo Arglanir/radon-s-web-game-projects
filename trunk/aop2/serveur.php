@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 /********************************************
 jeu.php : interface avec le fichier de jeu
 	reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence

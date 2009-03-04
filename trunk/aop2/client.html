@@ -25,7 +25,6 @@ jouer
 tableauArguments : tableau des arguments de la page
 
 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="Content-language" content="fr" />
@@ -43,7 +42,7 @@ tableauArguments : tableau des arguments de la page
 tableauArguments["offline"] = parseInt(tableauArguments["offline"]);
 if (tableauArguments["j"] != "observateur")
 	tableauArguments["j"] = parseInt(tableauArguments["j"]);
-tableauArguments["type"] = (tableauArguments["type"]?tableauArguments["type"]:"texte");
+tableauArguments["type"] = (tableauArguments["type"]?tableauArguments["type"]:"cellule");
 
 
 /*** initialisation des paramètres et types ***/
@@ -120,6 +119,21 @@ this.tableauCasesUtilisees = new Array();
 			this.tableauDesMax[y][x] = parseInt(XlaCase.getAttribute('max'));
 		}
 	}
+	//alert(Xpartie.getElementsByTagName("histoire").item(0));
+this.histoire = (Xpartie.getElementsByTagName("histoire").length>0?
+		(Xpartie.getElementsByTagName("histoire").item(0).firstChild?
+			Xpartie.getElementsByTagName("histoire").item(0).firstChild.nodeValue:false):false);
+this.params = false;
+	if (Xpartie.getElementsByTagName("parametrescampagne").length>0)//il y a des paramètres de campagne !
+		if (Xpartie.getElementsByTagName("parametrescampagne").item(0).getAttribute("titre")){//ou pas
+			alert("ici");
+			this.params = Xpartie.getElementsByTagName("parametrescampagne").item(0);
+			document.getElementById("infocampagne").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>";
+			document.getElementById("infocampagne").style.display = "block";
+			document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
+													(this.histoire?this.histoire:"Une mission banale");
+			document.getElementById("popupcampagne").style.display = "block";
+	}
 	
 //méthodes
 this.purifie=purifie;
@@ -166,7 +180,7 @@ function purifie(){with(this){//renvoie true s'il y a eu un changement, false si
 				  case 0: perteBord=true; //on ne regarde pas au bord mais on perd une cellule
 				  case 1: //on regarde pas après les bords
 					if (entre(0,nvy,this.tailleY-1) && entre(0,nvx,this.tailleX-1)){
-						if (this.options[4]==0 && case2cellules(this.tableauJeu[nvy][nvx])>=this.tableauDesMax[nvy][nvx] && case2joueur(nbSurCase)!=case2joueur(this.tableauJeu[nvy][nvx])){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+						if (this.options[4]==0 && !case2chateau(this.tableauJeu[nvy][nvx]) && !case2chateau(nbSurCase) && case2cellules(this.tableauJeu[nvy][nvx])>=this.tableauDesMax[nvy][nvx] && case2joueur(nbSurCase)!=case2joueur(this.tableauJeu[nvy][nvx])){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
 							true;
 						} else
 						switch(this.tableauDecor[nvy][nvx]){
@@ -390,10 +404,24 @@ function existeGagnant(){with(this){//renvoie le numéro du joueur gagnant ! fals
 	return leGagnant;
 }}
 
+var popupfinaffichee = false;
+
 function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la fenêtre, jouable 0non/1oui/2chat
 	//argument : 0 non jouable, 1 jouable, 2 chateau, 254 non jouable joueur externe 255 non jouable gagnant
 	var mettreLesOnload = true;
 	var nGagnant = this.existeGagnant();
+	if (nGagnant==tableauArguments["j"] && !popupfinaffichee){
+		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
+													this.params.getAttribute("infosucces")+"<br />"+
+													(this.params.getAttribute("suivante") != "fin" ? 
+														"<a target='framecom' href='creajeucampagne.php?c="+this.params.getAttribute("c")+
+														"&m="+this.params.getAttribute("m")+
+														"&n=0&joueur="+this.joueur[1][0]+
+														"&couleur="+this.joueur[1][1]+"' onclick=\"supprimerPartie(false);\">Mission suivante</a>" :
+														"Campagne terminée ! Félicitations !");
+		document.getElementById("popupcampagne").style.display = "block";
+		popupfinaffichee = true;
+	}
 	if (!tableauArguments["offline"] && this.joueurs[this.joueurEnCours][3] != 0) typeJouable = 254;//joueur ailleurs
 	if (nGagnant) typeJouable = 255;
 	var typeJouable = (typeJouable == undefined?1:typeJouable);
@@ -560,6 +588,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
 		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title='Si tu penses que l'IA n'a pas été lancée' />";
+	chaineHTML += "<input type='button' value='Recharger le jeu' onclick='getJeuXML();' title='Si tu penses que le jeu est coincé dans ton client' />";
 	
 	chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
@@ -592,7 +621,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 //			chaineHTML += "<input type='button' BORDERCOLOR='"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
 			break;
 		default:
-			alert("Argument de affiche() non reconnu : "+typeJouable);
+			//alert("Argument de affiche() non reconnu : "+typeJouable);
 	}
 		
 	if (tableauArguments["type"]=="texte" || !mettreLesOnload){
@@ -760,8 +789,6 @@ function case2joueur(entier){//retourne le n° d'un joueur à qui est la case
 	return Math.floor((entier-(case2chateau(entier)?10000:0))/100);
 }
 
-
-
 function versRRGGBB(couleur){//retourne le bon format de couleur pour les images
 	switch (couleur.substring(0,1)){
 	case "#"://couleur #HHHHHH
@@ -919,14 +946,15 @@ function chargeMP(){
 	window.location.replace("jeu.html?pw="+escape(document.mdp.motdepasse.value)+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]);
 }
 
-function supprimerPartie(){
+function supprimerPartie(revenirAccueil){
+	revenirAccueil = (typeof revenirAccueil == "undefined"?true:revenirAccueil);
 	var xhr = createXHR();
 	var chaineDAppel = serveur+"?a=s"+(tableauArguments["pw"]?"&pw="+tableauArguments["pw"]:"")+"&p="+tableauArguments["p"]+"&j="+tableauArguments["j"]+"&nocache=" + Math.random();
 	xhr.onreadystatechange  = function(){ 
 		if(xhr.readyState  == 4){
 			if(xhr.status  == 200) {
 				document.getElementById("options").innerHTML = "Partie supprim&eacute;e.<br />";
-				window.location.replace('index.php');
+				if (revenirAccueil) window.location.replace('index.php');
 			} else {
 			}
          }
@@ -1045,6 +1073,21 @@ function mettreOnlineOffline(){
 </script>
 </head>
 <body onload="main()">
+<div id="infocampagne" style="display:none;"></div>
+<div style="z-index: 99; display: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%" id="popupcampagne">
+	<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 100%;"><!-- background: url('css/img/footer.jpg')-->
+		<tr>
+			<td align="center">
+				<div style="width: 400px; height: 400px; border: 1px solid #C0C793; background: #FFFFFF">
+				<input class="btn" style="align:center;font-size:6px;height:12px;width:12px;padding:0;float:right;right:0;top:0;" value="x" onclick="document.getElementById('popupcampagne').style.display='none';" />
+				<div id="interieurpopup"></div>
+				
+				
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
 <div name="Joueurs" id="joueurs">
 <form name="mdp">
 <input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" />
@@ -1084,6 +1127,7 @@ function debug(chaine){
 <div id="debug">
 
 </div>
+<iframe id="framecom" name="framecom" style="display:none;"></iframe>
 <div id="comm">
 
 </div>
