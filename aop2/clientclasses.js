@@ -55,7 +55,7 @@ function lecteurXML(atester){
 		try 
 		{
 			this.doc.async=false;
-			this.doc.load(fichier);
+			if (!this.doc.load(fichier)) throw new Exception("");
 			return true;
 		}
 		catch(e) {
@@ -302,8 +302,11 @@ function communiqueGET(tableauArgs,callback,callbackerreur){
 						document.getElementById("comm").innerHTML = "";
 						callbackerreur();
 					}
-					else
+					else{
+						alert(xhr.responseXML);
+						alert(xhr.responseText);
 						document.getElementById("comm").innerHTML = "Erreur lors du chargement du XML";
+					}
 				}
 			} else {
 				if (callbackerreur){
@@ -858,7 +861,7 @@ function PlateauDeJeu() {
 					  case 1: //on regarde pas après les bords
 						if (entre(0,nvy,this.tailleY-1) && entre(0,nvx,this.tailleX-1)){
 							var autreCase=this.getCase(nvx,nvy);
-							if (!this.partie.options.yaExplosionJoueur() && autreCase.vaExploser() && autreCase.getJoueur() != cetteCase.getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+							if (!this.partie.options.yaExplosionJoueur() && !autreCase.getChateau() && !cetteCase.getChateau() && autreCase.vaExploser() && autreCase.getJoueur() != cetteCase.getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
 								true;
 							} else
 							switch(autreCase.getDecor()){

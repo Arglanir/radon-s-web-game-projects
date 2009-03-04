@@ -51,7 +51,8 @@ function supprimerPartie(numero){
 </script>
 </head>
 <body>
-<a href="index.php">Retour à l'accueil</a>
+<a href="index.php">Retour à l'accueil</a> | 
+<a href="campagnes/editeurcampagnes.php?pw=<?php echo $_GET['pw'] ?>">Vers l'&eacute;diteur</a>
 <h3>Fichier XML :</h3>
 <?php
 include_once ("newjeux.php");

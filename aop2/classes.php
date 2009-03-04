@@ -14,6 +14,7 @@ class Partie {
 	var $gagnant;
 	
 	var $commentaires;
+	var $docxml;
 	
 	//fonctions de création
 	function Partie(){
@@ -23,6 +24,7 @@ class Partie {
 		$this->joueur = array();
 		$this->noTour = 1;
 		$this->joueurEnCours = 0;
+		$this->docxml = false;
 	}
 	function addJoueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
 		if ($this->demarree) return false;//plus d'ajout après le démarrage
@@ -129,11 +131,11 @@ class Partie {
 	
 	function fromXML($fichier){
 		if (!file_exists($fichier)) return false;
-		$xml_partie = new DOMDocument();
-		$xml_partie->load( $fichier );
-		$Xpartie = $xml_partie->get_elements_by_tagname( "partie" );
-		$Xpartie = $Xpartie[0];
 		$partie = new Partie();
+		$partie->docxml = new DOMDocument();
+		$partie->docxml->load( $fichier );
+		$Xpartie = $partie->docxml->get_elements_by_tagname( "partie" );
+		$Xpartie = $Xpartie[0];
 		$partie->demarree = ($Xpartie->get_attribute("demarree")=="1");
 		$partie->setNoTour(0+$Xpartie->get_attribute("notour"));
 		$partie->setJoueurEnCours(0+$Xpartie->get_attribute("joueurencours"));
@@ -146,29 +148,29 @@ class Partie {
 		$partie->options = Options::fromXML($partie->options[0]);
 		$partie->tableauJeu = $Xpartie->get_elements_by_tagname( "tableaudejeu" );
 		$partie->commentaires = $Xpartie->get_elements_by_tagname( "commentaire" );
-		$partie->commentaires = $partie->commentaires[0]->get_content();
+		$partie->commentaires = $partie->commentaires[0];
 		$partie->tableauJeu = PlateauDeJeu::fromXML($partie->tableauJeu[0]);
 		return $partie;
 	}
 	function fromSXML($fichier){
 		if (!file_exists($fichier)) return false;
 		try {
-			$xml_partie = new SimpleXMLElement(file_get_contents($fichier));
+			$docxml = new SimpleXMLElement(file_get_contents($fichier));
 		} catch (Exception $e){
 			return false;
 		}
-		if (!$xml_partie) return false;
+		if (!$docxml) return false;
 		
-		$Xpartie = $xml_partie;/*->children();
+		$Xpartie = $docxml;/*->children();
 		$Xpartie = $Xpartie[0];*/
 
 		$partie = new Partie();
-		
+		$partie->docxml = $docxml;
 		$partie->setNoTour(0+$Xpartie["notour"]);
 		$partie->setJoueurEnCours(0+$Xpartie["joueurencours"]);
 		$partie->nbJoueurs = 0+$Xpartie["nombredejoueurs"];
 		$partie->gagnant = 0+$Xpartie["gagnant"];
-		$partie->commentaires = $Xpartie->commentaire->asXML();
+		$partie->commentaires = $Xpartie->commentaire;
 		$partie->demarree = ($Xpartie["demarree"]=="1");
 		
 		foreach($Xpartie->children() as $Xelement){
@@ -190,6 +192,7 @@ class Partie {
 	}
 	
 	function toSXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document SimpleXML de partie
+		//if (!$this->docxml)
 		$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><partie></partie>');
 		//$Xpartie = $xml_partie->addChild('partie');
 	
@@ -209,38 +212,52 @@ class Partie {
 		
 		$Xtableau = $this->tableauJeu->toSXML($Xpartie);
 
-		$Xpartie->addChild("commentaire", $this->commentaires);
+		$XCom = $Xpartie->addChild("commentaire");
+		$Xhist = $XCom->addChild("histoire",$this->commentaires->histoire);
+		$Xpara = $XCom->addChild("parametrescampagne");
+		$Xpara->addAttribute("c",$this->commentaires->parametrescampagne["c"]);
+		$Xpara->addAttribute("m",$this->commentaires->parametrescampagne["m"]);
+		$Xpara->addAttribute("titre",$this->commentaires->parametrescampagne["titre"]);
+		$Xpara->addAttribute("infosucces",$this->commentaires->parametrescampagne["infosucces"]);
+		$Xpara->addAttribute("suivante",$this->commentaires->parametrescampagne["suivante"]);
+
 		return $Xpartie;
 	}
 	function toXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document XML de partie
-		$xml_partie = domxml_new_doc("1.0");
-		$Xpartie = $xml_partie->create_element( "partie" );
-		$xml_partie->append_child($Xpartie);
+		if (!$this->docxml) {
+			$this->docxml = domxml_new_doc("1.0");
+		}
+		else {
+			$Xpartie = $this->docxml->get_elements_by_tagname("partie");
+			$this->docxml->remove_child($Xpartie[0]);
+		}
+		$Xpartie = $this->docxml->create_element( "partie" );
+		$this->docxml->append_child($Xpartie);
 		$Xpartie->set_attribute("nombredejoueurs", $this->nbJoueurs);
 		$Xpartie->set_attribute("notour", $this->noTour);
 		$Xpartie->set_attribute("gagnant", $this->gagnant);
 		$Xpartie->set_attribute("joueurencours", $this->joueurEnCours);
 		$Xpartie->set_attribute("demarree", ($this->demarree?1:0));
 		
-		$Xjoueurs = $xml_partie->create_element("joueurs");
+		$Xjoueurs = $this->docxml->create_element("joueurs");
 		$Xpartie->append_child($Xjoueurs);
 		
 		for ($i = 1; $i <= $this->nbJoueurs; $i++){
-			$Xjoueur = $this->joueur[$i]->toXML($xml_partie,$i,$cacherMotsDePasse,$joueurAppelant!=$i);
+			$Xjoueur = $this->joueur[$i]->toXML($this->docxml,$i,$cacherMotsDePasse,$joueurAppelant!=$i);
 			$Xjoueurs->append_child($Xjoueur);
 		}
 
-		$Xoptions = $this->options->toXML($xml_partie);
+		$Xoptions = $this->options->toXML($this->docxml);
 		$Xpartie->append_child($Xoptions);
 		
-		$Xtableau = $this->tableauJeu->toXML($xml_partie);
+		$Xtableau = $this->tableauJeu->toXML($this->docxml);
 		$Xpartie->append_child($Xtableau);
 
-		$Xcommentaire = $xml_partie->create_element( "commentaire" );
-		$Xcommentaire->set_content($this->commentaires);
+		//$Xcommentaire = $this->docxml->create_element( "commentaire" );
+		$Xcommentaire = $this->commentaires;
 		$Xpartie->append_child($Xcommentaire);
 
-		return $xml_partie;
+		return $this->docxml;
 
 	}
 	
@@ -653,7 +670,7 @@ class PlateauDeJeu {
 					  case 1: //on regarde pas après les bords
 						if (entre(0,$nvy,$this->tailleY-1) && entre(0,$nvx,$this->tailleX-1)){
 							$autreCase=$this->getCase($nvx,$nvy);
-							if (!$options->yaExplosionJoueur() && $autreCase->vaExploser() && $autreCase->getJoueur() != $cetteCase->getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+							if (!$options->yaExplosionJoueur() && !$autreCase->getChateau() && !$cetteCase->getChateau() && $autreCase->vaExploser() && $autreCase->getJoueur() != $cetteCase->getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
 								true;
 							} else
 							switch($autreCase->getDecor()){

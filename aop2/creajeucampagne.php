@@ -10,9 +10,9 @@ Paramètres GET:
 	
 Renvoie les liens joueurs
 */
-include("classes.php");
-include("newjeux.php");
-include("functions.inc");
+include_once("classes.php");
+include_once("newjeux.php");
+include_once("fonctions.inc");
 
 if (!array_key_exists("c",$_GET)){lancerErreur("Campagne non renseignee","Recherche des parametres");}
 if (!array_key_exists("m",$_GET)){lancerErreur("Mission non renseignee","Recherche des parametres");}
@@ -28,8 +28,9 @@ $createur->partie = Partie::ouvrirXML($fichierSource);
 
 $createur->partie->joueur[1]->nom = $_GET["joueur"];
 $createur->partie->joueur[1]->couleur = $_GET["couleur"];
+//régler le niveau de difficulté : à faire
 
-$createur->->opt_partie_cachee = true;
+$createur->opt_partie_cachee = true;
 $createur->enregistrerPartie();
 
 if (array_key_exists("enxml",$_GET))
