@@ -61,12 +61,15 @@
 		chateau (0 | 1) "0">
 <!ELEMENT commentaire (parametrescampagne?,histoire?) >
 <!ELEMENT histoire (#PCDATA)>
+<!ATTLIST histoire
+	h CDATA "">
 <!ELEMENT parametrescampagne (EMPTY)>
 <!ATTLIST parametrescampagne
 		c NMTOKEN #REQUIRED 
 		m CDATA #REQUIRED 
 		titre CDATA #REQUIRED 
 		infosucces CDATA #REQUIRED
+		deco CDATA "cellule"
 		suivante CDATA "fin">
 		<!-- //numéro de campagne
 		//mission de la campage

@@ -187,7 +187,7 @@ function metsLesIA(jusqua,niveau,debut){
 		</div> 
 	</div> 
 	<div id="content">
-		<div id="campagnes" class="onglet" style="width: 350px;display:none;">
+		<div id="campagnes" class="onglet" style="width: 400px;display:none;">
 			<h2><a href="#" onclick="changerAffichage('campagnes');return false;" style="text-decoration:none;">&gt; Campagnes</a></h2>
 			<form name="camp" action="creajeucampagne.php" target="framecreation">
 				Nom : <input type="text" name="joueur" /> | <?php echo addSelectOption(
@@ -201,6 +201,8 @@ array("text" => "Couleur",
 	"color" => True
 ),false); ?><br />
 				<input type="hidden" name="m"/><input type="hidden" name="c"/><input type="hidden" name="n" value="0"/>
+				<!--input type="hidden" name="noredirection"/-->
+				<!-- ajouter les campagnes ici -->
 				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
 			</form>
 		</div>
@@ -275,13 +277,12 @@ array("text" => "Couleur",
 			}*/
 			?>
 			<table>
-			<tr><td style="text-align:right;">
-			<label style="float: right;">Taille :</label></td><td>
+			<tr><td style="text-align:right;">Taille :</td><td>
 			<input class="btno" type="button" value="." onclick="document.cre.x.value=5;document.cre.y.value=5;" title="petit : 5x5" />
 			<input class="btno" type="button" value="o" onclick="document.cre.x.value=9;document.cre.y.value=9;" title="moyen : 9x9" />
 			<input class="btno" type="button" value="O" onclick="document.cre.x.value=15;document.cre.y.value=15;" title="grand : 15x15" />
 			<input type=text id="x" name="x" value="6" style="width:30px">
-			<div style="float:left;">x&nbsp;</div>
+			x&nbsp;
 			<input type=text id="y" name="y" value="6" style="width:30px">
 			</tr>
 

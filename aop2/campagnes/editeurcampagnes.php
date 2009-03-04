@@ -40,7 +40,12 @@ for($i=1; $i<=$max_joueurs; $i++) {
 <!--link rel="stylesheet" type="text/css" href="../css/style.css" /--> 
 <script type="text/javascript" src="../clientclasses.js"></script>
 <script type="text/javascript" src="md5.js"></script>
+<style type="text/css">
+
+</style>
 <script type="text/javascript">
+if (typeof tableauArguments["type"] == "undefined")
+	tableauArguments["type"] = "atome";
 
 var partie = false;
 var md5mdpIA = "<?php echo md5mdpIA; ?>";
@@ -80,6 +85,7 @@ function finaliser(){//appelé avant l'envoi de la partie à l'enregistreur
 	partie.params.setAttribute("m",document.camp.mission.value);
 	partie.params.setAttribute("titre",document.camp.titre.value);
 	partie.params.setAttribute("infosucces",document.camp.infosucces.value);
+	partie.params.setAttribute("deco",document.getElementById("typecases").value);
 	partie.params.setAttribute("suivante",document.camp.missionsuivante.value);
 	
 	document.sauv.fichier.value=partie.toXML().asXML();
@@ -91,21 +97,55 @@ function finaliser(){//appelé avant l'envoi de la partie à l'enregistreur
 var mode="ajoutercellule";//mode d'action quand on clique sur une case
 //différents modes : ajoutercellule enlevercellule setjoueurN setdecorD setderniereactionN clicchateau
 
+var cellulecopiee = false;
+	
 function action(x, y){//fonction appelée quand on clique sur une case
 	//var nb = parseInt(document.modes.nb.value);
-	var nb = current_joueur;
+	var nb = current_joueur;var mettreAZero = false;
 	//En attendant de faire mieux...
 	//parseInt(mode.substring(mode.length-1,mode.length));
+	if (mode.indexOf("colle")==0){
+		document.getElementById("case_copiee").style.display="none";cellulecopiee = false;
+	}
 	switch(mode) {//mode.substring(0,mode.length-1)){
-		case "ajoutercellule":partie.tableauJeu.getCase(x,y).addCellules(1);
+		case "ajoutercellule":
+			partie.tableauJeu.getCase(x,y).addCellules(1);
 			if( nb != 0) partie.tableauJeu.getCase(x,y).setJoueur( nb);
 			break;
-		case "enlevercellule":partie.tableauJeu.getCase(x,y).remCellules(1);break;
-		case "setjoueur":partie.tableauJeu.getCase(x,y).setJoueur( nb);break;
-		case "setdecor":changeCase(x, y);break;//partie.tableauJeu.getCase(x,y).setDecor(2);break;
-		case "setderniereaction":partie.joueur[ nb].derniereAction.ouX = x;partie.joueur[ nb].derniereAction.ouY = y;break;
-		case "clicchateau":partie.tableauJeu.getCase(x,y).clicChateau();break;
-		case "retrecir":partie.tableauJeu.nouveau(x+1,y+1);document.options.x.value=x;document.options.y.value=y;break;
+		case "enlevercellule":
+			partie.tableauJeu.getCase(x,y).remCellules(1);break;
+		case "setjoueur":
+			partie.tableauJeu.getCase(x,y).setJoueur( nb);break;
+		case "setdecor":
+			changeCase(x, y);break;//partie.tableauJeu.getCase(x,y).setDecor(2);break;
+		case "setderniereaction":
+			partie.joueur[ nb].derniereAction.ouX = x;partie.joueur[ nb].derniereAction.ouY = y;break;
+		case "clicchateau":
+			partie.tableauJeu.getCase(x,y).clicChateau();break;
+		case "coupecolle":mettreAZero = true;
+		case "copiecolle":
+			if (cellulecopiee){
+				partie.tableauJeu.getCase(x,y).setJoueur(cellulecopiee.getJoueur());
+				partie.tableauJeu.getCase(x,y).setCellules(cellulecopiee.getCellules());
+				partie.tableauJeu.getCase(x,y).setDecor(cellulecopiee.getDecor());
+				document.getElementById("case_copiee").style.display="none";
+				cellulecopiee = false;
+			}
+			else {
+				cellulecopiee = partie.tableauJeu.getCase(x,y).copie();
+				if (mettreAZero){
+					partie.tableauJeu.getCase(x,y).setJoueur(0);
+					partie.tableauJeu.getCase(x,y).setCellules(0);
+					partie.tableauJeu.getCase(x,y).setDecor(0);
+				}
+				document.getElementById("case_copiee").innerHTML = "<img src=\""+image_caseO(cellulecopiee)+"\" />";
+				document.getElementById("case_copiee").style.display="inline";
+			}
+			break;
+		case "RAZcase":
+			partie.tableauJeu.getCase(x,y).setCellules(0);partie.tableauJeu.getCase(x,y).setJoueur(0);break;
+		case "retrecir":
+			partie.tableauJeu.nouveau(x+1,y+1);document.options.x.value=x;document.options.y.value=y;break;
 	}
 	afficherPlateau();
 }
@@ -126,6 +166,21 @@ function changeCase(x, y) {
 function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeur
 	seulementJoueurs = (typeof seulementJoueurs == "undefined"?false:seulementJoueurs);
   if (!seulementJoueurs){
+	//optionscampagne
+	if (partie.params){
+		//alert("ici");
+		var params = partie.params;
+		document.camp.campagne.value=params.getAttribute("c");
+		document.camp.mission.value=params.getAttribute("m");
+		document.camp.titre.value=params.getAttribute("titre");
+		document.camp.infosucces.value=params.getAttribute("infosucces");
+		document.camp.missionsuivante.value=params.getAttribute("suivante");
+		document.camp.histoire.value=partie.histoire;
+		if (params.getAttribute("deco")){
+			document.getElementById("typecases").value=params.getAttribute("deco");
+			tableauArguments["type"]=params.getAttribute("deco");
+		}
+	}
 	//plateau
 	afficherPlateau();
 	//options
@@ -137,17 +192,6 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 	document.options.x.value=partie.tableauJeu.tailleX;
 	document.options.y.value=partie.tableauJeu.tailleY;
 
-	//optionscampagne
-	if (partie.params){
-		//alert("ici");
-		var params = partie.params;
-		document.camp.campagne.value=params.getAttribute("c");
-		document.camp.mission.value=params.getAttribute("m");
-		document.camp.titre.value=params.getAttribute("titre");
-		document.camp.infosucces.value=params.getAttribute("infosucces");
-		document.camp.missionsuivante.value=params.getAttribute("suivante");
-		document.camp.histoire.value=partie.histoire;
-	}
   }
 	//joueurs
 	chargerPalette()
@@ -158,7 +202,9 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 		eval("document.joueurs.mdp"+j).value=partie.joueur[j].mdp;
 		eval("document.joueurs.nivia"+j).value=partie.joueur[j].niveau;
 	}
-  if (!seulementJoueurs)	updateNumberPlayers(false);		}
+  if (!seulementJoueurs)
+	updateNumberPlayers(false);
+}
 
 function nomIA(){//génère un nom d'IA
 	var syllabes = new Array("kel","gal","mot","juh","syd","fek","péd","van","fort","bel","jol");
@@ -186,6 +232,7 @@ function updateNumberPlayers(agirsurpartie){
 			if (agirsurpartie) partie.joueur[i] = null;
 		}
 	}
+	AfficherChoixJoueur();
 	chargerLesDiv(true);
 }
 function changecolor(n) {
@@ -202,7 +249,10 @@ function image_case_couleur(nojoueur) {
 	return image_case((nojoueur == 0?"D0D0FF":partie.joueur[nojoueur].couleur), 7, 0, 0, 0, 0)
 }
 function image_case(couleur, cellules, chateau, typedecor, va_exploser, dernier) {
-	return "../images/image.php?c="+couleur+"&n="+cellules+"&h="+chateau+"&m="+va_exploser+"&type=<?php echo $type_graphisme;?>&d="+typedecor+"&r="+dernier;
+	return "../images/image.php?c="+couleur+"&n="+cellules+"&h="+chateau+"&m="+va_exploser+"&type="+tableauArguments["type"]+"&d="+typedecor+"&r="+dernier;
+}
+function image_caseO(uneCase){
+	return image_case((uneCase.getJoueur() == 0?"D0D0FF":partie.joueur[uneCase.getJoueur()].couleur), uneCase.getCellules(), uneCase.getChateau()?1:0, uneCase.getDecor(), uneCase.vaExploser(), 0);
 }
 function afficherPlateau(){
 	var chaineHTML = "";
@@ -214,7 +264,8 @@ function afficherPlateau(){
 		var dernier = (nojoueur == 0?false:partie.joueur[nojoueur].derniereAction.ouX == x && partie.joueur[nojoueur].derniereAction.ouY == y );
 		onclick_string = 'onclick="action('+x+','+y+');"';
 		onload_string = 'onload="chargementImageJeu('+zonePouvantCharger+');"';
-		chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+x+","+y+":"+cellules+"\" alt=\""+x+","+y+":"+cellules+"\" "+onload_string+" src=\"../images/image.php?c="+couleur+"&n="+cellules+"&h="+(laCase.getChateau()?1:0)+"&d="+laCase.getDecor()+"&type=<?php echo $type_graphisme;?>&m="+(laCase.vaExploser()?1:0)+"&r="+(dernier?1:0)+"\" "+onclick_string+" />";
+		chaineHTML += "<img width=33 height=33 style=\"vertical-align:bottom;\" title=\""+x+","+y+":"+cellules+"\" alt=\""+x+","+y+":"+cellules+"\" "+
+						onload_string+" src=\""+image_case(couleur, cellules, (laCase.getChateau()?1:0), laCase.getDecor(), (laCase.vaExploser()?1:0), (dernier?1:0))+"\" "+onclick_string+" />";
 	}
 		chaineHTML += "<br />";
 	}
@@ -275,7 +326,7 @@ function id_choix_joueur(i) {
 
 function AfficherChoixJoueur() {
 	var choix_joueurHTML = ""
-	for(i = 0; i <= partie.nbJoueurs; i++) {
+	for(i = (document.modes.m.value == 'setderniereaction'?1:0); i <= partie.nbJoueurs; i++) {
 		choix_joueurHTML += "<img id=\""+id_choix_joueur(i)+"\" width=33 height=33 alt=\"\" src=\""+image_case_couleur(i)+"\" border=2 onClick=\"select_choix_joueur("+i+")\"/>&nbsp;";
 	}
 	document.getElementById("choix_joueur").innerHTML = choix_joueurHTML;
@@ -289,7 +340,7 @@ function ChargerChoixJoueur() {
 
 function select_choix_joueur(i) {
 	if(document.modes.m.value == 'setderniereaction' && i==0) i = 1;
-	for(j = 0; j <= partie.nbJoueurs; j++) {
+	for(j = (document.modes.m.value == 'setderniereaction'?1:0); j <= partie.nbJoueurs; j++) {
 		if(j != i) document.getElementById(id_choix_joueur(j)).style.borderColor = "white";
 	}
 	document.getElementById(id_choix_joueur(i)).style.borderColor = "black";
@@ -300,13 +351,14 @@ function select_choix_joueur(i) {
 </head>
 <body onload="demarrer();">
 <div id="lesdiv" style="color:#FFF;background-color:#000;position:absolute;top:0;right:0;">
-<?php echo $messagePHP; ?>
+<?php echo (strlen($messagePHP)>0?$messagePHP." | ":""); ?>
 	<a href="#" id="menudivplateau" onclick="changerAffichage('divplateau')" style="text-decoration:none;color:#FFF;font-weight:bold;">Plateau</a>
 	| <a href="#" id="menudivjoueurs" onclick="changerAffichage('divjoueurs')" style="text-decoration:none;color:#FFF;font-weight:bold;">Joueurs</a>
 	| <a href="#" id="menudivoptions" onclick="changerAffichage('divoptions')" style="text-decoration:none;color:#AFA439;font-weight:bold;">Options</a>
 	| <a href="#" id="menudivoptionscampagne" onclick="changerAffichage('divoptionscampagne')" style="text-decoration:none;color:#FFF;font-weight:bold;">Campagne</a>
 	| <a href="#" id="menudivautres" onclick="changerAffichage('divautres')" style="text-decoration:none;color:#AFA439;font-weight:bold;">Autres</a>
 </div>
+<table><tr><td>
 <div id="divplateau" class="onglet" style="display:inline;">
 	<div id="plat1" style="display:none;"></div>
 	<div id="plat2" style="display:none;"></div>
@@ -322,6 +374,7 @@ function onchange_mode(sel) {
 		//document.modes.nb.style.display='none';
 		mode=sel.value;
 	//}
+	if (sel.value=='ajoutercellule' || sel.value=='setjoueur' || sel.value=='setderniereaction') AfficherChoixJoueur();
 	document.getElementById("palette").style.display = (sel.value=='setdecor') ? 'inline':'none';
 	document.getElementById("choix_joueur").style.display = (sel.value=='ajoutercellule' || sel.value=='setjoueur' || sel.value=='setderniereaction') ? 'inline':'none';
 	select_choix_joueur(current_joueur); //Pour être sûr que le joueur sélectionné est bien valide.
@@ -341,6 +394,9 @@ function onchange_mode(sel) {
 			<option value="setderniereaction">Fixer derni&egrave;re action joueur</option>
 			<option value="clicchateau">Activer/désactiver chateau</option>
 			<option value="retrecir">R&eacute;tr&eacute;cir le plateau</option>
+			<option value="RAZcase">RAZ case</option>
+			<option value="copiecolle">Copier/Coller</option>
+			<option value="coupecolle">Couper/Coller</option>
 		</select>
 		<!--select name="nb" style="display:none;" onchange="onchange_nb(this)">
 			<option value=0>0</option>
@@ -354,12 +410,13 @@ function onchange_mode(sel) {
 			<option value=8>8</option>
 		</select-->
 	</form>
-		<div id="palette" style="display:none">
-		</div>
+		<div id="palette" style="display:none"></div>
+		<div id="case_copiee" style="display:none"></div>
 		<div id="choix_joueur" style="display:inline">
 		</div>
 	</div>
 </div>
+</td><td>
 <div id="divjoueurs" class="onglet" style="display:inline;"><form name="joueurs">
 <?php
 			addSelectOption(
@@ -395,6 +452,7 @@ function onchange_mode(sel) {
 			}
 			?>
 </form></div>
+</td></tr><tr><td>
 <div id="divoptions" class="onglet" style="display:none;"><form name="options"><table>
 	<tr><td style="text-align:right;">
 			<label style="float: right;">Taille :</label></td><td>
@@ -454,17 +512,20 @@ function onchange_mode(sel) {
 			</td></tr>
 	<tr><td>
 </table></form></div>
+</td><td>
 <div id="divoptionscampagne" class="onglet" style="display:inline;">
 	<form name="camp">
 	Campagne/mission : <input type="text" name="campagne" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="mission" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" /> ->
 	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.missionsuivante.value;"> mission suivante</a> : 
 	<input type="text" name="missionsuivante" value="fin" style="width:60px" /><br />
-	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" /><br />
-	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';" /><br />
-	<textarea name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" >Histoire</textarea>
+	<table><tr><td>
+	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" onchange="this.value=HTMLentities(this.value);" /><br />
+	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';"  onchange="this.value=HTMLentities(this.value);"/></td><td>
+	<textarea name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" onchange="this.value=HTMLentities(this.value);">Histoire</textarea></td></tr></table>
 	</form>
 </div>
+</td></tr><tr><td colspan="2">
 <div id="divautres" class="onglet"  style="diplay:none;">
 <form name="sauv" method="POST" action="editeurcampagnes.php">
 <input type="submit" class="btn" value="Recharger" onclick="document.sauv.action='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.mission.value;" />
@@ -478,6 +539,7 @@ function lancerTesteur(){
 }
 //--></script>
 <input type="button" class="btn" value="Tester" onclick="lancerTesteur();" title="Tester la mission cr&eacute;&eacute;e" />
+<select id="typecases" onchange="tableauArguments['type']=this.value;chargerPalette();afficherPlateau();"><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option><option value="cool">new age</option></select>
 </form>
 <form name="charg" method="GET" action="editeurcampagnes.php"><!-- style="display:none;"-->
 Charger une mission existante : <input type="text" name="c" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
@@ -486,6 +548,7 @@ Charger une mission existante : <input type="text" name="c" value="<?php echo (a
 <input class="btn" type="submit" value="Charger !">
 </form>
 </div>
+</td></tr></table>
 <textarea id="resultat" style="<?php if (!array_key_exists("fichier",$_POST)) echo "display:none;";?>"><?php echo $_POST["fichier"]; ?></textarea>
 <iframe name="framelancement" id="framelancement" style="display:none;"></iframe><!--   -->
 </body>

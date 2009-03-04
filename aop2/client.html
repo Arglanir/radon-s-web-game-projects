@@ -127,6 +127,9 @@ this.params = false;
 	if (Xpartie.getElementsByTagName("parametrescampagne").length>0)//il y a des paramètres de campagne !
 		if (Xpartie.getElementsByTagName("parametrescampagne").item(0).getAttribute("titre")){//ou pas
 			this.params = Xpartie.getElementsByTagName("parametrescampagne").item(0);
+			if (this.params.getAttribute("deco")){
+				tableauArguments["type"] = this.params.getAttribute("deco");
+			}
 			document.getElementById("infocampagne").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>";
 			document.getElementById("infocampagne").style.display = "block";
 			document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
@@ -414,21 +417,15 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													this.params.getAttribute("infosucces")+"<br />"+
 													(this.params.getAttribute("suivante") != "fin" ? 
-														"<a target='framecom' href='creajeucampagne.php?c="+this.params.getAttribute("c")+
-														"&m="+this.params.getAttribute("suivante")+
-														"&n=0&joueur="+this.joueurs[1][0]+
-														"&couleur="+this.joueurs[1][1]+"' onclick=\"supprimerPartie(false);\">Mission suivante</a>" :
+														"<a href='' onclick=\"continuerCampagne(leJeu);\">Mission suivante</a>" :
 													"Campagne termin&eacute;e ! F&eacute;licitations !<br />"+
-														"<a href='#' onclick=\"supprimerPartie();\">Revenir à l'accueil</a>");
+														"<a href='#' onclick=\"supprimerPartie();\">Revenir &agrave; l'accueil</a>");
 		document.getElementById("popupcampagne").style.display = "block";
 		popupfinaffichee = true;
 	} else if (nGagnant && !popupfinaffichee){
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													"Dommage ! Tu feras mieux la prochaine fois..."+"<br />"+
-													"<a target='framecom' href='creajeucampagne.php?c="+this.params.getAttribute("c")+
-														"&m="+this.params.getAttribute("m")+
-														"&n=0&joueur="+this.joueurs[1][0]+
-														"&couleur="+this.joueurs[1][1]+"' onclick=\"supprimerPartie(false);\">Recommencer</a>";
+													"<a href='' onclick=\"recommencer(unJeu);\">Recommencer</a>";
 		document.getElementById("popupcampagne").style.display = "block";
 		popupfinaffichee = true;
 	}
@@ -780,9 +777,38 @@ function afficheOptions(){with(this){//affiche les options en cours, pour faire 
 	chaineHTML += (this.options[3]?"Placement autour des cases &agrave; soi":"Placement sur cases adjacentes en croix")+"<br />";
 	chaineHTML += (this.options[4]?"D&eacute;veloppement unique du joueur en cours":"D&eacute;veloppement de tout le monde")+"<br />";
 	chaineHTML += (tableauArguments["j"] == quiLanceLIA?"<input type='button' onclick='supprimerPartie();' value='Supprimer la partie' />"+"<br />":"");
+	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.params?"<a href='' onclick=\"recommencer(unJeu);\">Recommencer la mission</a>"+"<br />":"");
+	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.joueurs[1][0] == "Testeur" && this.params?"<a href='' onclick=\"editer(unJeu);\">Aller &agrave; l'&eacute;diteur</a>"+"<br />":"");
 	
 	document.getElementById("options").innerHTML = chaineHTML;
 }}
+
+function recommencer(leJeu){
+	if (!leJeu.params) return false;
+	var lien="creajeucampagne.php?n=0&c="+leJeu.params.getAttribute("c")+
+		"&m="+leJeu.params.getAttribute("m")+"&joueur="+leJeu.joueurs[1][0]+
+		"&couleur="+leJeu.joueurs[1][1];
+	debug(lien);debug(framecom);
+	supprimerPartie(false);
+	setTimeout("framecom.src='"+lien+"';",2000);
+}
+function continuerCampagne(leJeu){
+	if (!leJeu.params) return false;
+	var lien="creajeucampagne.php?n=0&c="+leJeu.params.getAttribute("c")+
+		"&m="+leJeu.params.getAttribute("suivante")+"&joueur="+leJeu.joueurs[1][0]+
+		"&couleur="+leJeu.joueurs[1][1];
+	debug(lien);debug(framecom);
+	supprimerPartie(false);
+	setTimeout("framecom.src='"+lien+"';",2000);
+}
+function editer(leJeu){
+	var lien = "campagnes/editeurcampagnes.php?c="+
+				leJeu.params.getAttribute("c")+"&m="+leJeu.params.getAttribute("m")+
+				"&pw="+("undefined" != typeof tableauArguments["pwtest"]?
+					tableauArguments["pwtest"]:prompt("Mot de passe Testeur/Administrateur requis",""));
+	supprimerPartie(false);
+	setTimeout("location.replace('"+lien+"');",2000);
+}
 
 //fonctions utiles
 function case2chateau(entier){//regarde si sur une case il y a un chateau
@@ -1137,7 +1163,7 @@ function debug(chaine){
 <div id="debug">
 
 </div>
-<iframe id="framecom" name="framecom" style="display:none;"></iframe>
+<iframe id="framecom" name="framecom"></iframe><!-- style="display:none;" -->
 <div id="comm">
 
 </div>

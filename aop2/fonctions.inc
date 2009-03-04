@@ -122,8 +122,8 @@ function addSelectOption($arrayOptions,$affichage=true) {
 		}
 	}
 	if($table) $sortie_ecran .=  "<tr><td style=\"text-align:right;\">";
-	/*if($table) $sortie_ecran .= '<label style="text-align: right;" >'.$text.' :</label>';
-	else $sortie_ecran .= '<label>'.$text.' :</label>';*/  $sortie_ecran .= ''.$text.' :';
+	/*if($table) $sortie_ecran .= '<label style="text-align: right;" >'.$text.' : </label>';
+	else $sortie_ecran .= '<label>'.$text.' : </label>';*/  $sortie_ecran .= ''.$text.' : ';
 	if($table) $sortie_ecran .=  "</td><td>";
 	$sortie_ecran .=  ($saut_ligne?"\n":"").'<select name="'.$idname.'" id="'.$idname.'" onChange="'.$callback.'">'." ";
 	$i = 1;

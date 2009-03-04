@@ -14,6 +14,9 @@ include_once("classes.php");
 include_once("newjeux.php");
 include_once("fonctions.inc");
 
+header("Cache-Control: no-cache, must-revalidate");
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+
 if (!array_key_exists("c",$_GET)){lancerErreur("Campagne non renseignee","Recherche des parametres");}
 if (!array_key_exists("m",$_GET)){lancerErreur("Mission non renseignee","Recherche des parametres");}
 if (!array_key_exists("n",$_GET)){lancerErreur("Niveau non transmis","Recherche des parametres");}

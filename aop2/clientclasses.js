@@ -167,7 +167,7 @@ function HTMLentities(texte) {
 	texte = texte.replace(/ª/g,'&ordf;'); // 170 AA
 	texte = texte.replace(/«/g,'&laquo;'); // 171 AB
 	texte = texte.replace(/¬/g,'&not;'); // 172 AC
-	texte = texte.replace(/ /g,'&shy;'); // 173 AD
+	//texte = texte.replace(/ /g,'&shy;'); // 173 AD
 	texte = texte.replace(/®/g,'&reg;'); // 174 AE
 	texte = texte.replace(/¯/g,'&macr;'); // 175 AF
 	texte = texte.replace(/°/g,'&deg;'); // 176 B0
@@ -469,6 +469,7 @@ function Partie(){
 		Xparams.setAttribute("titre",this.params.getAttribute("titre"));
 		Xparams.setAttribute("infosucces",this.params.getAttribute("infosucces"));
 		Xparams.setAttribute("suivante",this.params.getAttribute("suivante"));
+		Xparams.setAttribute("deco",this.params.getAttribute("deco"));
 		Xcommentaire.appendChild(Xparams);
 		Xpartie.appendChild(Xcommentaire);
 		return Xjeu;

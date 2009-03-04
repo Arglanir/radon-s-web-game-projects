@@ -249,21 +249,21 @@ class CreaJeu{
 		echo "Partie ".$this->numero_partie." créée !<br />\n";
 		$nbHumains = 0;$Lurl = 0;
 		for($i = 1; $i <= $this->partie->nbJoueurs; $i++) {
-			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), $_POST["mdp".$i]);
+			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), isset($_POST["si_mdp".$i])?$_POST["mdp".$i]:"0");
 			if (!$this->partie->joueur[$i]->isIA()){
 				echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
 				$nbHumains++;$Lurl = $url;
 			}
 		}
-		if ($nbHumains==1){
-			echo "<script type='text/javascript'>parent.location.replace('".$Lurl."');</script>";
+		if ($nbHumains==1 && !isset($_GET["noredirection"])){
+			echo "<script type='text/javascript'>parent.parent.parent.location.replace('".$Lurl."');</script>";
 		}
 	}
 	function affichageInfosXML(){//renvoie des infos XML
 		$reponse = '<partie numero="'.$this->numero_partie.'" nbJoueurs="'.$this->partie->nbJoueurs.'">';
 
 		for($i = 1; $i <= $this->partie->nbJoueurs; $i++) {
-			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), $_POST["mdp".$i]);
+			$url = getUrlJoueur($this->numero_partie, $i, isset($_POST["si_mdp".$i]), isset($_POST["si_mdp".$i])?$_POST["mdp".$i]:"0");
 			$reponse .= '<joueur nom="'.$this->partie->joueur[$i]->nom.'" numero="'.$i.'" couleur="'.$this->partie->joueur[$i]->couleur.'" lien="'.$url.'" />';
 			//echo '<a href="'.$url.'">Le jeu pour '.$this->partie->joueur[$i]->nom.'</a><br />';
 		}
@@ -480,8 +480,10 @@ array("text" => " Couleur",
 				$chaineAAfficherDansTable .= "</td>";
 			}
 			$chaineAAfficherDansTable .=  "<td id='action".$partie["numero"]."'>";
-			if ($admin)
+			if ($admin){
 				$chaineAAfficherDansTable .= "<input style=\"vertical-align:bottom;\" type=\"button\" value=\"Supprimer\" onclick=\"supprimerPartie('".$partie["numero"]."');\" />";
+				$chaineAAfficherDansTable .= '<a style="color:black;" href="'.getUrlJoueur($partie["numero"],"observateur").'">Observer</a>';
+			}
 			else
 				$chaineAAfficherDansTable .= "<input style=\"vertical-align:bottom;\" type=\"button\" value=\"S'ajouter\" onclick=\"sajouter('".$partie["numero"]."');\" />";
 			$chaineAAfficherDansTable .=  "</td>";
