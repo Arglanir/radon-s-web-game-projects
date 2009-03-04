@@ -157,7 +157,7 @@ text-decoration : underline;
 color : #C8901B
 }
 #content input,select,label {
-	float: left;
+	/*float: left;*/
 	height: 22px;
 	margin-bottom: 5px;
 	margin-right: 5px;

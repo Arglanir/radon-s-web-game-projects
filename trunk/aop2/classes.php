@@ -148,7 +148,7 @@ class Partie {
 		$partie->options = Options::fromXML($partie->options[0]);
 		$partie->tableauJeu = $Xpartie->get_elements_by_tagname( "tableaudejeu" );
 		$partie->commentaires = $Xpartie->get_elements_by_tagname( "commentaire" );
-		$partie->commentaires = $partie->commentaires[0];
+		$partie->commentaires = (isset($partie->commentaires[0])?$partie->commentaires[0]:false);
 		$partie->tableauJeu = PlateauDeJeu::fromXML($partie->tableauJeu[0]);
 		return $partie;
 	}
@@ -170,7 +170,7 @@ class Partie {
 		$partie->setJoueurEnCours(0+$Xpartie["joueurencours"]);
 		$partie->nbJoueurs = 0+$Xpartie["nombredejoueurs"];
 		$partie->gagnant = 0+$Xpartie["gagnant"];
-		$partie->commentaires = $Xpartie->commentaire;
+		$partie->commentaires = ($Xpartie->commentaire?$Xpartie->commentaire:false);
 		$partie->demarree = ($Xpartie["demarree"]=="1");
 		
 		foreach($Xpartie->children() as $Xelement){
@@ -212,14 +212,17 @@ class Partie {
 		
 		$Xtableau = $this->tableauJeu->toSXML($Xpartie);
 
-		$XCom = $Xpartie->addChild("commentaire");
-		$Xhist = $XCom->addChild("histoire",$this->commentaires->histoire);
-		$Xpara = $XCom->addChild("parametrescampagne");
-		$Xpara->addAttribute("c",$this->commentaires->parametrescampagne["c"]);
-		$Xpara->addAttribute("m",$this->commentaires->parametrescampagne["m"]);
-		$Xpara->addAttribute("titre",$this->commentaires->parametrescampagne["titre"]);
-		$Xpara->addAttribute("infosucces",$this->commentaires->parametrescampagne["infosucces"]);
-		$Xpara->addAttribute("suivante",$this->commentaires->parametrescampagne["suivante"]);
+		if ($this->commentaire){
+			$XCom = $Xpartie->addChild("commentaire");
+			$Xhist = $XCom->addChild("histoire",$this->commentaires->histoire);
+			$Xpara = $XCom->addChild("parametrescampagne");
+			$Xpara->addAttribute("c",$this->commentaires->parametrescampagne["c"]);
+			$Xpara->addAttribute("m",$this->commentaires->parametrescampagne["m"]);
+			$Xpara->addAttribute("titre",$this->commentaires->parametrescampagne["titre"]);
+			$Xpara->addAttribute("infosucces",$this->commentaires->parametrescampagne["infosucces"]);
+			$Xpara->addAttribute("suivante",$this->commentaires->parametrescampagne["suivante"]);
+			$Xpara->addAttribute("deco",$this->commentaires->parametrescampagne["deco"]);
+		}
 
 		return $Xpartie;
 	}
