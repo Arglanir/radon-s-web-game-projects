@@ -307,7 +307,7 @@ function select_choix_joueur(i) {
 	| <a href="#" id="menudivoptionscampagne" onclick="changerAffichage('divoptionscampagne')" style="text-decoration:none;color:#FFF;font-weight:bold;">Campagne</a>
 	| <a href="#" id="menudivautres" onclick="changerAffichage('divautres')" style="text-decoration:none;color:#AFA439;font-weight:bold;">Autres</a>
 </div>
-<div id="divplateau" class="ccontent" style="display:inline;">
+<div id="divplateau" class="onglet" style="display:inline;">
 	<div id="plat1" style="display:none;"></div>
 	<div id="plat2" style="display:none;"></div>
 	<div id="texteremplacement">Chargement du plateau...</div>
@@ -360,7 +360,7 @@ function onchange_mode(sel) {
 		</div>
 	</div>
 </div>
-<div id="divjoueurs" class="ccontent" style="display:inline;"><form name="joueurs">
+<div id="divjoueurs" class="onglet" style="display:inline;"><form name="joueurs">
 <?php
 			addSelectOption(
 			array("text" => "Nombre de joueurs",
@@ -395,7 +395,7 @@ function onchange_mode(sel) {
 			}
 			?>
 </form></div>
-<div id="divoptions" class="ccontent" style="display:none;"><form name="options"><table>
+<div id="divoptions" class="onglet" style="display:none;"><form name="options"><table>
 	<tr><td style="text-align:right;">
 			<label style="float: right;">Taille :</label></td><td>
 			<div style="float:left;">
@@ -454,7 +454,7 @@ function onchange_mode(sel) {
 			</td></tr>
 	<tr><td>
 </table></form></div>
-<div id="divoptionscampagne" class="ccontent" style="display:inline;">
+<div id="divoptionscampagne" class="onglet" style="display:inline;">
 	<form name="camp">
 	Campagne/mission : <input type="text" name="campagne" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="mission" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" /> ->
@@ -465,7 +465,7 @@ function onchange_mode(sel) {
 	<textarea name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" >Histoire</textarea>
 	</form>
 </div>
-<div id="divautres" class="ccontent"  style="diplay:none;">
+<div id="divautres" class="onglet"  style="diplay:none;">
 <form name="sauv" method="POST" action="editeurcampagnes.php">
 <input type="submit" class="btn" value="Recharger" onclick="document.sauv.action='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.mission.value;" />
 <input type="hidden" value="" name="fichier" />

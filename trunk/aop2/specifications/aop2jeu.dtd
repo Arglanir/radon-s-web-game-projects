@@ -1,3 +1,20 @@
+
+<!ENTITY % HTMLlat1 PUBLIC
+   "-//W3C//ENTITIES Latin 1 for XHTML//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent">
+%HTMLlat1;
+
+<!ENTITY % HTMLsymbol PUBLIC
+   "-//W3C//ENTITIES Symbols for XHTML//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent">
+%HTMLsymbol;
+
+<!ENTITY % HTMLspecial PUBLIC
+   "-//W3C//ENTITIES Special for XHTML//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent">
+%HTMLspecial;
+
+
 <!ELEMENT partie (joueurs, options, tableaudejeu, commentaire?) >
 <!ATTLIST partie 
 		nombredejoueurs NMTOKEN #REQUIRED
@@ -46,9 +63,13 @@
 <!ELEMENT histoire (#PCDATA)>
 <!ELEMENT parametrescampagne (EMPTY)>
 <!ATTLIST parametrescampagne
-		c NMTOKEN #REQUIRED //numéro de campagne
-		m CDATA #REQUIRED //mission de la campage
-		titre CDATA #REQUIRED //Titre de la mission
-		infosucces CDATA #REQUIRED //message de succès (genre mot de passe partie suivante)
-		suivante CDATA "fin">// numero mission suivante
-		
+		c NMTOKEN #REQUIRED 
+		m CDATA #REQUIRED 
+		titre CDATA #REQUIRED 
+		infosucces CDATA #REQUIRED
+		suivante CDATA "fin">
+		<!-- //numéro de campagne
+		//mission de la campage
+		//Titre de la mission
+		 //message de succès (genre mot de passe partie suivante)
+		 // numero mission suivante-->

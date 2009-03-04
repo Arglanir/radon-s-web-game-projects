@@ -88,11 +88,13 @@ function cacherTout(){
 function changerAffichage(quoi,comment){
 	if (document.getElementById(quoi).style.display == "none") {
 		document.getElementById(quoi).style.display = (comment?comment:"block");
-		document.getElementById('menu'+quoi).style.color = "#FFF";
+		if (document.getElementById('menu'+quoi))
+			document.getElementById('menu'+quoi).style.color = "#FFF";
 	}
 	else {
 		document.getElementById(quoi).style.display = "none";
-		document.getElementById('menu'+quoi).style.color = "#AFA439";
+		if (document.getElementById('menu'+quoi))
+			document.getElementById('menu'+quoi).style.color = "#AFA439";
 	}
 }
 
@@ -179,11 +181,30 @@ function metsLesIA(jusqua,niveau,debut){
 			<ul> 
 			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
 			<li><a id="menucreation" href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
-			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; Règles</a></li> 
+			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; R&egrave;gles</a></li> 
+			<li><a id="menucampagnes" href="#" onclick="changerAffichage('campagnes');return false;" >&or; Campagnes</a></li> 
 			</ul> 
 		</div> 
 	</div> 
 	<div id="content">
+		<div id="campagnes" class="onglet" style="width: 350px;display:none;">
+			<h2><a href="#" onclick="changerAffichage('campagnes');return false;" style="text-decoration:none;">&gt; Campagnes</a></h2>
+			<form name="camp" action="creajeucampagne.php" target="framecreation">
+				Nom : <input type="text" name="joueur" /> | <?php echo addSelectOption(
+array("text" => "Couleur",
+	"idname" => "couleur",
+	"options" => $GLOBALS["color_array"],
+	"callback" => "document.camp.joueur.style.backgroundColor = '#'+this.value;",//"changecolor(".$i.")",
+	"table" => false,
+	"default_index" => 0,
+	"saut_ligne" => false,
+	"color" => True
+),false); ?><br />
+				<input type="hidden" name="m"/><input type="hidden" name="c"/><input type="hidden" name="n" value="0"/>
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
+			</form>
+		</div>
+	
 		<div id="parties" class="onglet" style="width: 350px;">
 			<h2><a href="#" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>
 			<?php
@@ -199,7 +220,10 @@ function metsLesIA(jusqua,niveau,debut){
 				<input type="submit" class="btn" value="Chercher la partie" title="clique ici" />
 			</form>
 			<br />
-			<a href="#" onclick="changerAffichage('admini');return false;" style="text-decoration:none;">&gt; Administration</a><form style="display:none;" id='admini' action="admin.php" method="GET"><input type="text" name="pw" /><input type="submit" class="btn" value="Aller à l'administration" /></form>
+			<a href="#" onclick="changerAffichage('admini');" style="text-decoration:none;">&gt; Administration</a>
+			<div id="admini" style="display:none;"><form id='' action="admin.php" method="GET">
+				<input type="text" name="pw" /><input type="submit" class="btn" value="Aller à l'administration" />
+			</form></div>
 		</div>
 
 		<script type="text/javascript">var debut=true;</script>
@@ -395,7 +419,7 @@ function fermePopupReseau(){
 </div>
 
 		<div id="regles" class="onglet" style="width: 600px; display: none;">
-			<h2><a href="#" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; Règles</a></h2>
+			<h2><a href="#" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; R&egrave;gles</a></h2>
 			<h3>Introduction</h3>
 			<?php echo $game_name;?> est un jeu hautement instable où vous devez lutter pour la survie de votre colonie de cellules sans cesse grandissante. C'est la dure loi de l'évolution : seuls les plus forts gagneront cette course pour la Vie !
 

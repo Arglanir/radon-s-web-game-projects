@@ -126,12 +126,12 @@ this.histoire = (Xpartie.getElementsByTagName("histoire").length>0?
 this.params = false;
 	if (Xpartie.getElementsByTagName("parametrescampagne").length>0)//il y a des paramètres de campagne !
 		if (Xpartie.getElementsByTagName("parametrescampagne").item(0).getAttribute("titre")){//ou pas
-			alert("ici");
 			this.params = Xpartie.getElementsByTagName("parametrescampagne").item(0);
 			document.getElementById("infocampagne").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>";
 			document.getElementById("infocampagne").style.display = "block";
 			document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
-													(this.histoire?this.histoire:"Une mission banale");
+													(this.histoire?this.histoire:"Une mission banale")+"<br />"+
+													"<a href='#' onclick='document.getElementById(\"popupcampagne\").style.display = \"none\";'>Commencer le jeu</a>";
 			document.getElementById("popupcampagne").style.display = "block";
 	}
 	
@@ -415,10 +415,20 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 													this.params.getAttribute("infosucces")+"<br />"+
 													(this.params.getAttribute("suivante") != "fin" ? 
 														"<a target='framecom' href='creajeucampagne.php?c="+this.params.getAttribute("c")+
+														"&m="+this.params.getAttribute("suivante")+
+														"&n=0&joueur="+this.joueurs[1][0]+
+														"&couleur="+this.joueurs[1][1]+"' onclick=\"supprimerPartie(false);\">Mission suivante</a>" :
+													"Campagne termin&eacute;e ! F&eacute;licitations !<br />"+
+														"<a href='#' onclick=\"supprimerPartie();\">Revenir à l'accueil</a>");
+		document.getElementById("popupcampagne").style.display = "block";
+		popupfinaffichee = true;
+	} else if (nGagnant && !popupfinaffichee){
+		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
+													"Dommage ! Tu feras mieux la prochaine fois..."+"<br />"+
+													"<a target='framecom' href='creajeucampagne.php?c="+this.params.getAttribute("c")+
 														"&m="+this.params.getAttribute("m")+
-														"&n=0&joueur="+this.joueur[1][0]+
-														"&couleur="+this.joueur[1][1]+"' onclick=\"supprimerPartie(false);\">Mission suivante</a>" :
-														"Campagne terminée ! Félicitations !");
+														"&n=0&joueur="+this.joueurs[1][0]+
+														"&couleur="+this.joueurs[1][1]+"' onclick=\"supprimerPartie(false);\">Recommencer</a>";
 		document.getElementById("popupcampagne").style.display = "block";
 		popupfinaffichee = true;
 	}

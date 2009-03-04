@@ -193,7 +193,7 @@ class Partie {
 	
 	function toSXML($cacherMotsDePasse=false,$joueurAppelant=0){//renvoie le document SimpleXML de partie
 		//if (!$this->docxml)
-		$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><partie></partie>');
+		$Xpartie = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE partie SYSTEM "./specifications/aop2jeu.dtd" ><partie></partie>');
 		//$Xpartie = $xml_partie->addChild('partie');
 	
 		$Xpartie->addAttribute("nombredejoueurs", $this->nbJoueurs);
