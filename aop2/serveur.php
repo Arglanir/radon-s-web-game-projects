@@ -73,7 +73,7 @@ if (!$partie){
 		$parties = new PartiesEnCours();
 		$parties->supprimerPartie($p,true);
 	}
-	lancerErreur("Partie ".$p." inconnue","Suppression de ladite partie");
+	lancerErreur("Partie ".$p." inconnue ou mal formee",($action == "s"?"Suppression de ladite partie":"Ouverture du fichier"));
 }
 
 if ($action=="g"){//on renvoie la grille XML
