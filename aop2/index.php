@@ -223,8 +223,9 @@ array("text" => "Couleur",
 			</form>
 			<br />
 			<a href="#" onclick="changerAffichage('admini');" style="text-decoration:none;">&gt; Administration</a>
-			<div id="admini" style="display:none;"><form id='' action="admin.php" method="GET">
-				<input type="text" name="pw" /><input type="submit" class="btn" value="Aller à l'administration" />
+			<div id="admini" style="display:none;"><form id='' name="adminform" action="admin.php" method="GET">
+				<input type="text" name="pw" /><input type="submit" class="btn" value="Aller à l'administration" /><br />
+				<input type="submit" class="btn" value="Aller à l'&eacute;diteur" onclick="document.adminform.action = 'campagnes/editeurcampagnes.php';"/>
 			</form></div>
 		</div>
 

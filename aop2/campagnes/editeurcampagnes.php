@@ -545,8 +545,29 @@ function lancerTesteur(){
 Charger une mission existante : <input type="text" name="c" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="m" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" />
 	<input type="hidden" name="pw" value="<?php echo $_GET['pw']; ?>" />
-<input class="btn" type="submit" value="Charger !">
+<input class="btn" type="submit" value="Charger !"><input class="btn" id="menuensemblecampagnes" type="button" value="Mission existantes" onclick="changerAffichage('ensemblecampagnes');" />
 </form>
+<div id="ensemblecampagnes" style="display:none;">
+<?php
+$dir = opendir('.');
+echo "<br /><table>";
+while (false !== ($file = readdir($dir))) {
+	$num = array();
+	if (!ereg("^xaop(.*)\.lvl$",$file,$num))
+		continue;
+	$numero = $num[1];
+	echo "<tr><td>$numero</td><td>";
+	//echo date("d F Y H:i:s", fileatime($file));
+	echo "</td><td>";
+	echo "<input type=\"button\" value=\"charger\" onclick=\"document.charg.c.value='".substr($numero,0,1)."';".
+			"document.charg.m.value='".substr($numero,1)."';document.charg.submit();\" />";
+	echo "</td>";
+	echo "</tr>\n";
+}
+echo "</table>";
+closedir($dir);
+?>
+</div>
 </div>
 </td></tr></table>
 <textarea id="resultat" style="<?php if (!array_key_exists("fichier",$_POST)) echo "display:none;";?>"><?php echo $_POST["fichier"]; ?></textarea>
