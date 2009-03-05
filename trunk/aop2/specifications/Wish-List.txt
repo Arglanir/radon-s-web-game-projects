@@ -20,10 +20,24 @@ Wish:
 
 Cédric :
 - client avec un meilleur objet plus facile d'utilisation (pour faire les IA perso par exemple)
+	X classes faites
+	- client joueur
+	- client IA
 - tester l'IA (trouver la bonne heuristique) - même au niveau 1 l'IA devrait être plus performante
-- dans le créateur aléatoire de décor, il faudrait vérifier que l'ensemble des cases jouables est connexe par explosion (pas seulement en diagonale), et enlever la limite d'obstacles
+- dans le créateur aléatoire de décor, il faudrait vérifier que l'ensemble des cases jouables est connexe par explosion
+	(pas seulement en diagonale), et enlever la limite d'obstacles
 - pouvoir redémarrer un jeu avec le même décor, sur le même numéro de partie
+	X pour une mission
 - un joueur pourrait abandonner, remplacé par une IA de niveau 0
 - avoir des images de cellules animées
-- sur les images, avoir un endroit où le nombre de cellules est affiché
+	X images d'atomes
+	- armée
+X sur les images, avoir un endroit où le nombre de cellules est affiché
 - pouvoir faire des campagnes
+	X option créée dans le client et le serveur
+	- créer des campagnes
+		- campagne atomique
+		- campagne cellulaire du début de la vie
+		- campagnes militaires
+		- campagnes population moyen-âge
+- option de non-création de cellules (on enlève une cellule plus éloignée)

@@ -393,6 +393,9 @@ function mettreEntre(nombre,base){//fonction permettant le modulo
 	return nombre;
 }
 
+function distN0(a,b){return Math.max(Math.abs(a),Math.abs(b))+(typeof multiplicateur == "undefined"?0.1:multiplicateur)*Math.min(Math.abs(b),Math.abs(b));}
+
+
 //la classe de partie
 function Partie(){
 	
@@ -428,7 +431,11 @@ function Partie(){
 		else partie.commentaire = false;*/
 		//new lecteurXML(partie.commentaire);
 		partie.histoire = Xpartie.getElementsByTagName( "histoire" );
-		if (partie.histoire.length>0) partie.histoire = partie.histoire[0].firstChild.nodeValue;
+		if (partie.histoire.length>0)
+			if (partie.histoire[0].firstChild)
+				partie.histoire = partie.histoire[0].firstChild.nodeValue;
+			else 
+				partie.histoire = partie.histoire[0].getAttribute("h");
 		else partie.histoire = false;
 		//new lecteurXML(partie.histoire);
 		partie.params = Xpartie.getElementsByTagName( "parametrescampagne" );
@@ -460,8 +467,7 @@ function Partie(){
 		Xpartie.appendChild(this.tableauJeu.toXML(Xjeu.doc));
 		var Xcommentaire = Xjeu.doc.createElement("commentaire");
 		var Xhistoire = Xjeu.doc.createElement("histoire");
-		var Xhistoire2 = Xjeu.doc.createTextNode(this.histoire);
-		Xhistoire.appendChild(Xhistoire2);
+		Xhistoire.setAttribute("h",this.histoire);
 		Xcommentaire.appendChild(Xhistoire);
 		var Xparams = Xjeu.doc.createElement("parametrescampagne");
 		Xparams.setAttribute("c",this.params.getAttribute("c"));
@@ -572,7 +578,7 @@ function Joueur(nom,couleur,mdp,type,niveau){
 	}
 }
 
-function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
+function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur,augmentationMatiere){
 	/*var chateauxPermis;//	Options : chateaux activés ? true/false
 	var profondeur;	//Profondeur de jeu
 	var typeBord;	//Bord bloqués ?	1/0/2:monde rond
@@ -584,18 +590,21 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 	this.typeBord = ((typeof typeBord=="undefined")?1:typeBord);
 	this.ajoutDiag = ((typeof ajoutDiag=="undefined")?1:(ajoutDiag?true:false));
 	this.explosionJoueur = ((typeof explosionJoueur=="undefined")?0:(explosionJoueur?true:false));
+	this.augmentationMatiere = ((typeof augmentationMatiere=="undefined")?true:(augmentationMatiere?true:false));
 
 	this.setPermissionChateau = function (chateauxPermis){this.chateauxPermis = (chateauxPermis?true:false);}
 	this.setProfondeur = function (profondeur){this.profondeur = profondeur;}
 	this.setTypeBord = function (typeBord){this.typeBord = typeBord;}
 	this.setPlacementDiag = function (ajoutDiag){this.ajoutDiag = (ajoutDiag?true:false);}
 	this.setExplosionJoueur = function (explosionJoueur){this.explosionJoueur = (explosionJoueur?true:false);}
+	this.setAugmentationMatiere = function (augmentationMatiere){this.augmentationMatiere = (augmentationMatiere?true:false);}
 
 	this.yaPermissionChateau = function (){return this.chateauxPermis;}
 	this.quelleProfondeur = function (){return this.profondeur;}
 	this.quelTypeBord = function (){return this.typeBord;}
 	this.yaPlacementDiag = function (){return this.ajoutDiag;}
 	this.yaExplosionJoueur = function (){return this.explosionJoueur;}
+	this.yaAugmentationMatiere = function (){return this.augmentationMatiere;}
 	
 	this.fromXML = function (Xoptions){
 		options = new Options();
@@ -616,6 +625,8 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 					break;
 				case "explosion_joueur": options.setExplosionJoueur(valeur);
 					break;
+				case "augmentation_matiere": options.setAugmentationMatiere(valeur);
+					break;
 			}
 		}
 		return options;
@@ -623,8 +634,7 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 	this.toXML = function (xml_partie){
 		var Xoptions = xml_partie.createElement("options");
 		var Xoption = xml_partie.createElement("option");
-		Xoption.setAttribute("type","chateaux_actifs");
-		Xoption.setAttribute("valeur",(this.yaPermissionChateau()?1:0));
+		Xoption.setAttribute("type","chateaux_actifs");Xoption.setAttribute("valeur",(this.yaPermissionChateau()?1:0));
 		Xoptions.appendChild(Xoption);
 		Xoption = xml_partie.createElement("option");
 		Xoption.setAttribute("type","profondeur_jeu");Xoption.setAttribute("valeur",this.quelleProfondeur());
@@ -637,6 +647,9 @@ function Options(chateauxPermis,profondeur,typeBord,ajoutDiag,explosionJoueur){
 		Xoptions.appendChild(Xoption);
 		Xoption = xml_partie.createElement("option");
 		Xoption.setAttribute("type","explosion_joueur");Xoption.setAttribute("valeur",(this.yaExplosionJoueur()?1:0));
+		Xoptions.appendChild(Xoption);
+		Xoption = xml_partie.createElement("option");
+		Xoption.setAttribute("type","augmentation_matiere");Xoption.setAttribute("valeur",(this.yaAugmentationMatiere()?1:0));
 		Xoptions.appendChild(Xoption);
 		
 		return Xoptions;
@@ -786,7 +799,6 @@ function PlateauDeJeu() {
 		}
 	}
 
-	
 	this.getCase = function (x, y){
 		if (x>=0 && x<this.tailleX && y>=0 && y<this.tailleY) return this.plateau[y][x];
 		else return false;
@@ -830,6 +842,25 @@ function PlateauDeJeu() {
 			}
 			return d;
 		}
+	}
+	this.caseLaPlusEloigneeDe = function (x,y,joueur){//renvoie le array(x,y) de la case du joueur la plus éloignée
+		//entre ex-aequo, on prend la case du milieu, dans un parcours en y puis x
+		var distanceMax = -1;
+		var tabReponses = null;
+		for (var i=0;i<this.tailleY;i++) for (var j=0;j<this.tailleX;j++){
+			var cetteCase = this.getCase(j,i);
+			if (cetteCase.getJoueur() == joueur && cetteCase.getCellules() > 0){
+				var dist = this.distance(j,i,x,y);
+				if (dist > distanceMax){
+					tabReponses = new Array(new Array(j,i));
+					distanceMax = dist;
+				}
+				else if (dist == distanceMax){
+					tabReponses[tabReponses.length] = new Array(j,i);
+				}
+			}
+		}
+		return tabReponses[Math.floor(tabReponses.length*0.5)];
 	}
 	
 	this.purifie = function (joueurEnCours){//en fonction des options, 1 itération
@@ -950,6 +981,11 @@ function PlateauDeJeu() {
 		if (typeof chateau == "undefined") chateau=false;
 		laCase = this.getCase(x,y);
 		//if (!laCase) var_dump(this);
+		if (!this.partie.options.yaAugmentationMatiere()){
+			var temp = this.caseLaPlusEloigneeDe(x,y,joueurEnCours);
+			x2 = temp[0]; y2 = temp[1];
+			this.getCase(x2,y2).remCellules(1);
+		}
 		laCase.setJoueur(joueurEnCours);
 		laCase.decorAjouter1Cellule();
 		//laCase.addCellules(laCase.getDecor()==2?2:1);

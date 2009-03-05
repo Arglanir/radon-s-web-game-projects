@@ -453,7 +453,7 @@ function onchange_mode(sel) {
 			?>
 </form></div>
 </td></tr><tr><td>
-<div id="divoptions" class="onglet" style="display:none;"><form name="options"><table>
+<div id="divoptions" class="onglet" style="display:none;"><form name="options" onsubmit="partie.tableauJeu.nouveau(parseInt(document.options.x.value),parseInt(document.options.y.value));afficherPlateau();return false;"><table>
 	<tr><td style="text-align:right;">
 			<label style="float: right;">Taille :</label></td><td>
 			<div style="float:left;">
@@ -501,7 +501,16 @@ function onchange_mode(sel) {
 				"callback" => "partie.options.setExplosionJoueur(parseInt(this.value));",
 				"table"=>true
 			));
-;
+			addSelectOption(
+			array("text" => "Augmentation ",
+				"idname" => "opt_augmentation_matiere",
+				"options" => array("Pas de cellule en plus" => 0,
+									"Une cellule de plus par tour" => 1),
+				"default" => 1,
+				"callback" => "partie.options.setAugmentationMatiere(parseInt(this.value));",
+				"table"=>true
+			));
+
 ?>
 	<tr><td style="text-align:right;">
 			<label style="float: right;">Profondeur de jeu :</label></td><td>
@@ -517,12 +526,12 @@ function onchange_mode(sel) {
 	<form name="camp">
 	Campagne/mission : <input type="text" name="campagne" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="mission" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" /> ->
-	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.missionsuivante.value;"> mission suivante</a> : 
+	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="#" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.missionsuivante.value;">mission suivante</a> : 
 	<input type="text" name="missionsuivante" value="fin" style="width:60px" /><br />
 	<table><tr><td>
 	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" onchange="this.value=HTMLentities(this.value);" /><br />
 	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';"  onchange="this.value=HTMLentities(this.value);"/></td><td>
-	<textarea name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" onchange="this.value=HTMLentities(this.value);">Histoire</textarea></td></tr></table>
+	<input type="texte" name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" onchange="this.value=HTMLentities(this.value);" value="Histoire"></td></tr></table>
 	</form>
 </div>
 </td></tr><tr><td colspan="2">
@@ -545,32 +554,35 @@ function lancerTesteur(){
 Charger une mission existante : <input type="text" name="c" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 
 	<input type="text" name="m" value="<?php echo (array_key_exists("m",$_GET)?$_GET["m"]:"0000"); ?>" style="width:60px" />
 	<input type="hidden" name="pw" value="<?php echo $_GET['pw']; ?>" />
-<input class="btn" type="submit" value="Charger !"><input class="btn" id="menuensemblecampagnes" type="button" value="Mission existantes" onclick="changerAffichage('ensemblecampagnes');" />
+<input class="btn" type="submit" value="Charger !"><input class="btn" id="menuensemblecampagnes" type="button" value="Missions existantes" onclick="changerAffichage('ensemblecampagnes');" />
 </form>
 <div id="ensemblecampagnes" style="display:none;">
 <?php
 $dir = opendir('.');
-echo "<br /><table>";
+echo "<br /><table><tr>";
+$anciennecampange = "-";
 while (false !== ($file = readdir($dir))) {
 	$num = array();
 	if (!ereg("^xaop(.*)\.lvl$",$file,$num))
 		continue;
 	$numero = $num[1];
-	echo "<tr><td>$numero</td><td>";
+	$campagne = substr($numero,0,1);
+	if (strcmp($campagne,$anciennecampange)!=0){
+		$anciennecampange = $campagne;
+		echo "</tr><tr><td>Campagne ".$campagne." : </td>";
+	}
+	$mission = substr($numero,1);
+	echo "<td><a href='#' onclick=\"document.charg.c.value='".$campagne."';".
+			"document.charg.m.value='".$mission."';document.charg.submit();\">$numero</a></td>";
 	//echo date("d F Y H:i:s", fileatime($file));
-	echo "</td><td>";
-	echo "<input type=\"button\" value=\"charger\" onclick=\"document.charg.c.value='".substr($numero,0,1)."';".
-			"document.charg.m.value='".substr($numero,1)."';document.charg.submit();\" />";
-	echo "</td>";
-	echo "</tr>\n";
 }
-echo "</table>";
+echo "</tr></table>";
 closedir($dir);
 ?>
 </div>
 </div>
 </td></tr></table>
 <textarea id="resultat" style="<?php if (!array_key_exists("fichier",$_POST)) echo "display:none;";?>"><?php echo $_POST["fichier"]; ?></textarea>
-<iframe name="framelancement" id="framelancement" style="display:none;"></iframe><!--   -->
+<iframe name="framelancement" id="framelancement"></iframe><!--  style="display:none;"  -->
 </body>
 </html>

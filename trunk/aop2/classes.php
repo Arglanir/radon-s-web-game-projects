@@ -25,6 +25,7 @@ class Partie {
 		$this->noTour = 1;
 		$this->joueurEnCours = 0;
 		$this->docxml = false;
+		$this->commentaires = false;
 	}
 	function addJoueur($nom,$couleur,$mdp="0",$type=0,$niveau=0){
 		if ($this->demarree) return false;//plus d'ajout après le démarrage
@@ -37,7 +38,7 @@ class Partie {
 			$leMaxDist = -1;
 			$lEndroit = array(0,0);
 			for ($i=0;$i<$this->tableauJeu->tailleX;$i++) for ($j=0;$j<$this->tableauJeu->tailleY;$j++){
-				$m = $this->tableauJeu->distance($this->options,$i,$j);
+				$m = $this->tableauJeu->distance($i,$j);
 				if ($m > $leMaxDist){
 					$leMaxDist = $m;
 					$lEndroit = array($i,$j);
@@ -61,7 +62,7 @@ class Partie {
 	function joueurSuivant(){//met le joueur en cours au joueur suivant
 		$this->joueurEnCours = mettreEntre($this->joueurEnCours,$this->nbJoueurs)+1;//on passe au suivant
 		if ($this->joueurEnCours == 1) $this->noTour++;//augmentation du n° du tour
-		if (!$this->tableauJeu->peutJouer($this->options,$this->joueurEnCours)) $this->joueurSuivant();
+		if (!$this->tableauJeu->peutJouer($this->joueurEnCours)) $this->joueurSuivant();
 		return true;
 	}
 	function getJoueurEnCours(){
@@ -124,7 +125,7 @@ class Partie {
 				$partie->tableauJeu->getCase($j,$i)->setJoueur(case2joueur($tableauDecor[$i][$j]));
 			}
 		}
-		$partie->tableauJeu->metsLesMax($partie->options);
+		$partie->tableauJeu->metsLesMax();
 		unset($tableauDecor);
 		return $partie;
 	}
@@ -147,9 +148,10 @@ class Partie {
 		$partie->options = $Xpartie->get_elements_by_tagname( "options" );
 		$partie->options = Options::fromXML($partie->options[0]);
 		$partie->tableauJeu = $Xpartie->get_elements_by_tagname( "tableaudejeu" );
+		$partie->tableauJeu = PlateauDeJeu::fromXML($partie->tableauJeu[0]);
+		$partie->tableauJeu->options = $partie->options;
 		$partie->commentaires = $Xpartie->get_elements_by_tagname( "commentaire" );
 		$partie->commentaires = (isset($partie->commentaires[0])?$partie->commentaires[0]:false);
-		$partie->tableauJeu = PlateauDeJeu::fromXML($partie->tableauJeu[0]);
 		return $partie;
 	}
 	function fromSXML($fichier){
@@ -188,6 +190,7 @@ class Partie {
 			}
 			
 		}	
+		$partie->tableauJeu->options = $partie->options;
 		return $partie;
 	}
 	
@@ -212,7 +215,7 @@ class Partie {
 		
 		$Xtableau = $this->tableauJeu->toSXML($Xpartie);
 
-		if ($this->commentaire){
+		if ($this->commentaires){
 			$XCom = $Xpartie->addChild("commentaire");
 			$Xhist = $XCom->addChild("histoire",$this->commentaires->histoire);
 			$Xpara = $XCom->addChild("parametrescampagne");
@@ -412,25 +415,29 @@ class Options {
 	var $typeBord;	//Bord bloqués ?	1/0/2:monde rond
 	var $ajoutDiag;	//Ajout diagonale ? true/false  (peut-on cliquer en diagonale ou seulement à côté ?)
 	var $explosionJoueur;//Explosion slt pour joueur en cours ? true/false
+	var $augmentationMatiere;//true/false
 	
-	function Options($chateauxPermis=0,$profondeur=100,$typeBord=1,$ajoutDiag=1,$explosionJoueur=1){
+	function Options($chateauxPermis=0,$profondeur=100,$typeBord=1,$ajoutDiag=1,$explosionJoueur=1,$augmentationMatiere=1){
 		$this->chateauxPermis = ($chateauxPermis?true:false);
 		$this->profondeur = $profondeur;
 		$this->typeBord = $typeBord;
 		$this->ajoutDiag = ($ajoutDiag?true:false);
 		$this->explosionJoueur = ($explosionJoueur?true:false);
+		$this->augmentationMatiere = ($augmentationMatiere?true:false);
 	}
 	function setPermissionChateau($chateauxPermis){$this->chateauxPermis = ($chateauxPermis?true:false);}
 	function setProfondeur($profondeur){$this->profondeur = $profondeur;}
 	function setTypeBord($typeBord){$this->typeBord = $typeBord;}
 	function setPlacementDiag($ajoutDiag){$this->ajoutDiag = ($ajoutDiag?true:false);}
 	function setExplosionJoueur($explosionJoueur){$this->explosionJoueur = ($explosionJoueur?true:false);}
+	function setAugmentationMatiere($augmentationMatiere){$this->augmentationMatiere = ($augmentationMatiere?true:false);}
 
 	function yaPermissionChateau(){return $this->chateauxPermis;}
 	function quelleProfondeur(){return $this->profondeur;}
 	function quelTypeBord(){return $this->typeBord;}
 	function yaPlacementDiag(){return $this->ajoutDiag;}
 	function yaExplosionJoueur(){return $this->explosionJoueur;}
+	function yaAugmentationMatiere(){return $this->augmentationMatiere;}
 	
 	function fromXML($Xoptions){
 		$options = new Options();
@@ -449,6 +456,8 @@ class Options {
 				case "ajout_diagonale": $options->setPlacementDiag($valeur);
 					break;
 				case "explosion_joueur": $options->setExplosionJoueur($valeur);
+					break;
+				case "augmentation_matiere": $options->setAugmentationMatiere($valeur);
 					break;
 			}
 		}
@@ -470,6 +479,8 @@ class Options {
 					break;
 				case "explosion_joueur": $options->setExplosionJoueur($valeur);
 					break;
+				case "augmentation_matiere": $options->setAugmentationMatiere($valeur);
+					break;
 			}
 		}
 		return $options;
@@ -478,15 +489,16 @@ class Options {
 	function toSXML($parent){//renvoie le noeud SimpleXML
 		$Xoptions = $parent->addChild("options");
 		
-		$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur");
+		$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur","augmentation_matiere");
 		$options = array(($this->yaPermissionChateau()?1:0),
 							$this->quelleProfondeur() , 
 							$this->quelTypeBord(), 
 							($this->yaPlacementDiag()?1:0), 
-							($this->yaExplosionJoueur()?1:0));
-		for ($i = 0; $i < 5; $i++){
+							($this->yaExplosionJoueur()?1:0),
+							($this->yaAugmentationMatiere()?1:0));
+		foreach ($lesOptions as $i => $option){ // = 0; $i < 5; $i++){
 			$Xoption = $Xoptions->addChild("option");
-			$Xoption->addAttribute("type", $lesOptions[$i]);
+			$Xoption->addAttribute("type", $option);
 			$Xoption->addAttribute("valeur", $options[$i]);
 		}
 		
@@ -495,15 +507,16 @@ class Options {
 	function toXML($xml_partie){//renvoie un DOMNode
 		$Xoptions = $xml_partie->create_element("options");
 		
-		$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur");
+		$lesOptions = array("chateaux_actifs", "profondeur_jeu" , "type_bords", "ajout_diagonale", "explosion_joueur","augmentation_matiere");
 		$options = array(($this->yaPermissionChateau()?1:0),
 							$this->quelleProfondeur() , 
 							$this->quelTypeBord(), 
 							($this->yaPlacementDiag()?1:0), 
-							($this->yaExplosionJoueur()?1:0));
-		for ($i = 0; $i < 5; $i++){
+							($this->yaExplosionJoueur()?1:0),
+							($this->yaAugmentationMatiere()?1:0));
+		foreach ($lesOptions as $i => $option) {// = 0; $i < 5; $i++){
 			$Xoption = $Xoptions->create_element("option");
-			$Xoption->set_attribute("type", $lesOptions[$i]);
+			$Xoption->set_attribute("type", $option);
 			$Xoption->set_attribute("valeur", $options[$i]);
 			$Xoptions->append_child($Xoption);
 		}
@@ -517,9 +530,11 @@ class PlateauDeJeu {
 	var $plateau;//tableau bi dim de UneCase
 	var $tailleX;
 	var $tailleY;
+	var $options;
 	
 	function PlateauDeJeu(){
 		$this->plateau = array();
+		$this->options = null;
 		$tableauPlein = true;
 		switch( func_num_args ()){
 			case 1:
@@ -527,6 +542,7 @@ class PlateauDeJeu {
 				$ancienPlateau= func_get_arg(0);
 				$this->tailleX = $ancienPlateau->tailleX;
 				$this->tailleY = $ancienPlateau->tailleY;
+				$this->options = $ancienPlateau->options;
 				for ($i = 0; $i < $this->tailleY; $i++){
 					$this->plateau[$i] = array();
 					for ($j = 0; $j < $this->tailleX; $j++)
@@ -558,12 +574,14 @@ class PlateauDeJeu {
 	}
 	function copie(){//crée une copie du plateau
 		$leNouveau = new PlateauDeJeu($this->tailleX, $this->tailleY, false);
+		$leNouveau->options = $this->options;
 		for ($i = 0; $i < $this->tailleY; $i++)
 			for ($j = 0; $j < $this->tailleX; $j++)
 				$leNouveau->plateau[$i][$j] = $this->plateau[$i][$j]->copie();
 		return $leNouveau;
 	}
 	function getCase($x, $y){
+		//echo "<br />".var_dump($x)." ".var_dump($y);
 		if ($x>=0 && $x<$this->tailleX && $y>=0 && $y<$this->tailleY) return $this->plateau[$y][$x];
 		else return false;
 	}
@@ -576,16 +594,16 @@ class PlateauDeJeu {
 		}
 		return true;
 	}
-	function metsLesMax($options){//en fonction du plateau et des options
+	function metsLesMax(){//en fonction du plateau et des options
 		for($i=0;$i<$this->tailleY;$i++) for($j=0;$j<$this->tailleX;$j++){
 			$k = 4;
-			if ($options->quelTypeBord() == 1){//on compte les bords
+			if ($this->options->quelTypeBord() == 1){//on compte les bords
 					if ($i==0 || $i==$this->tailleY-1) $k--;
 					if ($j==0 || $j==$this->tailleX-1) $k--;
 			}
 			for ($ii=-1;$ii<2;$ii++) for($jj=-1;$jj<2;$jj++)//on regarde les obstacles
 					if (abs($ii)+abs($jj)==1){//pas diagonale
-						switch($options->quelTypeBord()){
+						switch($this->options->quelTypeBord()){
 						case 1: //on regarde pas après les bords
 						case 0:
 							if (entre(0,$ii+$i,$this->tailleY-1)&&entre(0,$jj+$j,$this->tailleX-1))
@@ -607,19 +625,19 @@ class PlateauDeJeu {
 		}
 	}
 	
-	function distance($options,$x,$y,$x2=-1,$y2=-1){//renvoie un flottant
+	function distance($x,$y,$x2=-1,$y2=-1){//renvoie un flottant
 		if ($x2>=0 && $y2>=0){//entre 2 cases
 			$dx=$x2-$x;$dy=$y2-$y;
-			switch($options->quelTypeBord()){
+			switch($this->options->quelTypeBord()){
 				case 0:case 1:
-					if ($options->yaPlacementDiag())
+					if ($this->options->yaPlacementDiag())
 						return	distN0($dx,$dy);//max(abs($dx),abs($dy));
 								//round(sqrt(pow($dx,2)+pow($dy,2)),1);
 					else
 						return abs($dx)+abs($dy);
 				case 2://torrique
 					$d = $this->tailleX + $this->tailleY;
-					if ($options->yaPlacementDiag())
+					if ($this->options->yaPlacementDiag())
 						for ($i=-1;$i<2;$i++) for ($j=-1;$j<2;$j++)
 							$d = min($d,distN0($dx+$i*$this->tailleX,$dy+$j*$this->tailleY));//sqrt(pow($dx+$i*$this->tailleX,2)+pow($dy+$j*$this->tailleY,2));
 					else
@@ -638,13 +656,33 @@ class PlateauDeJeu {
 			}
 			$d = $this->tailleX + $this->tailleY;
 			foreach($posJoueurs as $pos){
-				$d = min($d,$this->distance($options,$x,$y,$pos[0],$pos[1]));
+				$d = min($d,$this->distance($x,$y,$pos[0],$pos[1]));
 			}
 			return $d;
 		}
 	}
 	
-	function purifie($options,$joueurEnCours,$numtour="1-0"){//en fonction des options, 1 itération
+	function caseLaPlusEloigneeDe($x,$y,$joueur){//renvoie le array(x,y) de la case du joueur la plus éloignée
+		//entre ex-aequo, on prend la case du milieu, dans un parcours en y puis x
+		$distanceMax = -1;
+		$tabReponses = null;
+		for ($i=0;$i<$this->tailleY;$i++) for ($j=0;$j<$this->tailleX;$j++){
+			$cetteCase = $this->getCase($j,$i);
+			if ($cetteCase->getJoueur() == $joueur && $cetteCase->getCellules() > 0){
+				$dist = $this->distance($j,$i,$x,$y);
+				if ($dist > $distanceMax){
+					$tabReponses = array(array($j,$i));
+					$distanceMax = $dist;
+				}
+				else if ($dist == $distanceMax){
+					$tabReponses[count($tabReponses)] = array($j,$i);
+				}
+			}
+		}
+		return $tabReponses[floor(count($tabReponses)*0.5)];
+	}
+	
+	function purifie($joueurEnCours,$numtour="1-0"){//en fonction des options, 1 itération
 		$changement=false;
 		$ouGlaceExplosion = array();//var indiceGlace=0;//préparation des endroits glacés
 		$differences = array(); //préparation du traitement des explosions
@@ -660,20 +698,20 @@ class PlateauDeJeu {
 		//parcours du plateau pour traiter les explosions
 		for ($x=0;$x<$this->tailleX;$x++) for($y=0;$y<$this->tailleY;$y++){
 			$cetteCase = $this->getCase($x,$y);
-			if (($options->yaExplosionJoueur() && $cetteCase->getJoueur()==$joueurEnCours) || !$options->yaExplosionJoueur())
+			if (($this->options->yaExplosionJoueur() && $cetteCase->getJoueur()==$joueurEnCours) || !$this->options->yaExplosionJoueur())
 			if ($cetteCase->vaExploser() && !$cetteCase->getChateau()){//explosion !
 				$changement = true;			//va sur les cases d'à côté
 				for ($ii=-1;$ii<2;$ii++) for($jj=-1;$jj<2;$jj++) if (abs($ii)+abs($jj)==1){//pas diagonale
 					$nvx = $x+$jj; $nvy = $y+$ii;
 					$perteBord = false;
-					switch($options->quelTypeBord()){
+					switch($this->options->quelTypeBord()){
 					  case 2: //on regarde après les bords
 						$nvx = mettreEntre($x+$jj,$this->tailleX); $nvy = mettreEntre($y+$ii,$this->tailleY);
 					  case 0: $perteBord=true; //on ne regarde pas au bord mais on perd une cellule
 					  case 1: //on regarde pas après les bords
 						if (entre(0,$nvy,$this->tailleY-1) && entre(0,$nvx,$this->tailleX-1)){
 							$autreCase=$this->getCase($nvx,$nvy);
-							if (!$options->yaExplosionJoueur() && !$autreCase->getChateau() && !$cetteCase->getChateau() && $autreCase->vaExploser() && $autreCase->getJoueur() != $cetteCase->getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
+							if (!$this->options->yaExplosionJoueur() && !$autreCase->getChateau() && !$cetteCase->getChateau() && $autreCase->vaExploser() && $autreCase->getJoueur() != $cetteCase->getJoueur()){//l'autre case explose de même, et autre joueur : on ne traverse pas, on garde la cellule
 								true;
 							} else
 							switch($autreCase->getDecor()){
@@ -743,28 +781,32 @@ class PlateauDeJeu {
 		}
 		return $changement;
 	}
-	function purifieTotalement($options,$joueurEnCours,$numTour,$profondeur=0){
-		if ($profondeur>=$options->quelleProfondeur()){
+	function purifieTotalement($joueurEnCours,$numTour,$profondeur=0){
+		if ($profondeur>=$this->options->quelleProfondeur()){
 			return true;
 		} else {
-			$changements = $this->purifie($options,$joueurEnCours,$numTour."-".$joueurEnCours);
+			$changements = $this->purifie($joueurEnCours,$numTour."-".$joueurEnCours);
 			$profondeur++;
 			if ($changements)//on arrête s'il y a pas de changements
-				$this->purifieTotalement($options,$joueurEnCours,$numTour,$profondeur);
+				$this->purifieTotalement($joueurEnCours,$numTour,$profondeur);
 			else
-				$this->purifieTotalement($options,$joueurEnCours,$numTour,$options->quelleProfondeur());
+				$this->purifieTotalement($joueurEnCours,$numTour,$this->options->quelleProfondeur());
 		}
 	}
 	function clicNormal($x,$y,$joueurEnCours,$chateau=false,$numTour=1){//ajoute une cellule
 		$laCase = $this->getCase($x,$y);
 		if (!$laCase) var_dump($this);
+		if (!$this->options->yaAugmentationMatiere()){
+			list($x2,$y2) = $this->caseLaPlusEloigneeDe($x,$y,$joueurEnCours);
+			$this->getCase($x2,$y2)->remCellules(1);
+		}
 		$laCase->setJoueur($joueurEnCours);
 		$laCase->addCellules($laCase->getDecor()==2?2:1);
 		$laCase->numTourUtilisee = $numTour."-".$joueurEnCours;
 		if ($chateau) $laCase->clicChateau();
 	}
 	function clicChateau($x,$y,$joueurEnCours,$numTour=1){return $this->clicNormal($x,$y,$joueurEnCours,true,$numTour);}
-	function peutJouerEn($options,$x,$y,$joueurAppelant,$chateau=false){
+	function peutJouerEn($x,$y,$joueurAppelant,$chateau=false){
 		$laCase = $this->getCase($x,$y);
 		if ($laCase->getDecor() != 0 && $chateau)
 			return false; // chateau et case instable
@@ -782,9 +824,9 @@ class PlateauDeJeu {
 			return false;
 		for($i=-1;$i<2;$i++) for($j=-1;$j<2;$j++){//on va regarder si une case autour appartient au joueur
 			if ($i==0 && $j==0) continue; // on a déjà testé la case centrale
-			if (!$options->yaPlacementDiag() && abs($i)+abs($j)==2) continue;//pas en diagonale
+			if (!$this->options->yaPlacementDiag() && abs($i)+abs($j)==2) continue;//pas en diagonale
 			$nvx = $x+$i; $nvy = $y+$j;
-			if ($options->quelTypeBord() != 2 && (!entre(0,$nvx,$this->tailleX-1) || !entre(0,$nvy,$this->tailleY-1)))
+			if ($this->options->quelTypeBord() != 2 && (!entre(0,$nvx,$this->tailleX-1) || !entre(0,$nvy,$this->tailleY-1)))
 				continue;//après le bord
 			$nvx = mettreEntre($nvx,$this->tailleX);$nvy = mettreEntre($nvy,$this->tailleY);//au cas où le monde est rond
 			$autreCase = $this->getCase($nvx,$nvy);
@@ -793,16 +835,16 @@ class PlateauDeJeu {
 		}
 		return false;
 	}
-	function ouPeutJouer($options,$joueurAppelant,$chateau=false){//renvoie un tableau des positions jouables
+	function ouPeutJouer($joueurAppelant,$chateau=false){//renvoie un tableau des positions jouables
 		$positions = array();
 		for ($x=0;$x<$this->tailleX;$x++)
 			for ($y=0;$y<$this->tailleY;$y++)
-				if ($this->peutJouerEn($options,$x,$y,$joueurAppelant,$chateau))
+				if ($this->peutJouerEn($x,$y,$joueurAppelant,$chateau))
 					$positions[] = array($x,$y);
 		return $positions;
 	}
-	function peutJouer($options,$joueurAppelant){//vérifie si le joueur appelant peut jouer
-		return count($this->ouPeutJouer($options,$joueurAppelant)) > 0;
+	function peutJouer($joueurAppelant){//vérifie si le joueur appelant peut jouer
+		return count($this->ouPeutJouer($joueurAppelant)) > 0;
 		for ($x=0;$x<$this->tailleX;$x++)
 			for ($y=0;$y<$this->tailleY;$y++)
 				if ($this->getCase($x, $y)->getJoueur()==$joueurAppelant && $this->getCase($x, $y)->getCellules()>0)

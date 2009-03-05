@@ -83,7 +83,7 @@ this.derniereAction[numero] = new Array(Xaction.getAttribute('type'),
 			tableauArguments["j"] = "observateur";
 
 	var Xoptions = Xpartie.getElementsByTagName("option");
-this.options = new Array();
+this.options = new Array(1,100,2,1,0,1);
 	for (var i in Xoptions){
 		var valeur = parseInt(Xoptions.item(i).getAttribute('valeur'));
 		switch(Xoptions.item(i).getAttribute('type')){
@@ -92,6 +92,7 @@ this.options = new Array();
 		case "type_bords":this.options[2] = valeur;break;
 		case "ajout_diagonale":this.options[3] = valeur;break;
 		case "explosion_joueur":this.options[4] = valeur;break;
+		case "augmentation_matiere":this.options[5] = valeur;break;
 		}
 	}
 	var Xtableaupartie = Xpartie.getElementsByTagName("tableaudejeu").item(0);
@@ -135,7 +136,8 @@ this.params = false;
 			document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													(this.histoire?this.histoire:"Une mission banale")+"<br />"+
 													"<a href='#' onclick='document.getElementById(\"popupcampagne\").style.display = \"none\";'>Commencer le jeu</a>";
-			document.getElementById("popupcampagne").style.display = "block";
+			if (tableauArguments["j"] != "observateur" && typeof tableauArguments["synchroserveur"] == undefined)
+				document.getElementById("popupcampagne").style.display = "block";
 	}
 	
 //méthodes
@@ -151,6 +153,8 @@ this.existeGagnant=existeGagnant;
 this.peutJouer=peutJouer;
 this.lesJoueurs2string=lesJoueurs2string;
 this.faireJouerSuivant=faireJouerSuivant;
+this.caseLaPlusEloigneeDe=caseLaPlusEloigneeDe; 
+this.distance=distance;
 }
 
 function purifie(){with(this){//renvoie true s'il y a eu un changement, false sinon
@@ -417,7 +421,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													this.params.getAttribute("infosucces")+"<br />"+
 													(this.params.getAttribute("suivante") != "fin" ? 
-														"<a href='' onclick=\"continuerCampagne(leJeu);\">Mission suivante</a>" :
+														"<a href='#' onclick=\"continuerCampagne(leJeu);\">Mission suivante</a>" :
 													"Campagne termin&eacute;e ! F&eacute;licitations !<br />"+
 														"<a href='#' onclick=\"supprimerPartie();\">Revenir &agrave; l'accueil</a>");
 		document.getElementById("popupcampagne").style.display = "block";
@@ -425,7 +429,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	} else if (nGagnant && !popupfinaffichee){
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													"Dommage ! Tu feras mieux la prochaine fois..."+"<br />"+
-													"<a href='' onclick=\"recommencer(unJeu);\">Recommencer</a>";
+													"<a href='#' onclick=\"recommencer(unJeu);\">Recommencer</a>";
 		document.getElementById("popupcampagne").style.display = "block";
 		popupfinaffichee = true;
 	}
@@ -683,11 +687,57 @@ function toString(){with(this){//recrée une string de jeu
 	return chaine;
 }}
 
+function distance (x,y,x2,y2){with(this){//renvoie un flottant
+	var dx=x2-x; var dy=y2-y;
+	switch(this.options[2]){
+		case 0:case 1:
+			if (this.options[3])
+				return	distN0(dx,dy);//max(abs(dx),abs(dy));
+						//round(sqrt(pow(dx,2)+pow(dy,2)),1);
+			else
+				return Math.abs(dx)+Math.abs(dy);
+		case 2://torrique
+			var d = this.tailleX + this.tailleY;
+			if (this.partie.options.yaPlacementDiag())
+				for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
+					d = Math.min(d,distN0(dx+i*this.tailleX,dy+j*this.tailleY));//sqrt(pow(dx+i*this.tailleX,2)+pow(dy+j*this.tailleY,2));
+			else
+				for(var i=-1;i<2;i++) for(var j=-1;j<2;j++)
+					d = Math.min(d,Math.abs(dx+i*this.tailleX)+Math.abs(dy+j*this.tailleY));
+			return d;
+	}
+}}
+function caseLaPlusEloigneeDe (x,y,joueur){with(this){//renvoie le array(x,y) de la case du joueur la plus éloignée
+	//entre ex-aequo, on prend la case du milieu, dans un parcours en y puis x
+	var distanceMax = -1;
+	var tabReponses = null;
+	for (var i=0;i<this.tailleY;i++) for (var j=0;j<this.tailleX;j++){
+		var cetteCase = this.tableauJeu[i][j];
+		if (case2joueur(cetteCase) == joueur && case2cellules(cetteCase) > 0){
+			var dist = this.distance(j,i,x,y);
+			if (dist > distanceMax){
+				tabReponses = new Array(new Array(j,i));
+				distanceMax = dist;
+			}
+			else if (dist == distanceMax){
+				tabReponses[tabReponses.length] = new Array(j,i);
+			}
+		}
+	}
+	return tabReponses[Math.floor(tabReponses.length*0.5)];
+}}
+
 function joueEn(x,y){with(this){//ajoute une cellule du joueur en cours en x,y
 	//alert("Joue en "+x+", "+y)
 	if (!this.jouable(x,y))
 		return false;
 	demarree = 1;
+	if (!this.options[5]){
+		var temp = this.caseLaPlusEloigneeDe(x,y,joueurEnCours);
+		x2 = temp[0]; y2 = temp[1];
+		if (case2cellules(this.tableauJeu[y2][x2])>0)
+			this.tableauJeu[y2][x2] -= 1;
+	}
 	if (tableauArguments["offline"]==0 && this.joueurEnCours==tableauArguments["j"])
 		jeJoueEn(x,y,false);//on n'attend pas de savoir si c'est bon, ce client est bien programmé
 	if (case2cellules(this.tableauJeu[y][x]) >= 100 - (this.tableauDecor[y][x]==2?2:1))
@@ -777,8 +827,8 @@ function afficheOptions(){with(this){//affiche les options en cours, pour faire 
 	chaineHTML += (this.options[3]?"Placement autour des cases &agrave; soi":"Placement sur cases adjacentes en croix")+"<br />";
 	chaineHTML += (this.options[4]?"D&eacute;veloppement unique du joueur en cours":"D&eacute;veloppement de tout le monde")+"<br />";
 	chaineHTML += (tableauArguments["j"] == quiLanceLIA?"<input type='button' onclick='supprimerPartie();' value='Supprimer la partie' />"+"<br />":"");
-	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.params?"<a href='' onclick=\"recommencer(unJeu);\">Recommencer la mission</a>"+"<br />":"");
-	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.joueurs[1][0] == "Testeur" && this.params?"<a href='' onclick=\"editer(unJeu);\">Aller &agrave; l'&eacute;diteur</a>"+"<br />":"");
+	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.params?"<a href='#' onclick=\"recommencer(unJeu);\">Recommencer la mission</a>"+"<br />":"");
+	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.joueurs[1][0] == "Testeur" && this.params?"<a href='#' onclick=\"editer(unJeu);\">Aller &agrave; l'&eacute;diteur</a>"+"<br />":"");
 	
 	document.getElementById("options").innerHTML = chaineHTML;
 }}
