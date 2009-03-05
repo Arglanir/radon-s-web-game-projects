@@ -41,7 +41,7 @@
 <!ELEMENT options (option*) >
 <!ELEMENT option (EMPTY) >
 <!ATTLIST option 
-		type (chateaux_actifs | type_bords | ajout_diagonale | explosion_joueur | profondeur_jeu) #REQUIRED
+		type (chateaux_actifs | type_bords | ajout_diagonale | explosion_joueur | profondeur_jeu | augmentation_matiere) #REQUIRED
 		valeur NMTOKEN #REQUIRED>
 <!ELEMENT tableaudejeu (ligne*)>
 <!ATTLIST tableaudejeu 

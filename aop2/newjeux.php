@@ -48,6 +48,7 @@ class CreaJeu{
 		for ($j=1;$j <= $this->partie->nbJoueurs;$j++){
 			$this->partie->joueur[$j]->derniereAction = new Action("n",$positionsJoueurs[$j][0],$positionsJoueurs[$j][1]);
 		}
+		$this->partie->tableauJeu->options = $this->partie->options;
 		$this->partie->tableauJeu->metsLesJoueurs($positionsJoueurs);
 		$this->partie->tableauJeu->poseDecor($tabDecor);
 		$this->partie->tableauJeu->metsLesMax($this->partie->options);
@@ -79,6 +80,7 @@ class CreaJeu{
 		$this->opt_partie_cachee=0;
 		$this->opt_avec_decor=1;
 		$this->opt_attente_joueurs=0;
+		$this->opt_augmentation_matiere=1;
 		if(isset($_POST["nbJoueurs"])) {
 			$this->partie->nbJoueurs = (int)$_POST["nbJoueurs"];
 		} else return "Erreur : Nombre de joueurs indéterminé";
@@ -130,11 +132,14 @@ class CreaJeu{
 		$this->opt_partie_cachee = (int)$_POST["opt_partie_cachee"];
 		if(isset($_POST["opt_attente_joueurs"]))
 		$this->opt_attente_joueurs = (int)$_POST["opt_attente_joueurs"];
+		if(isset($_POST["opt_augmentation_matiere"]))
+		$this->opt_augmentation_matiere = (int)$_POST["opt_augmentation_matiere"];
 		$this->partie->options = new Options($this->opt_chateaux_actifs,
 											$this->opt_profondeur_jeu,
 											$this->opt_type_bords,
 											$this->opt_ajout_diagonale,
-											$this->opt_explosion_joueur);
+											$this->opt_explosion_joueur,
+											$this->opt_augmentation_matiere);
 		return false;
 	}
 	

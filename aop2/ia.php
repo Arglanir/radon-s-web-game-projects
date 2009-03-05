@@ -37,7 +37,7 @@ if (!$partie)
 	lancerErreur("Partie ".$p." inconnue.","Lancement de l'IA");
 
 $joueurIA = $partie->joueurEnCours;
-$forcerAJouer = (array_key_exists("pw",$_GET)?md5($_GET["pw"])==$partie->joueur[$joueurIA]->mdp:false);
+$forcerAJouer = (array_key_exists("pw",$_GET)?md5($_GET["pw"])==md5mdpIA:false);
 if (!$partie->joueur[$joueurIA]->isIA() && !$forcerAJouer)
 	lancerErreur("Le joueur en cours est humain","Lancement de l'IA");
 $niveauIA = $partie->joueur[$joueurIA]->niveau;
@@ -72,7 +72,7 @@ function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la
 	for ($x=0;$x<$plateau->tailleX;$x++){
 		for ($y=0;$y<$plateau->tailleY;$y++){
 			$c = $plateau->getCase($x,$y);
-			if ($plateau->peutJouerEn($partie->options,$x,$y,$joueur)){
+			if ($plateau->peutJouerEn($x,$y,$joueur)){
 				$cellules += ($nb = $c->getCellules());
 				if ($nb==0) $casesMenacees += 1;
 				if ($nb>0) $casesControlees += 1;
@@ -108,9 +108,8 @@ function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la
 function descente($plateau,$joueur,$joueurIA,$profondeurMax,$profondeur=0,$alpha=-10000000,$beta=10000000){
 	global $partie;
 	$nbJoueurs = $partie->nbJoueurs;
-	$options = $partie->options;
 	
-	$lesPositions = melanger($plateau->ouPeutJouer($partie->options,$joueur));
+	$lesPositions = melanger($plateau->ouPeutJouer($joueur));
 	if (count($lesPositions) == 0)
 		return descente($plateau,mettreEntre($joueur,$nbJoueurs)+1,$joueurIA,$profondeurMax,$profondeur+1,$alpha,$beta);
 	$evaluationPositions = array();
@@ -120,7 +119,7 @@ function descente($plateau,$joueur,$joueurIA,$profondeurMax,$profondeur=0,$alpha
 	foreach($lesPositions as $key => $pos){
 		$plateau2 = $plateau->copie();
 		$plateau2->clicNormal($pos[0],$pos[1],$joueur,$partie->noTour);
-		$plateau2->purifieTotalement($partie->options,$joueur,$partie->noTour);
+		$plateau2->purifieTotalement($joueur,$partie->noTour);
 		$g = $plateau2->yaGagnant();
 		if ($g){
 			if ($g==$joueurIA && $noeudMax) $evaluationPositions[$key] = 100000;
@@ -157,7 +156,7 @@ function descente($plateau,$joueur,$joueurIA,$profondeurMax,$profondeur=0,$alpha
 }
 
 if ($niveauIA == 0){//jeu au hasard
-	$lesPositions = $partie->tableauJeu->ouPeutJouer($partie->options,$joueurIA);
+	$lesPositions = $partie->tableauJeu->ouPeutJouer($joueurIA);
 	$laPos = $lesPositions[rand(0,count($lesPositions)-1)];
 	$_GET["x"] = $laPos[0];
 	$_GET["y"] = $laPos[1];
@@ -168,6 +167,7 @@ else {
 	$_GET["y"] = $lActionEn[1];
 }
 
+//echo $_GET["x"]." ".$_GET["y"];
 
 include ("serveur.php");
 

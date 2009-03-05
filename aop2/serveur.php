@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+//error_reporting(0);
 /********************************************
 jeu.php : interface avec le fichier de jeu
 	reçoit les requêtes de jeu, regarde si c'est bon et accepte ou non la requete et agit en conséquence
@@ -145,7 +145,7 @@ if (($action == "n" || $action=="c") && is_int($joueurAppelant)) {
 	//est-ce que l'action doit être traitée ?
 	$traiter = ((array_key_exists("k",$_GET)?$_GET["k"]!=0:true) && $partie->joueurEnCours==$joueurAppelant);
 	//l'action est-elle autorisée ?
-	$autorisee = $partie->tableauJeu->peutJouerEn($partie->options,$x,$y,$joueurAppelant,$action=="c");
+	$autorisee = $partie->tableauJeu->peutJouerEn($x,$y,$joueurAppelant,$action=="c");
 	//premier envoi de réponse si l'action n'est pas traitée
 	if (!$traiter || !$autorisee)
 		envoyerReponse("<action ".$leType." autorisee=\"".($autorisee?"oui":"non")."\" traitee=\"non\" />");
@@ -154,7 +154,7 @@ if (($action == "n" || $action=="c") && is_int($joueurAppelant)) {
 	$partie->demarree = true;//jeu commencé
 	$partie->tableauJeu->clicNormal($x,$y,$joueurAppelant,$action=="c",$partie->noTour);
 	$partie->joueur[$joueurAppelant]->derniereAction = new Action($action,$x,$y,$partie->noTour);
-	$partie->tableauJeu->purifieTotalement($partie->options,$joueurAppelant,$partie->noTour);
+	$partie->tableauJeu->purifieTotalement($joueurAppelant,$partie->noTour);
 	$partie->joueurSuivant();
 	
 	//est-ce qu'il y a un gagnant ?
