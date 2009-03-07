@@ -48,7 +48,7 @@ tableauArguments["type"] = (tableauArguments["type"]?tableauArguments["type"]:"c
 /*** initialisation des paramètres et types ***/
 //les options d'affichage
 var tempsEntreAffichages = 1000;
-var tempsDAttenteAvantRelance = 8000;//connexion au serveur
+var tempsDAttenteAvantRelance = 2000;//connexion au serveur
 
 var quiLanceLIA = 0;//c'est l'hôte
 var demarree = 0;
@@ -598,7 +598,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		chaineHTML += "<input type='button' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
-		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title='Si tu penses que l'IA n'a pas été lancée' />";
+		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
 	chaineHTML += "<input type='button' value='Recharger le jeu' onclick='getJeuXML();' title='Si tu penses que le jeu est coincé dans ton client' />";
 	
 	chaineHTML += "</td></tr></table><br />";
@@ -1139,6 +1139,10 @@ function imageSuivante(){
 	if (!url) {
 		typeImagesChargees = tableauArguments["type"]; nbJoueursCharges = unJeu.nbJoueurs;
 		document.getElementById("imgs").innerHTML = "Chargement des images termin&eacute; !";
+		if (!lefaireunefois){
+			apresChargement();//on lance l'affichage
+			lefaireunefois = true;
+		}
 	} else {
 		if (maxIndURL<indiceImages){
 			if (!lefaireunefois){
