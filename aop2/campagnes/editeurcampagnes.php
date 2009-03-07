@@ -37,7 +37,7 @@ for($i=1; $i<=$max_joueurs; $i++) {
 ?><html>
 <head>
 <title>Editeur de campagne</title>
-<!--link rel="stylesheet" type="text/css" href="../css/style.css" /--> 
+<!--link rel="stylesheet" type="text/css" href="../css/style.css" /-->
 <script type="text/javascript" src="../clientclasses.js"></script>
 <script type="text/javascript" src="md5.js"></script>
 <style type="text/css">
@@ -80,11 +80,11 @@ function finaliser(){//appelé avant l'envoi de la partie à l'enregistreur
 	partie.tableauJeu.metsLesMax();
 	
 	// infos de campagne
-	partie.histoire = document.camp.histoire.value;
+	partie.histoire = HTMLentities(document.camp.histoire.value);
 	partie.params.setAttribute("c",document.camp.campagne.value);
 	partie.params.setAttribute("m",document.camp.mission.value);
-	partie.params.setAttribute("titre",document.camp.titre.value);
-	partie.params.setAttribute("infosucces",document.camp.infosucces.value);
+	partie.params.setAttribute("titre",HTMLentities(document.camp.titre.value));
+	partie.params.setAttribute("infosucces",HTMLentities(document.camp.infosucces.value));
 	partie.params.setAttribute("deco",document.getElementById("typecases").value);
 	partie.params.setAttribute("suivante",document.camp.missionsuivante.value);
 	
@@ -172,10 +172,10 @@ function chargerLesDiv(seulementJoueurs){//charge l'ensemble des div de l'éditeu
 		var params = partie.params;
 		document.camp.campagne.value=params.getAttribute("c");
 		document.camp.mission.value=params.getAttribute("m");
-		document.camp.titre.value=params.getAttribute("titre");
-		document.camp.infosucces.value=params.getAttribute("infosucces");
+		document.camp.titre.value=html_entity_decode(params.getAttribute("titre"));
+		document.camp.infosucces.value=html_entity_decode(params.getAttribute("infosucces"));
 		document.camp.missionsuivante.value=params.getAttribute("suivante");
-		document.camp.histoire.value=partie.histoire;
+		document.camp.histoire.value=html_entity_decode(partie.histoire);
 		if (params.getAttribute("deco")){
 			document.getElementById("typecases").value=params.getAttribute("deco");
 			tableauArguments["type"]=params.getAttribute("deco");
@@ -529,9 +529,9 @@ function onchange_mode(sel) {
 	<a style="text-decoration:none;" title="Cliquer ici pour accéder à la mission suivante" href="#" onclick="if (document.camp.missionsuivante.value != 'fin') this.href='editeurcampagnes.php?pw=<?php echo $_GET['pw']; ?>&c='+document.camp.campagne.value+'&m='+document.camp.missionsuivante.value;">mission suivante</a> : 
 	<input type="text" name="missionsuivante" value="fin" style="width:60px" /><br />
 	<table><tr><td>
-	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" onchange="this.value=HTMLentities(this.value);" /><br />
-	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';"  onchange="this.value=HTMLentities(this.value);"/></td><td>
-	<input type="texte" name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" onchange="this.value=HTMLentities(this.value);" value="Histoire"></td></tr></table>
+	<input type="text" name="titre" value="Titre de la mission" onfocus="if (this.value=='Titre de la mission') this.value='';" /><br />
+	<input name="infosucces" value="Texte en cas de succ&egrave;s" onfocus="if (this.value.indexOf('Texte')==0) this.value='';" /></td><td>
+	<input type="text" name="histoire" onfocus="if (this.value.indexOf('Histoire')==0) this.value='';" value="Histoire"></td></tr></table>
 	</form>
 </div>
 </td></tr><tr><td colspan="2">
