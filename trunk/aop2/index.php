@@ -181,8 +181,9 @@ function metsLesIA(jusqua,niveau,debut){
 			<ul> 
 			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
 			<li><a id="menucreation" href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
-			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; R&egrave;gles</a></li> 
 			<li><a id="menucampagnes" href="#" onclick="changerAffichage('campagnes');return false;" >&or; Campagnes</a></li> 
+			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; R&egrave;gles</a></li> 
+			<li><a id="menumerci" href="#" onclick="changerAffichage('merci');return false;" >&or; Remerciements</a></li> 
 			</ul> 
 		</div> 
 	</div> 
@@ -204,6 +205,7 @@ array("text" => "Couleur",
 				<!--input type="hidden" name="noredirection"/-->
 				<!-- ajouter les campagnes ici -->
 				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=2;document.camp.m.value='0001';document.camp.submit();" value="Campagne 2" title="Lancer la campagne" type="button" class="btn" />
 			</form>
 		</div>
 	
@@ -222,9 +224,9 @@ array("text" => "Couleur",
 				<input type="submit" class="btn" value="Chercher la partie" title="clique ici" />
 			</form>
 			<br />
-			<a href="#" onclick="changerAffichage('admini');" style="text-decoration:none;">&gt; Administration</a>
-			<div id="admini" style="display:none;"><form id='' name="adminform" action="admin.php" method="GET">
-				<input type="text" name="pw" /><input type="submit" class="btn" value="Aller à l'administration" /><br />
+			<a href="#" onclick="changerAffichage('admini_form');" style="text-decoration:none;">&gt; Administration</a>
+			<div id="admini_form"  style="display:none;"><form name="adminform" action="admin.php" method="GET">
+				<input type="text" name="pw" /><input type="submit" class="btn" value="Aller &agrave; l'administration" /><br />
 				<input type="submit" class="btn" value="Aller à l'&eacute;diteur" onclick="document.adminform.action = 'campagnes/editeurcampagnes.php';"/>
 			</form></div>
 		</div>
@@ -461,6 +463,14 @@ function fermePopupReseau(){
 			<img style="vertical-align:bottom;" src="images/image.php?n=0&d=3&type=mediev" /> Obstacle </dt>
 			<dd>Les cellules ne peuvent s'y développer. Ce sera donc une cellule de moins dans la limite de population sans explosion des cases d'à-côté.</dd>
 			</dl>
+		</div>
+		<div id="merci" class="onglet" style="width: 300px; display: none;">
+			<h2><a href="#" onclick="changerAffichage('merci');return false;" style="text-decoration:none;">&gt; Remerciements</a></h2>
+			Pierre Fritsch <i>Concept initial du jeu</i><br />
+			Erwin Mayer <i>Style du site</i><br />
+			Mikaël Mayer <i>Fonctions PHP->HTML, Index, Campagnes</i><br />
+			Cédric Mayer <i>Plein de choses...</i><br />
+			Et tous les testeurs...
 		</div>
 	</div>
 

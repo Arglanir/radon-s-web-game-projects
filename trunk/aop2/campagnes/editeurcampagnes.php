@@ -23,8 +23,12 @@ if (array_key_exists("c",$_GET) && array_key_exists("m",$_GET)){
 
 if (array_key_exists("save",$_GET) && array_key_exists("fichier",$_POST)){//sauvegarde de fichier
 	$laction = (file_exists($fichierExistant)?"modifi&eacute;":"cr&eacute;&eacute;");
+	$slashesMis = (strpos($_POST["fichier"],"\\\"") < 30);
 	$fi = fopen($fichierExistant,"w");
-	fwrite($fi,$_POST["fichier"]);
+	if (!$slashesMis)
+		fwrite($fi,$_POST["fichier"]);
+	else
+		fwrite($fi,stripslashes($_POST["fichier"]));
 	fclose($fi);
 	$messagePHP .= $fichierExistant." ".$laction;
 }
@@ -59,7 +63,7 @@ var default_joueur = 0; //idem
 function demarrer(){
 	//chargement de la partie de base
 	lectXML = new lecteurXML();
-	var chargementOK = lectXML.chargeFichier("<?php echo ($fichierExistant?$fichierExistant:"base.xml"); ?>");
+	var chargementOK = lectXML.chargeFichier("<?php echo ($fichierExistant?$fichierExistant:"base.xml"); ?>?nocache="+Math.random());
 	if (!chargementOK) {
 		alert("Probl&egrave;me de chargement de fichier");
 		return false;
@@ -280,8 +284,10 @@ var zoneVisible = 1; var zonePouvantCharger = 2;
 function RAZZone(zone){	nbImagesChargeesZone[zone] = 0;}
 function chargementImageJeu(zone){//appelé quand une image se charge
 	nbImagesChargeesZone[zone]++;
+	document.getElementById("texteremplacement").innerHTML = "Plateau charg&eacute; &agrave; "+Math.floor((nbImagesChargeesZone[zone]*100)/(partie.tableauJeu.tailleX*partie.tableauJeu.tailleY))+"% <a href='#' onclick='afficherPlateau();'>Recharger</a>";
 	if (nbImagesChargeesZone[zone] == partie.tableauJeu.tailleX*partie.tableauJeu.tailleY){//fin du chargement des images : zone de jeu affichée
 		var zone2 = 3-zone;
+		document.getElementById("texteremplacement").innerHTML = "Chargement du plateau...";
 		document.getElementById("texteremplacement").style.display = "none";
 		document.getElementById("plat"+zone2).style.display = "none";
 		document.getElementById("plat"+zone).style.display = "block";
@@ -548,7 +554,13 @@ function lancerTesteur(){
 }
 //--></script>
 <input type="button" class="btn" value="Tester" onclick="lancerTesteur();" title="Tester la mission cr&eacute;&eacute;e" />
-<select id="typecases" onchange="tableauArguments['type']=this.value;chargerPalette();afficherPlateau();"><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option><option value="cool">new age</option></select>
+<select id="typecases" onchange="tableauArguments['type']=this.value;chargerPalette();afficherPlateau();">
+	<option value="atome">atomes</option>
+	<option value="cellule">cellules</option>
+	<option value="mediev">moyen-&acirc;ge</option>
+	<option value="cool">new age</option>
+	<option value="aop2">aop2</option>
+</select>
 </form>
 <form name="charg" method="GET" action="editeurcampagnes.php"><!-- style="display:none;"-->
 Charger une mission existante : <input type="text" name="c" value="<?php echo (array_key_exists("c",$_GET)?$_GET["c"]:0); ?>" style="width:30px" /> / 

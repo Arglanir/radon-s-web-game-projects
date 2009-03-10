@@ -16,7 +16,8 @@ X			g demande de grille,
 X			m mise à jour joueur,
 X			nvp nouveau mot de passe,
 X			autrejoueur	ajout d'un nouveau joueur, (paramètres POST)
-X			s supprimer la partie)
+X			s supprimer la partie
+			encore recommencer une partie de même décor, mêmes paramètres)
 		x	abscisse de l'endroit joué
 		y	ordonnée de l'endroit joué
 		k	si a=m, joueur dont on veut connaître la dernière action
@@ -94,7 +95,7 @@ if ($joueurAppelant == "admin"){
 	if (strlen($partie->joueur[$joueurAppelant]->mdp) > 3){
 		if (!array_key_exists("pw",$_GET))
 			lancerErreur("Mot de passe joueur requis","Login joueur");
-		if (md5($_GET["pw"]) == $partie->joueur[$joueurAppelant]->mdp)
+if (md5($_GET["pw"]) == $partie->joueur[$joueurAppelant]->mdp)//A FAIRE : remplacer par un strcmp
 			lancerErreur("Mot de passe joueur incorrect","Login joueur");	
 	}
 }
@@ -111,7 +112,15 @@ if ($action == "nvp" && is_int($joueurAppelant)){
 	if (!array_key_exists("k",$_GET))
 		lancerErreur("Nouveau mot de passe requis","Changement de mot de passe joueur");
 	$partie->joueur[$joueurAppelant]->mdp = md5($_GET["k"]);
+	$partie->enregistrerXML($fichierPartie);
 	envoyerReponse("<action type=\"changement de mot de passe\" traitee=\"oui\" nouveaumotdepasse=\"".$_GET["k"]."\" />");
+}
+
+//recommencement de la partie
+if ($action == "encore"){// && is_int($joueurAppelant)
+	$partie->nouvelle();
+	$partie->enregistrerXML($fichierPartie);
+	envoyerReponse("<action type=\"red&amp;eacute;marrage de la partie\" traitee=\"oui\" />");
 }
 
 //mise à jour du client

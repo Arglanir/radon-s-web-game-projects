@@ -1,4 +1,5 @@
 var serveur = "serveur.php";
+//alert(typeof serveur);
 
 //arguments de l'appel de la page
 var bouh = location.search.substring(1,location.search.length).split(unescape("%26"));//on enlève le ? et on sépare avec les &
@@ -6,9 +7,8 @@ var tableauArguments = new Array();
 tableauArguments["offline"] = 0;
 for(var i=0;i<bouh.length;i++){
    var temp = bouh[i].split("=");
-    tableauArguments[temp[0]]=unescape(temp[1]);
+    tableauArguments[temp[0]]=unescape(typeof temp[1] != "undefined"?temp[1]:true);
 }
-
 
 function createXHR() {
 
@@ -106,24 +106,27 @@ function lecteurXML(atester){
 	}
 	
 	this.asXML = function (){//transforme en string
+		var chaine = "";
 		try{
 			var serializer = new XMLSerializer();
-            return serializer.serializeToString(this.doc);
+            chaine = serializer.serializeToString(this.doc);
 		}
 		catch(e){
 			try{
 				var xmlSerializer = document.implementation.createLSSerializer();
-                return xmlSerializer.writeToString(this.doc);
+                chaine = xmlSerializer.writeToString(this.doc);
 			}
 			catch(e){
 			try{
-				return this.doc.xml;
+				chaine = this.doc.xml;
 			}
 			catch(e){
 				return false;
 			}
 			}
 		}
+		chaine = chaine.replace(/>/g,'>\n');//pour une meilleure formation
+		return chaine;
 	}
 	
 	if (atester){
@@ -380,7 +383,7 @@ function envoieFormulaire(tableauArgsGET,formulaire,callback){
 	communiquePOST(tableauArgsGET,tableauPOST,callback);
 }
 
-//autre fonctions de calcul répétitif
+//autres fonctions de calcul répétitif
 function entre(avant,puis,ensuite){//renvoie vrai si ils sont dans l'ordre
 	return (avant<=puis) && (puis<=ensuite);
 }
@@ -395,6 +398,14 @@ function mettreEntre(nombre,base){//fonction permettant le modulo
 
 function distN0(a,b){return Math.max(Math.abs(a),Math.abs(b))+(typeof multiplicateur == "undefined"?0.1:multiplicateur)*Math.min(Math.abs(b),Math.abs(b));}
 
+function melanger(tableau){
+	for (var i in tableau){
+		var i2 = Math.floor(Math.random()*tableau.length);
+		var temp = tableau[i];
+		tableau[i] = tableau[i2];
+		tableau[i2] = temp;
+	}
+}
 
 //la classe de partie
 function Partie(){
@@ -411,6 +422,7 @@ function Partie(){
 	this.params = false;//reste un DOMNode <parametrescampagne>...</parametrescampagne>
 	
 	this.fromXML = function(Xpartie){
+		if (typeof Xpartie != "object") return false;
 		var partie = new Partie();
 		partie.demarree = (Xpartie.getAttribute("demarree")=="1");
 		partie.noTour = parseInt(Xpartie.getAttribute("notour"));
@@ -800,6 +812,7 @@ function PlateauDeJeu() {
 	}
 
 	this.getCase = function (x, y){
+		if (this.partie.options.quelTypeBord() == 2) return this.plateau[mettreEntre(y,this.tailleY)][mettreEntre(x,this.tailleX)];
 		if (x>=0 && x<this.tailleX && y>=0 && y<this.tailleY) return this.plateau[y][x];
 		else return false;
 	}
@@ -966,6 +979,7 @@ function PlateauDeJeu() {
 	this.purifieTotalement = function (afficher,joueurEnCours,profondeur){
 		if (typeof profondeur == "undefined") profondeur=0;
 		if (profondeur>=this.partie.options.quelleProfondeur()){
+			this.RAZ();
 			return true;
 		} else {
 			changements = this.purifie(joueurEnCours);
@@ -1038,16 +1052,17 @@ function PlateauDeJeu() {
 	}
 	
 	this.yaGagnant = function (){//regarde s'il n'y a qu'un type de joueur sur la carte
-		var joueursRestants = new Array();var gagnant = 0;
+		var gagnant = 0;
 		for (var x=0;x<this.tailleX;x++) for (var y=0;y<this.tailleY;y++){
 			var j = this.getCase(x,y).getJoueur();
 			var c = this.getCase(x,y).getCellules();
 			if (c>0 && j>0) {
-				joueursRestants[j] = 1; var gagnant = j;
-				if (joueursRestants.length>=2) return false;
+				if (gagnant != 0 && j != gagnant)
+					return false;
+				else 
+					gagnant = j;
 			}
 		}
-		if (joueursRestants.length>=2) return false;
 		return j;
 	}
 	this.RAZ = function (){//remet à zéro les cellules, prêts à une nouvelle purification
@@ -1158,13 +1173,14 @@ function UneCase(){
 		this.partie.joueurEnCours = 1;
 	}
 	this.decorAjouter1Cellule = function decorAjouter1Cellule(){//en fonction du décor lors du jeu d'un joueur
+		var nb = 1;
 		switch(this.decor){
 			case 3: return false;//pas le droit de jouer là
 			case 1: if (this.getCellules() == 0 || this.presquePreteAExploser()) return false;//pas le droit non plus
 			case 2: if (!this.utilisee && this.numTourUtilisee != this.partie.noTour+"-"+this.partie.joueurEnCours){
-				this.numTourUtilisee = this.partie.noTour+"-"+this.partie.joueurEnCours;
+				//this.numTourUtilisee = this.partie.noTour+"-"+this.partie.joueurEnCours;
 				this.utilisee = true;
-				if (this.decor == 2) this.addCellules(2);
+				if (this.decor == 2) this.addCellules(1);
 				nb--;
 			}
 			case 0:

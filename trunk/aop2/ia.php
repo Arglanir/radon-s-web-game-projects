@@ -15,8 +15,8 @@ function tempsRestant(){
 	$la = microtime(true);
 	return 30-$la+$debut;
 }
-tempsRestant();
-function melanger(&$unTableau){
+tempsRestant();//lance le chrono
+function melanger(&$unTableau){//comme on n'a pas le temps de parcourir tout l'arbre
 	$temp = NULL;$longueur = count($unTableau);
 	foreach($unTableau as $key => $value){
 		$key2 = rand(0,$longueur-1);
@@ -49,6 +49,8 @@ $_GET["pw"] = md5mdpIA;
 $_GET["x"] = 0;
 $_GET["y"] = 0;
 
+$nombreDeNoeuds = 0;
+
 function vaJouerAvant($joueurEnCours,$joueurConsidere,$joueurApres,$nbJoueurs){
 	if ($joueurApres<$joueurEnCours) $joueurApres += $nbJoueurs;
 	if ($joueurConsidere<$joueurEnCours) $joueurConsidere += $nbJoueurs;
@@ -57,7 +59,9 @@ function vaJouerAvant($joueurEnCours,$joueurConsidere,$joueurApres,$nbJoueurs){
 }
 
 function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la position pour un joueur venant de jouer
-	global $partie;
+	global $partie, $nombreDeNoeuds;
+
+	$nombreDeNoeuds++;
 	
 	$casesPretesAExploser = 0;
 	$casesMenacees = 0;
@@ -72,7 +76,7 @@ function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la
 	for ($x=0;$x<$plateau->tailleX;$x++){
 		for ($y=0;$y<$plateau->tailleY;$y++){
 			$c = $plateau->getCase($x,$y);
-			if ($plateau->peutJouerEn($x,$y,$joueur)){
+			if ($c->getJoueur()==$joueurIA){
 				$cellules += ($nb = $c->getCellules());
 				if ($nb==0) $casesMenacees += 1;
 				if ($nb>0) $casesControlees += 1;
@@ -100,7 +104,7 @@ function heuristique($plateau,$joueur,$joueurIA){//renvoie un nombre évaluant la
 	//$resultat += -5*$casesASoiMenacees;
 	//$resultat += 5*$casesMenacees;
 	//$resultat += 2*$casesControlees;
-	$resultat += 2*$casesPretesAExploser;
+	//$resultat += 2*$casesPretesAExploser;
 	
 	return $resultat;
 }
@@ -122,10 +126,10 @@ function descente($plateau,$joueur,$joueurIA,$profondeurMax,$profondeur=0,$alpha
 		$plateau2->purifieTotalement($joueur,$partie->noTour);
 		$g = $plateau2->yaGagnant();
 		if ($g){
-			if ($g==$joueurIA && $noeudMax) $evaluationPositions[$key] = 100000;
-			else if ($g!=$joueurIA && !$noeudMax) $evaluationPositions[$key] = -100000;
+			if ($g==$joueurIA) $evaluationPositions[$key] = 100000;
+			else if ($g!=$joueurIA) $evaluationPositions[$key] = -100000;
 		} else {
-			if ($profondeur >= $profondeurMax || tempsRestant()<3)
+			if ($profondeur >= $profondeurMax || tempsRestant()<3)//on arrête à caus du temps
 				$evaluationPositions[$key] = heuristique($plateau2,$joueur,$joueurIA);
 			else
 				$evaluationPositions[$key] = descente($plateau2,mettreEntre($joueur,$nbJoueurs)+1,$joueurIA,$profondeurMax,$profondeur+1,$alpha,$beta);
@@ -166,6 +170,10 @@ else {
 	$_GET["x"] = $lActionEn[0];
 	$_GET["y"] = $lActionEn[1];
 }
+
+$f = fopen("ia.log","a");
+fwrite($f,$nombreDeNoeuds." noeuds parcourus.\n");
+fclose($f);
 
 //echo $_GET["x"]." ".$_GET["y"];
 

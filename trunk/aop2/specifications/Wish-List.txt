@@ -17,6 +17,7 @@ Wish:
 	c'est juste un title, ça peut être pratique pour les débutants
 	ah et aussi firefox envoie un warning quand il n'y a pas de title... donc c'est mieux pour débugger dans la console
 - Replay button pour voir les dernières actions
+	euh... peut-être qu'avec le nouveau système ce sera possible
 
 Cédric :
 - client avec un meilleur objet plus facile d'utilisation (pour faire les IA perso par exemple)
@@ -40,4 +41,6 @@ X sur les images, avoir un endroit où le nombre de cellules est affiché
 		- campagne cellulaire du début de la vie
 		- campagnes militaires
 		- campagnes population moyen-âge
-- option de non-création de cellules (on enlève une cellule plus éloignée)
+	- campagnes à plusieurs joueurs
+	- base de données de joueurs
+X option de non-création de cellules (on enlève une cellule plus éloignée) - seulement pour les campagnes

@@ -91,7 +91,7 @@ function envoyerReponse($reponse_corps_xml){
 	echo "<reponse>\n".utf8_encode($reponse_corps_xml)."\n</reponse>";die();
 }
 function lancerErreur($raison_erreur,$ce_qui_etait_tente=false){
-	envoyerReponse('<erreur raison="'.addslashes($raison_erreur).'" origine="'.addslashes($ce_qui_etait_tente?$ce_qui_etait_tente:"").'" />');
+	envoyerReponse('<erreur raison="'.htmlentities(addslashes($raison_erreur)).'" origine="'.htmlentities(addslashes($ce_qui_etait_tente?$ce_qui_etait_tente:"")).'" />');
 }
 
 
