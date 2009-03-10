@@ -417,16 +417,16 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	//argument : 0 non jouable, 1 jouable, 2 chateau, 254 non jouable joueur externe 255 non jouable gagnant
 	var mettreLesOnload = true;
 	var nGagnant = this.existeGagnant();
-	if (nGagnant==tableauArguments["j"] && !popupfinaffichee){
+	if (nGagnant==tableauArguments["j"] && !popupfinaffichee && this.params){
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													this.params.getAttribute("infosucces")+"<br />"+
 													(this.params.getAttribute("suivante") != "fin" ? 
-														"<a href='#' onclick=\"continuerCampagne(leJeu);\">Mission suivante</a>" :
+														"<a href='#' onclick=\"if (this.href='#'){var lien=continuerCampagne(unJeu);this.innerHTML='Si la partie ne s\\'affiche pas, cliquez ici d\\'ici quelques secondes.';this.href=lien;return false;}\">Mission suivante</a>" :
 													"Campagne termin&eacute;e ! F&eacute;licitations !<br />"+
 														"<a href='#' onclick=\"supprimerPartie();\">Revenir &agrave; l'accueil</a>");
 		document.getElementById("popupcampagne").style.display = "block";
 		popupfinaffichee = true;
-	} else if (nGagnant && !popupfinaffichee){
+	} else if (nGagnant && !popupfinaffichee && this.params){
 		document.getElementById("interieurpopup").innerHTML = "<h3>"+this.params.getAttribute("titre")+"</h3>"+
 													"Dommage ! Tu feras mieux la prochaine fois..."+"<br />"+
 													"<a href='#' onclick=\"recommencer(unJeu);\">Recommencer</a>";
@@ -599,7 +599,7 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
 		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
-	chaineHTML += "<input type='button' value='Recharger le jeu' onclick='getJeuXML();' title='Si tu penses que le jeu est coincé dans ton client' />";
+	chaineHTML += "<input type='button' value='Recharger le jeu' onclick='tableauArguments.synchroserveur=true;getJeuXML();tableauArguments.synchroserveur=false;' title='Si tu penses que le jeu est coincé dans ton client' />";
 	
 	chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
@@ -841,6 +841,8 @@ function recommencer(leJeu){
 	debug(lien);debug(framecom);
 	supprimerPartie(false);
 	setTimeout("framecom.src='"+lien+"';",2000);
+	setTimeout("location.replace('"+lien+"');",5000);
+	return lien;
 }
 function continuerCampagne(leJeu){
 	if (!leJeu.params) return false;
@@ -850,6 +852,8 @@ function continuerCampagne(leJeu){
 	debug(lien);debug(framecom);
 	supprimerPartie(false);
 	setTimeout("framecom.src='"+lien+"';",2000);
+	setTimeout("location.replace('"+lien+"');",5000);
+	return lien;
 }
 function editer(leJeu){
 	var lien = "campagnes/editeurcampagnes.php?c="+
@@ -976,7 +980,7 @@ function traiterOuJoue(noJoueur,reponse,fonctionALancer){//fonction de traitemen
 	var tabReponse = new Array();
 	tabReponse["a"] = a;tabReponse["x"] = x;tabReponse["y"] = y;tabReponse["k"] = k;tabReponse["n"] = n;
 	if (fonctionALancer != undefined)
-		fonctionALancer(tabReponse);
+		fonctionALancer(tabReponse);
 }
 
 function quiJoue(fonctionALancer){// demande au serveur qui est en train de jouer
@@ -1217,7 +1221,7 @@ function debug(chaine){
 <div id="debug">
 
 </div>
-<iframe id="framecom" name="framecom"></iframe><!-- style="display:none;" -->
+<iframe id="framecom" name="framecom" style="display:none;"></iframe><!-- -->
 <div id="comm">
 
 </div>

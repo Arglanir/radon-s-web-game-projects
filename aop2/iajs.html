@@ -1,0 +1,363 @@
+<html>
+<!--
+Paramètres GET :
+	p	numero de partie
+Optionnels :
+	j	numero du joueur joué par cette IA
+		absent, donne un conseil pour le joueur en cours
+	pw	mot de passe du joueur
+	profondeur	force la profondeur de la recherche
+	niveau	si c'est une intelligence artificielle, force la profondeur de recherche à son niveau
+	demarrer pour lancer tout de suite
+-->
+<head>
+<title>IA javascript pour AOP2</title>
+<script type="text/javascript" src="clientclasses.js"></Script>
+<script type="text/javascript" src="campagnes/md5.js"></Script>
+<script type="text/javascript"><!--
+var partie;
+var joueurIA;
+var profondeurTotale = 2;
+
+var infini = 1000000000;
+function bo(nb){
+	if (typeof nb == "object"){
+		//un tableau de tableaux
+		var ch="";
+		for (i in nb)
+			ch += " ("+nb[i].join(",")+")";
+		return ch;
+	}
+	else {
+		if (Math.abs(nb) == infini)
+			return (nb<0?"-":"")+"&infin;";
+		return ""+nb;
+	}
+}
+
+function demarrer(justeOuJouer){
+	if (typeof justeOuJouer == "undefined") justeOuJouer = false;
+	if (arreter && !justeOuJouer) return;
+	
+	//chargement de la partie
+	if (typeof tableauArguments["profondeur"] != "undefined"){
+		profondeurTotale = parseInt(tableauArguments["profondeur"]);
+	}
+	
+	lectXML = new lecteurXML();
+	var chargementOK = lectXML.chargeFichier("xaop"+tableauArguments["p"]+"bacteries.par?nocache="+Math.random());
+	if (!chargementOK) {
+		document.getElementById("comm").innerHTML = "Probl&egrave;me de chargement de fichier";
+		setTimeout("demarrer("+justeOuJouer+");",1000);
+		return false;
+	}
+	//alert(lectXML.asXML());
+	Xpartie = lectXML.doc.getElementsByTagName("partie");
+	Xpartie = Xpartie[0];
+	partie = (new Partie()).fromXML(Xpartie);
+	
+	if (!partie){
+		document.getElementById("comm").innerHTML = "Probl&egrave;me de chargement de fichier";
+		setTimeout("demarrer("+justeOuJouer+");",1000);
+		return false;
+	}
+	
+	//alert(partie.joueur[2]);
+	
+	joueurIA = partie.joueurEnCours;
+
+	if (typeof tableauArguments["j"] == 'undefined'?false:parseInt(tableauArguments["j"]) != joueurIA){
+		document.getElementById("comm").innerHTML = "Ce n'est pas à moi de jouer.";
+		setTimeout("demarrer()",500);
+		return;
+	}
+	document.getElementById("qui").innerHTML = partie.joueur[joueurIA].nom+" : ("+q.join(",")+")";
+	
+	if (justeOuJouer){
+		alert(bo(tableauNoeud.ouPeutJouer(joueurIA)));
+		return;
+	}
+	
+	if (typeof tableauArguments["j"] == 'undefined')
+		document.getElementById("comm").innerHTML = "Je vais voir o&ugrave; le joueur "+joueurIA+" peut jouer.";
+	else
+		document.getElementById("comm").innerHTML = "Je vais jouer.";
+	
+	if (typeof tableauArguments["niveau"] != "undefined"){
+		if (partie.joueur[joueurIA].isIA())
+			profondeurTotale = partie.joueur[joueurIA].niveau;
+		else 
+			profondeurTotale = parseInt(tableauArguments["niveau"]);
+	}
+	
+	setTimeout("lancer()",100);
+	
+	document.getElementById("corps").innerHTML = "Recherche lanc&eacute;e";
+}
+
+function lancer(){
+	var reponse = etudierNoeud(partie.tableauJeu,joueurIA,profondeurTotale);
+	
+	document.getElementById("corps").innerHTML = reponse[2];
+	document.getElementById("comm").innerHTML = "";
+	if (reponse[2].indexOf("Fin") >0)
+		document.getElementById("comm").innerHTML = "La fin est proche !";
+	
+	if (typeof tableauArguments["j"] != "undefined")
+		communiqueGET({
+			"p" : tableauArguments["p"],
+			"j" : tableauArguments["j"],
+			"pw" : tableauArguments["pw"],
+			"a" : "n",
+			"x" : reponse[0][0],
+			"y" : reponse[0][1]
+		},function(unXML){//ok
+			document.getElementById("jeu").innerHTML = "J'ai joué en "+reponse[0][0]+","+reponse[0][1];
+			setTimeout("demarrer()",500);
+		});
+	else {
+			document.getElementById("jeu").innerHTML = "Le joueur "+joueurIA+" peut jouer en "+reponse[0][0]+","+reponse[0][1];
+	}
+}
+
+function vaJouerAvant(joueurEnCours,joueurConsidere,joueurApres){
+	if (joueurApres < joueurEnCours) joueurApres += partie.nbJoueurs;
+	if (joueurConsidere < joueurEnCours) joueurConsidere += partie.nbJoueurs;
+	if (joueurConsidere < joueurApres) return true;
+	return false;
+}
+
+var q = new Array(0,0,0,0,1,0,0,0,0,10,0);
+for (var i=1;i<11;i++){//chargement des coefficients
+	if (typeof tableauArguments["q"+i] != "undefined"){
+		q[i] = parseInt(tableauArguments["q"+i]);
+	}
+}
+/***
+(,5,9,8,5 ,5,5,5,6,10,8) : 90% de réussite (10/11)
+(,8,6,4,10,5,2,0,1,5, 8) : 85% de réussite (6/7)
+(,8,3,4,1 ,7,4,6,0,7, 8) : 77% de réussite (7/9)
+
+(,10,6,4,6,4,2,9,9,7,0) : 100% de réussite (4/4)
+(,5,1,8,0,3,8,6,9,2,10) : 100% de réussite (3/3)
+(,7,4,4,10,6,5,0,2,2,6) : 100% de réussite (3/3)
+(,0,4,4,8,3,4,2,3,8,1) : 100% de réussite (3/3)
+(,5,9,8,5,1,5,9,7,2,10) : 75% de réussite (3/4)
+(,7,1,6,8,7,0,0,7,4,1) : 75% de réussite (3/4)
+
+(,4,9,4,1,4,9,2,1,9,2) : 80% de réussite (4/5)
+(,5,3,1,2,8,3,9,9,8,10) : 100% de réussite (5/5)
+(,4,4,5,5,10,5,2,4,6,3) : 75% de réussite (3/4)
+
+116 parties
+(,3,2,7,10,2,7,3,4,6,3) : 80% de réussite (4/5)
+(,7,2,2,5,3,4,6,2,2,5) : 80% de réussite (4/5)
+(,7,1,7,6,0,5,3,2,3,7) : 83% de réussite (5/6)
+(,3,3,3,5,5,6,4,4,3,10) : 80% de réussite (4/5)
+(,9,6,7,3,0,10,6,3,3,7) : 80% de réussite (4/5)
+(,5,1,7,10,0,5,3,1,9,7) : 80% de réussite (4/5)
+(,2,4,2,10,8,9,7,0,9,10) : 100% de réussite (5/5)
+(,0,0,7,0,6,3,4,10,7,1) : 75% de réussite (3/4)
+(,3,3,3,8,10,2,4,4,8,10) : 75% de réussite (3/4)
+(,9,6,7,3,0,10,6,3,3,7) : 75% de réussite (3/4)
+(,5,1,7,10,0,5,3,1,9,7) : 75% de réussite (3/4)
+(,3,3,4,6,4,10,3,8,6,0) : 75% de réussite (3/4)
+(,10,7,3,0,0,8,7,9,2,1) : 75% de réussite (3/4)
+(,2,4,2,10,8,9,7,0,9,10) : 100% de réussite (4/4)
+(,7,2,2,5,3,4,6,2,2,5) : 100% de réussite (4/4)
+
+100
+(,11,9,4,3,6,9,10,4,1,9) : 87% de réussite (7/8)
+(,1,2,8,6,3,7,3,2,9,8) : 80% de réussite (12/15)
+
+120
+(,4,4,6,7,6,3,3,7,3,7) : 83% de réussite (5/6)
+(,11,9,4,3,6,9,10,4,1,9) : 83% de réussite (10/12)
+
+(,10,7,3,4,0,5,9,11,8,4) : 100% de réussite (13/13)
+(,7,-2,0,6,0,11,8,1,9,1) : 80% de réussite (4/5)
+(,4,2,6,3,0,3,5,4,10,1) : 85% de réussite (6/7)
+(,7,0,1,6,0,10,5,0,10,1) : 85% de réussite (12/14)
+(,10,6,5,4,0,3,9,9,10,3) : 100% de réussite (4/4)
+(,5,-2,3,6,0,7,5,2,8,1) : 75% de réussite (6/8)
+
+437
+(,4,2,2,4,9,4,2,0,2,5) : 80% de réussite (4/5)
+(,3,8,4,3,2,5,10,6,0,0) : 77% de réussite (7/9)
+(,6,9,6,6,3,12,8,9,2,6) : 78% de réussite (11/14)
+(,8,6,6,11,8,9,1,6,8,0) : 75% de réussite (3/4)
+(,2,8,4,0,1,11,9,9,10,10) : 80% de réussite (4/5)
+(,3,10,3,8,-1,1,2,10,10,10) : 83% de réussite (5/6)
+(,0,8,10,1,2,10,2,5,10,10) : 82% de réussite (14/17)
+(,1,4,12,4,5,8,5,7,10,7) : 80% de réussite (4/5)
+
+9 : (,6,5,7,5,0,6,9,9,0,7) : 78% de réussite (15/19) : > vieux > gagnant
+
+(,5,7,1,1,-1,9,3,7,3,6) : 87% de réussite (7/8) : clone
+(,1,5,5,5,0,9,6,3,8,1) : 76% de réussite (20/26) : enfantnouveau > gagnant > vieux > gagnant > gagnant
+(,6,6,2,1,0,8,4,6,3,7) : 81% de réussite (22/27) : enfant > gagnant > gagnant > gagnant
+---
+(,1,5,5,5,0,9,6,3,8,1) : 94% de réussite (16/17) : enfantnouveau > gagnant > vieux > gagnant
+(,6,6,2,1,0,8,4,6,3,7) : 80% de réussite (17/21) : enfant > gagnant > gagnant
+
+(,6,7,3,2,-2,10,4,8,4,10) : 75% de réussite (3/4) : enfant
+(,1,9,5,3,0,1,5,4,2,6) : 75% de réussite (6/8) : enfantnouveaunouveau > vieuxnouveau
+(,1,7,4,5,0,3,3,3,7,6) : 85% de réussite (6/7) : newb > vieux > gagnant > vieux > vieux > vieuxnouveau
+(,6,7,4,3,-2,10,4,8,4,9) : 100% de réussite (4/4) : enfant
+(,7,7,4,1,1,11,4,6,4,9) : 88% de réussite (8/9) : enfant > vieux > gagnant
+(,6,6,3,3,-2,11,4,6,4,11) : 100% de réussite (3/3) : enfant
+***/
+
+function heuristique(tableauNoeud,joueurEnCours){
+	var casesPretesAExploser = 0;//q1
+	var casesAllantExploser = 0;//q2
+	var casesMenacees = 0;//q3
+	var cellules = 0;//q4
+	var casesControlees = 0;//q5
+	var casesASoiMenacees = 0;//-q6
+	var casesUnPeuMenacees = 0;//q7
+	var casesASoiUnPeuMenacees = 0;//-q8
+	var frontiereBrulante = 0;//+-q9
+	
+	var cellulesEnnemis = 0;//-q10
+	
+	var resultat = 0;
+	
+	for (var x=0;x<tableauNoeud.tailleX;x++) for (var y=0;y<tableauNoeud.tailleY;y++){
+		var c = tableauNoeud.getCase(x,y);
+		if (c.getJoueur() == joueurIA){
+			var nb = c.getCellules();
+			cellules += nb;
+			casesControlees += (nb>0?1:0);
+			casesMenacees += (nb==0?1:0);
+			casesPretesAExploser += (c.preteAExploser()?1:0);// && c.getDecor() != 1
+			casesAllantExploser += (c.vaExploser()?1:0);
+		}
+		else {
+			cellulesEnnemis += c.getCellules();
+			var joueurEnnemi = c.getJoueur();
+			for (var i=-1;i<2;i++) for (j=(i!=0?0:-1);j<(i!=0?1:2);j+=2){
+				var c2 = tableauNoeud.getCase(x+i,y+j);
+				if (!c2 || c.getCellules()==0) continue;
+				if (c2.getJoueur() == joueurIA && c2.getCellules()>0){//frontière entre joueurEnnemi et joueurIA
+					casesASoiMenacees += (c.preteAExploser() && !c2.preteAExploser()?1:0);
+					casesMenacees += (c2.preteAExploser() && !c.preteAExploser()?1:0);
+					casesASoiUnPeuMenacees += (c2.getCellules() < c.getCellules()?1:0);
+					casesUnPeuMenacees += (c2.getCellules() < c.getCellules()?1:0);
+					if (c.preteAExploser() && c2.preteAExploser()) resultat += (vaJouerAvant(joueurEnCours,joueurEnnemi,joueurIA)?-q[9]:q[9]);//$frontiereBrulante += 1;
+				}
+			}
+		}
+	}
+	if (cellules == 0) return infini;
+	if (cellulesEnnemis == 0) return infini;
+	
+	resultat += q[1] * casesPretesAExploser;
+	resultat += q[2] * casesAllantExploser;
+	resultat += q[3] * casesMenacees;
+	resultat += q[4] * cellules;
+	resultat += q[5] * casesControlees;
+	resultat += -q[6] * casesASoiMenacees;
+	resultat += q[7] * casesUnPeuMenacees;
+	resultat += -q[8] * casesASoiUnPeuMenacees;
+	//resultat += +-q[9] * frontiereBrulante;
+	resultat += -q[10] * cellulesEnnemis;
+	
+	//resultat += 1*cellules;
+	//$resultat += -5*$casesASoiMenacees;
+	//$resultat += 5*$casesMenacees;
+	//$resultat += 2*$casesControlees;
+	//resultat += 2*casesPretesAExploser;
+	return resultat;
+}
+
+var tableauEnCoursDAnalyse = null;
+var identifiant = 0;
+
+function etudierNoeud(tableauNoeud,joueurDevantJouer,profondeurRestante,alpha,beta){
+	if (typeof alpha == "undefined") alpha = -infini;
+	if (typeof beta == "undefined") beta = infini;
+	
+	var noeudMax = (joueurDevantJouer == joueurIA);
+	var tabHTML = "<table style='display:inline;font-size:100%;' border=1><tr><td>j"+joueurDevantJouer+":"+(noeudMax?"M":"m")+"</td></tr>";
+	var tabHTML2 = "";
+	var tabHTML2Hd = "<table style='display:inline;font-size:80%;'>";
+	 //style=''
+	var valeurNoeud = heuristique(tableauNoeud,joueurDevantJouer);
+	if (profondeurRestante == 0){
+		return new Array(null,valeurNoeud,tabHTML+"<td>"+bo(valeurNoeud)+"</td></tr></table>");
+	}
+	
+	var lesPositions = tableauNoeud.ouPeutJouer(joueurDevantJouer);
+	if (lesPositions.length == 0)
+		return etudierNoeud(tableauNoeud,mettreEntre(joueurDevantJouer,partie.nbJoueurs)+1,profondeurRestante,alpha,beta);
+	
+	melanger(lesPositions);
+	
+	var evalPosition = new Array();
+	var meilleurePos = lesPositions[0];
+	var meilleurEval = (noeudMax ? -infini : infini);
+	var meilleurI = 0;
+	for (var i in lesPositions){var pos = lesPositions[i];
+		plateau2 = tableauNoeud.copie();
+		plateau2.clicNormal(pos[0],pos[1],joueurDevantJouer);
+		plateau2.purifieTotalement(false,joueurDevantJouer);
+		var g = plateau2.yaGagnant();
+		var tab;
+		if (g){//feuille de jeu !
+			if (g==joueurIA) evalPosition[i] = infini;
+			else  evalPosition[i] = -infini;
+			tab = "<tr><td>Fin "+pos[0]+","+pos[1]+":"+bo(evalPosition[i])+"</td></tr>";
+		}
+		else {
+			if (arreter){
+				evalPosition[i] = heuristique(plateau2,mettreEntre(joueurDevantJouer,partie.nbJoueurs)+1);
+				tab = "<tr><td>"+pos[0]+","+pos[1]+":"+bo(evalPosition[i])+"</td></tr>";
+			}
+			else{
+				evalPosition[i] = etudierNoeud(plateau2,mettreEntre(joueurDevantJouer,partie.nbJoueurs)+1,profondeurRestante-1,alpha,beta);
+				tab = "<tr><td>"+pos[0]+","+pos[1]+":"+evalPosition[i][2]+"</td></tr>";
+				evalPosition[i] = evalPosition[i][1];
+			}
+		}
+		var valeur = evalPosition[i];
+		tabHTML2 += tab;
+		if ((!noeudMax && meilleurEval > valeur) || (noeudMax && meilleurEval < valeur)){
+			meilleurEval = valeur;
+			meilleurePos = lesPositions[i];
+			meilleurI = i;
+			meilleurTab = tab;
+		}
+		if (!noeudMax){
+			if (alpha>=valeur){
+				tabHTML2 += "<tr><td>Coupe</td></tr>";
+				break;// new Array(meilleurePos,valeur,tabHTML+"<tr><td>"+meilleurePos[0]+","+meilleurePos[1]+"</td></tr><tr><td>"+meilleurEval+"</td></tr></table>");
+			}
+			beta = Math.min(beta, valeur);
+		}
+		else {
+			if (valeur>=beta){
+				tabHTML2 += "<tr><td>Coupe</td></tr>";
+				break;// new Array(meilleurePos,valeur,tabHTML+"<td>"+valeur+"</td></tr></table>");
+			}
+			alpha = Math.max(alpha, valeur);
+		}
+	}
+	tabHTML2 = tabHTML2Hd +meilleurTab+ tabHTML2 +"</table>";//recopie au-dessus
+	tabHTML += "<tr><td>"+meilleurePos[0]+","+meilleurePos[1]+"</td></tr><tr><td>"+bo(valeurNoeud)+"&gt;"+bo(meilleurEval)+"</td></tr></table>";
+	return new Array(meilleurePos,meilleurEval,"<div style='border:solid 1px;'><div style='top:0;position:relative;display:inline;'>"+tabHTML+"</div><div style='display:inline;'>"+tabHTML2+"</div></div>");
+	return new Array(meilleurePos,meilleurEval,"<table border=1><tr><td>"+tabHTML+"</td><td>"+tabHTML2+"</td></tr></table>");
+}
+
+var arreter = true;
+//--></script>
+</head>
+<body onload="if (typeof tableauArguments['demarrer'] != 'undefined') {arreter = false;demarrer();document.getElementById('controle').style.display='none';}">
+<div id="qui"></div>
+<div id="controle"><input type="button" value="Commencer" title="" onclick="if (arreter) {arreter=false;this.value='Arr&ecirc;ter';demarrer();} else {this.value='Recommencer';arreter=true;}" />
+<input type="button" value="Ou jouer ?" onclick="demarrer(true);" title="" /></div>
+<div id="comm"></div>
+<div id="jeu"></div>
+<div id="corps"></div>
+</body>
+</html>

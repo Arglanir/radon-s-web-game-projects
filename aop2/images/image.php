@@ -180,11 +180,15 @@ $decor = 0+(array_key_exists("d",$_GET)?$_GET["d"]:0);
 $maxatteint = (array_key_exists("m",$_GET)?$_GET["m"]=="1"||$_GET["m"]=="true":false);
 $tailleattome = max(min(0+(array_key_exists("taille",$_GET)?$_GET["taille"]:3),5),1);
 
+$mettreBord = true;
 
 if ($_GET["type"] == "cellule") {
 	$fichierDeBase = "aop.png";
 } elseif ($_GET["type"] == "cool") {
 	$fichierDeBase = "aopcool.png";
+} elseif ($_GET["type"] == "aop2") {
+	$fichierDeBase = "aop2.png";
+	$mettreBord = false;
 } else {
 	$fichierDeBase = "aopmed.png";
 }
@@ -200,7 +204,7 @@ $imR2 = imagecreate ( 33 , 33 );
 //on cherche les coordonnées 
 
 //création du fond
-$src_x=34*($decor == 3?2:($decor == 2?1:($decor == 1?3:$decor)))+1;
+$src_x=34*($decor == 3?2:($decor == 2?1:($decor == 1?3:$decor)));
 $src_y=0;
 imagecopy ( $imR , $imB , 0 , 0 , $src_x , $src_y , 33 , 33 );
 /*
@@ -251,14 +255,16 @@ if (!$chateau && $nombre>0){//pas de chateau
 if ($nombre>0)	imagecopymerge($imR, $imR2, 0, 0, 0, 0, 33, 33, 100);
 
 //dessin des bords
-$coulbord = array(0,0,0);$tailleimage = 33;
-if ($dernier) $coulbord = array($rouge, $vert, $bleu);
-$coulbord = imagecolorallocate($imR, $coulbord[0], $coulbord[1], $coulbord[2]);
-for ($i=0;$i<5;$i++){
-	imagesetpixel($imR, $tailleimage-1, $i, $coulbord);
-	imagesetpixel($imR, $tailleimage-1-$i, $tailleimage-1, $coulbord);
-	imagesetpixel($imR, $tailleimage-1, $tailleimage-1-$i, $coulbord);
-	imagesetpixel($imR, $i, $tailleimage-1, $coulbord);
+if ($mettreBord){
+	$coulbord = array(0,0,0);$tailleimage = 33;
+	if ($dernier) $coulbord = array($rouge, $vert, $bleu);
+	$coulbord = imagecolorallocate($imR, $coulbord[0], $coulbord[1], $coulbord[2]);
+	for ($i=0;$i<5;$i++){
+		imagesetpixel($imR, $tailleimage-1, $i, $coulbord);
+		imagesetpixel($imR, $tailleimage-1-$i, $tailleimage-1, $coulbord);
+		imagesetpixel($imR, $tailleimage-1, $tailleimage-1-$i, $coulbord);
+		imagesetpixel($imR, $i, $tailleimage-1, $coulbord);
+	}
 }
 
 header('Content-type: image/png');

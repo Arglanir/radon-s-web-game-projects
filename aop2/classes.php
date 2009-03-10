@@ -70,9 +70,30 @@ class Partie {
 	}
 	
 	function nouvelle(){//en fonction des données POST
-	
-	// A FAIRE, copier sur Mikaël
 		
+	// A FAIRE, copier sur Mikaël
+		//RAZ du tableau
+		for ($x = 0;$x < $this->tableauJeu->tailleX; $x++)	for ($y = 0;$y < $this->tableauJeu->tailleY; $y++){
+			$c = $this->tableauJeu->getCase($x,$y);
+			$c->setJoueur(0);
+			$c->setCellules(0);
+			$c->setChateau(0);
+			//on ne touche pas au décor
+		}
+		$this->noTour = 0;
+		$this->gagnant = 0;
+		$this->joueurEnCours = rand(1,$this->nbJoueurs);
+		//positionnement des joueurs
+		$aide = new Creajeu(false);
+		$aide->x = $this->tableauJeu->tailleX;
+		$aide->y = $this->tableauJeu->tailleY;
+		$aide->partie = $this;
+		$aide->opt_type_bords = $this->options->quelTypeBord();
+		$lesNouvellesPos = $aide->positionnementJoueurs();
+		$this->tableauJeu->metsLesJoueurs($lesNouvellesPos);
+		for ($j=1;$j <= $this->nbJoueurs;$j++){
+			$this->joueur[$j]->derniereAction = new Action("n",$lesNouvellesPos[$j][0],$lesNouvellesPos[$j][1]);
+		}
 	}
 	
 	function finDePartie(){
@@ -581,7 +602,7 @@ class PlateauDeJeu {
 		return $leNouveau;
 	}
 	function getCase($x, $y){
-		//echo "<br />".var_dump($x)." ".var_dump($y);
+		if ($this->options->quelTypeBord()==2) return $this->plateau[mettreEntre($y,$this->tailleY)][mettreEntre($x,$this->tailleX)];
 		if ($x>=0 && $x<$this->tailleX && $y>=0 && $y<$this->tailleY) return $this->plateau[$y][$x];
 		else return false;
 	}
