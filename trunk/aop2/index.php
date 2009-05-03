@@ -188,26 +188,6 @@ function metsLesIA(jusqua,niveau,debut){
 		</div> 
 	</div> 
 	<div id="content">
-		<div id="campagnes" class="onglet" style="width: 400px;display:none;">
-			<h2><a href="#" onclick="changerAffichage('campagnes');return false;" style="text-decoration:none;">&gt; Campagnes</a></h2>
-			<form name="camp" action="creajeucampagne.php" target="framecreation">
-				Nom : <input type="text" name="joueur" /> | <?php echo addSelectOption(
-array("text" => "Couleur",
-	"idname" => "couleur",
-	"options" => $GLOBALS["color_array"],
-	"callback" => "document.camp.joueur.style.backgroundColor = '#'+this.value;",//"changecolor(".$i.")",
-	"table" => false,
-	"default_index" => 0,
-	"saut_ligne" => false,
-	"color" => True
-),false); ?><br />
-				<input type="hidden" name="m"/><input type="hidden" name="c"/><input type="hidden" name="n" value="0"/>
-				<!--input type="hidden" name="noredirection"/-->
-				<!-- ajouter les campagnes ici -->
-				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
-				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=2;document.camp.m.value='0001';document.camp.submit();" value="Campagne 2" title="Lancer la campagne" type="button" class="btn" />
-			</form>
-		</div>
 	
 		<div id="parties" class="onglet" style="width: 350px;">
 			<h2><a href="#" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>
@@ -374,7 +354,7 @@ array("text" => "Couleur",
 			<!--center><input type="button" class="btn" onclick="lancerPopupJeuReseau()" value="Lancer une partie réseau" /></center-->
 			</form>
 		</div>		
-
+		
 <script type="text/javascript"><!--
 /** pour lancer le popup de création de partie réseau **/
 function lancerPopupJeuReseau(){
@@ -422,6 +402,27 @@ function fermePopupReseau(){
 	</table>
 </div>
 
+		<div id="campagnes" class="onglet" style="width: 400px;display:none;">
+			<h2><a href="#" onclick="changerAffichage('campagnes');return false;" style="text-decoration:none;">&gt; Campagnes</a></h2>
+			<form name="camp" action="creajeucampagne.php" target="framecreation">
+				Nom : <input type="text" name="joueur" /> | <?php echo addSelectOption(
+array("text" => "Couleur",
+	"idname" => "couleur",
+	"options" => $GLOBALS["color_array"],
+	"callback" => "document.camp.joueur.style.backgroundColor = '#'+this.value;",//"changecolor(".$i.")",
+	"table" => false,
+	"default_index" => 0,
+	"saut_ligne" => false,
+	"color" => True
+),false); ?><br />
+				<input type="hidden" name="m"/><input type="hidden" name="c"/><input type="hidden" name="n" value="0"/>
+				<!--input type="hidden" name="noredirection"/-->
+				<!-- ajouter les campagnes ici -->
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=2;document.camp.m.value='0001';document.camp.submit();" value="Campagne 2" title="Lancer la campagne" type="button" class="btn" />
+			</form>
+		</div>
+		
 		<div id="regles" class="onglet" style="width: 600px; display: none;">
 			<h2><a href="#" onclick="changerAffichage('regles');return false;" style="text-decoration:none;">&gt; R&egrave;gles</a></h2>
 			<h3>Introduction</h3>
