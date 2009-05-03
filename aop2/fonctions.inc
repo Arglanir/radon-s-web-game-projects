@@ -62,7 +62,7 @@ function distN0($a,$b,$multiplicateur=0.1){return max(abs($a),abs($b))+$multipli
 
 //renvoie une chaine contenant l'URL du client pour le joueur
 function getUrlJoueur($numero_partie, $numero_joueur, $si_mot_de_passe=false, $mot_de_passe="") {
-	$url = "client.html?j=".$numero_joueur."&p=".$numero_partie;
+	$url = "index.php?comp=client&j=".$numero_joueur."&p=".$numero_partie;
 	If($si_mot_de_passe) {
 		$url = $url."&pw=".$mot_de_passe;
 	}

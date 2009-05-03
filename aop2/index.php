@@ -123,14 +123,14 @@ function chargerPartiesEnCours(){
 				var nom = joueur.getAttribute('nom');
 				var numeroJ = joueur.getAttribute('numero');
 				var couleur = joueur.getAttribute('couleur');
-				var lien = "client.php?j="+numeroJ+"&p="+numeroP;
+				var lien = "index.php?comp=client&j="+numeroJ+"&p="+numeroP;
 				chaineAAfficher += '<a style="color:black;background-color:#'+couleur+';" href="'+lien+'">'+nom+'</a> ';
 			}
 			chaineAAfficher += '<span id="action-'+numeroP+'"><input type="button" value="Entrer" onclick="sajouter2(\''+numeroP+'\');" /></span>'+(nExistaitPas?"</b>":"")+'<br />';
 		}
 		if (partiesCachees){
 			chaineAAfficher += partiesCachees+" autres parties cachées.";
-			chaineAAfficher += "<form method=\"GET\" action=\"client.php\"><h3>Aller dans une partie non affichée</h3>\n";
+			chaineAAfficher += "<form method=\"GET\" action=\"index.php?comp=client\"><h3>Aller dans une partie non affichée</h3>\n";
 			chaineAAfficher += "<label>Num&eacute;ro partie :</label><input type=\"text\" name=\"p\" value=\"0000000\" onfocus=\"if (this.value='0000000') this.value='';\" /><br />";
 			chaineAAfficher += "<label>Num&eacute;ro du joueur :</label><select name=\"j\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option><option value=\"7\">7</option><option value=\"8\">8</option><option value=\"9\">9</option></select>";
 			chaineAAfficher += "<br /><br />";
@@ -179,7 +179,7 @@ function metsLesIA(jusqua,niveau,debut){
 		</div>
 		<div id="menu"> 
 			<ul> 
-			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" >&or; Parties en cours</a></li>
+			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" <?php echo ($_GET['comp'] <> "client")? "style='color: #FFF;'":""; ?> >&or; Parties en cours</a></li>
 			<li><a id="menucreation" href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
 			<li><a id="menucampagnes" href="#" onclick="changerAffichage('campagnes');return false;" >&or; Campagnes</a></li> 
 			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; R&egrave;gles</a></li> 
@@ -187,9 +187,12 @@ function metsLesIA(jusqua,niveau,debut){
 			</ul> 
 		</div> 
 	</div> 
-	<div id="content">
 	
-		<div id="parties" class="onglet" style="width: 350px;">
+	<div id="content">
+		<div id="client" style="display:<?php echo ($_GET['comp'] == "client")? "visible": "none"; ?>;">
+			<?php include("client.php"); ?>
+		</div>	
+		<div id="parties" class="onglet" style="width: 350px;display:<?php echo ($_GET['comp'] == "client")? "none": "visible"; ?>;">
 			<h2><a href="#" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>
 			<?php
 			//include_once ("newjeux.php");
@@ -197,7 +200,7 @@ function metsLesIA(jusqua,niveau,debut){
 			//$lesParties->afficherParties(false);
 			?>
 			<div id="parties2">Chargement des parties en cours...</div><div id="comm"></div>
-			<form method="GET" action="client.php" style="display:none;"><h3>Aller dans une partie non affichée</h3>
+			<form method="GET" action="index.php?comp=client" style="display:none;"><h3>Aller dans une partie non affichée</h3>
 				<label>Num&eacute;ro partie :</label><input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br />
 				<label>Num&eacute;ro du joueur :</label><select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
 				<br /><br />
