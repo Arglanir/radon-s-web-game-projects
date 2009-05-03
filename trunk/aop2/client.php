@@ -592,42 +592,42 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	chaineHTML += "</td></tr></table><br />";
 	
 	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==1)
-		chaineHTML += "<input type='button' value='D&eacute;marrer' onclick='demarree=1;this.style.display=\"none\";unJeu.faireJouerSuivant();' />";
+		chaineHTML += "<input type='button' class='btn' value='D&eacute;marrer' onclick='demarree=1;this.style.display=\"none\";unJeu.faireJouerSuivant();' />";
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==0)
-		chaineHTML += "<input type='button' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
+		chaineHTML += "<input type='button' class='btn' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
-		chaineHTML += "<input type='button' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
-	chaineHTML += "<input type='button' value='Recharger le jeu' onclick='tableauArguments.synchroserveur=true;getJeuXML();tableauArguments.synchroserveur=false;' title='Si tu penses que le jeu est coincé dans ton client' />";
+		chaineHTML += "<input type='button' class='btn' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
+	chaineHTML += "<input type='button' class='btn' value='Recharger le jeu' onclick='tableauArguments.synchroserveur=true;getJeuXML();tableauArguments.synchroserveur=false;' title='Si tu penses que le jeu est coincé dans ton client' />";
 	
 	chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
 		case 1:
 			if (this.options[0]) {
 				chaineHTML += "A toi de jouer : ";
-				chaineHTML += "<input type='button' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Ajout de cellule' onclick='unJeu.affiche(2)' title='' />";
+				chaineHTML += "<input type='button' class='btn' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Ajout de cellule' onclick='unJeu.affiche(2)' title='' />";
 				break;
 			}
 		case 2:
 			if (this.options[0]) {
 				chaineHTML += "A toi de jouer : ";
-				chaineHTML += "<input type='button' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Construire/d&eacute;truire un chateau' onclick='unJeu.affiche(1)' title='' />";
+				chaineHTML += "<input type='button' class='btn' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Mode : Construire/d&eacute;truire un chateau' onclick='unJeu.affiche(1)' title='' />";
 				break;
 			}
-			chaineHTML += "<input type='button' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Jouez...' title='' />";
+			chaineHTML += "<input type='button' class='btn' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Jouez...' title='' />";
 			break;
 		case 0:
-			chaineHTML += "<input type='button' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant le traitement...' onclick=\"alert('Pause')\" title='' />";
+			chaineHTML += "<input type='button' class='btn' style='background-color:#"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant le traitement...' onclick=\"alert('Pause')\" title='' />";
 			break;
 		case 255:
-			chaineHTML += "<input type='button' style='background-color:#"+this.joueurs[nGagnant][1]+"' value='"+this.joueurs[nGagnant][0]+" a gagn&eacute; !' onclick=\"alert('Bravo !')\" title='' />";
+			chaineHTML += "<input type='button' class='btn' style='background-color:#"+this.joueurs[nGagnant][1]+"' value='"+this.joueurs[nGagnant][0]+" a gagn&eacute; !' onclick=\"alert('Bravo !')\" title='' />";
 			if (nGagnant && tableauArguments["j"]==quiLanceLIA){
-				setTimeout("document.getElementById(\"comm\").innerHTML = \"<input type=\\\"button\\\" onclick=\\\"supprimerPartie()\\\" value=\\\"Supprimer la partie\\\" />\";",10000);
+				setTimeout("document.getElementById(\"comm\").innerHTML = \"<input type=\\\"button\\\" class='btn' onclick=\\\"supprimerPartie()\\\" value=\\\"Supprimer la partie\\\" />\";",10000);
 			}
 			break;
 		case 254:
-			chaineHTML += "<input type='button' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
+			chaineHTML += "<input type='button' class='btn' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
 //			chaineHTML += "<input type='button' style='background-color:"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
 //			chaineHTML += "<input type='button' BORDERCOLOR='"+this.joueurs[this.joueurEnCours][1]+"' value='Patientez pendant que "+this.joueurs[this.joueurEnCours][0]+" joue...' onclick=\"alert('Pause')\" title='' />";
 			break;
@@ -826,7 +826,7 @@ function afficheOptions(){with(this){//affiche les options en cours, pour faire 
 	}
 	chaineHTML += (this.options[3]?"Placement autour des cases &agrave; soi":"Placement sur cases adjacentes en croix")+"<br />";
 	chaineHTML += (this.options[4]?"D&eacute;veloppement unique du joueur en cours":"D&eacute;veloppement de tout le monde")+"<br />";
-	chaineHTML += (tableauArguments["j"] == quiLanceLIA?"<input type='button' onclick='supprimerPartie();' value='Supprimer la partie' />"+"<br />":"");
+	chaineHTML += (tableauArguments["j"] == quiLanceLIA?"<input type='button' class='btn' onclick='supprimerPartie();' value='Supprimer la partie' />"+"<br />":"");
 	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.params?"<a href='#' onclick=\"recommencer(unJeu);\">Recommencer la mission</a>"+"<br />":"");
 	chaineHTML += (tableauArguments["j"] == quiLanceLIA && this.joueurs[1][0] == "Testeur" && this.params?"<a href='#' onclick=\"editer(unJeu);\">Aller &agrave; l'&eacute;diteur</a>"+"<br />":"");
 	
@@ -1185,17 +1185,17 @@ function mettreOnlineOffline(){
 <div name="Joueurs" id="joueurs">
 <form name="mdp">
 <input type="text" name="motdepasse" value="Mot de passe" onfocus="this.value='';" />
-<input type="button" onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" />
-<input type="button" onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" />
+<input type="button" class='btn' onclick="chargeMP();" value="OK" title="cliquer ici pour charger le mot de passe" />
+<input type="button" class='btn' onclick="changeMP();" value="Change" title="cliquer ici pour changer le mot de passe" />
  | 
-<input type="button" name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 0;this.value='Se remettre offline';}" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />
+<input type="button" class='btn' name="mettreoffline" value="Online/offline" title="Sortir" onclick="if (tableauArguments['offline'] == 0) if (unJeu.joueurEnCours==tableauArguments['j']) {tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 1;this.value='Recharger le jeu online';} else {tableauArguments['synchroserveur']=1;getJeuXML();tableauArguments['synchroserveur']=0;tableauArguments['offline'] = 0;this.value='Se remettre offline';}" onmouseover="if (tableauArguments['offline'] == 0) {this.title='Actuellement : online'; this.value='Se mettre offline';} else {this.title='Actuellement : offline'; this.value='Recharger le jeu online';}" />
  | 
 <input type="checkbox" name="prevenu" /> Etre pr&eacute;venu quand c'est notre tour
  | 
 <input type="checkbox" name="instantane" onclick="if (this.checked) tempsEntreAffichages=10; else tempsEntreAffichages=1000;" /> D&eacute;veloppement instantan&eacute;
  | 
 Format : <select name="type"><option value="texte">texte</option><option value="atome">atomes</option><option value="cellule">cellules</option><option value="mediev">moyen-&acirc;ge</option><option value="cool">new age</option></select>
-<input type="button" value="OK" onclick="window.location.replace(window.location.href.replace(/&type=\w*/g, '').replace(/type=\w*&/g, '') +'&type='+document.mdp.type.value);">
+<input type="button" class='btn' value="OK" onclick="window.location.replace(window.location.href.replace(/&type=\w*/g, '').replace(/type=\w*&/g, '') +'&type='+document.mdp.type.value);">
 </form>
 </div>
 
@@ -1206,7 +1206,7 @@ Format : <select name="type"><option value="texte">texte</option><option value="
 <form method="GET">
 Num&eacute;ro partie : <input type="text" name="p" value="0000000" onfocus="if (this.value='0000000') this.value='';" /><br/>
 Num&eacute;ro du joueur : <select name="j"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select><br/>
-<input type="submit" value="Chercher la partie" title="clique ici" />
+<input type="submit" class='btn' value="Chercher la partie" title="clique ici" />
 </form>
 </div>
 <div name="imagesprechargees" id="imgs">
@@ -1225,6 +1225,6 @@ function debug(chaine){
 <div id="comm">
 
 </div>
-<div id="bas"><small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small></div>
+<div id="bas"><!--small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small--></div>
 </body>
 </html>
