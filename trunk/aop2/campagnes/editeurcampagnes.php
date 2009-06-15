@@ -18,7 +18,7 @@ $fichierExistant = false;
 if (array_key_exists("c",$_GET) && array_key_exists("m",$_GET)){
 	$fichierExistant = "xaop".$_GET["c"].$_GET["m"].".lvl";
 	$fichierExistant = (file_exists($fichierExistant) || array_key_exists("save",$_GET)?$fichierExistant:false);
-	if (!$fichierExistant) $messagePHP .= "Fichier inconnu";
+	if (!$fichierExistant) $messagePHP .= "Fichier inconnu, à créer";
 }
 
 if (array_key_exists("save",$_GET) && array_key_exists("fichier",$_POST)){//sauvegarde de fichier
