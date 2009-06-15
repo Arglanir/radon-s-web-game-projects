@@ -29,7 +29,7 @@ if (!file_exists($fichierSource)){lancerErreur("Mission ".$_GET["c"].$_GET["m"].
 $createur = new CreaJeu(false);
 $createur->partie = Partie::ouvrirXML($fichierSource);
 
-$createur->partie->joueur[1]->nom = $_GET["joueur"];
+$createur->partie->joueur[1]->nom = htmlentities($_GET["joueur"]);
 $createur->partie->joueur[1]->couleur = $_GET["couleur"];
 //régler le niveau de difficulté : à faire
 
