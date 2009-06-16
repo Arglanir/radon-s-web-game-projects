@@ -1,10 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
-<!--
+<?
+/***
 Age of paramecia 2
 jeu créé par Cédric Mayer
 
-jeu.html : contient une interface de jeu javascript, crée le jeu chez le client et le laisse 
+client.php : contient une interface de jeu javascript, crée le jeu chez le client et le laisse jouer.
+	inclu par index.php
 
 jouer
 	communique avec ajax avec jeu.php
@@ -23,12 +23,23 @@ jouer
 
 ********* Structure des données
 tableauArguments : tableau des arguments de la page
+*/
+$mettreLeCadreHTML = ($_GET["comp"]=="client");
+
+if (mettreLeCadreHTML){
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<!--
 
 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="Content-language" content="fr" />
 <title>AOP2</title>
+<? } else { ?>
+<div id="divDuClientDeJeu">
+<? } ?>
 <script type="text/javascript" src="clientclasses.js" ></script>
 <script type="text/javascript">
 /*** lecture des arguments de la page ***/
@@ -1165,8 +1176,16 @@ function mettreOnlineOffline(){
 }
 
 </script>
+<?
+if (mettreLeCadreHTML){
+?>
 </head>
 <body onload="main()">
+<? } else { ?>
+
+<?
+}
+?>
 <div id="infocampagne" style="display:none;"></div>
 <div style="z-index: 99; display: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%" id="popupcampagne">
 	<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 100%;"><!-- background: url('css/img/footer.jpg')-->
@@ -1226,5 +1245,16 @@ function debug(chaine){
 
 </div>
 <div id="bas"><!--small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small--></div>
+<?
+if (mettreLeCadreHTML){
+?>
 </body>
 </html>
+<? } else { ?>
+<script type="text/javascript">
+//main(); -> déplacé dans l'index
+</script>
+</div>
+<?
+}
+?>
