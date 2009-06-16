@@ -15,11 +15,8 @@ for($i=1; $i<=$max_joueurs; $i++) {
 	$array_count[$i] = $i;
 }
 
-
-
 $game_name = "Age Of Paramecia II";
 ?>
-
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
 <title><?php echo $game_name;?></title>
@@ -170,7 +167,7 @@ function metsLesIA(jusqua,niveau,debut){
 }
 </script>
 </head>
-<body onload="bodyOnLoad();chargerPartiesEnCours();">
+<body onload="bodyOnLoad();<? echo ($_GET["comp"]=="client") ?"main();" : "chargerPartiesEnCours();" ?>">
 <div id="site"> 
 	<div id="header"> 
 		<div id="bigtitle">
@@ -190,7 +187,7 @@ function metsLesIA(jusqua,niveau,debut){
 	
 	<div id="content">
 		<div id="client" style="display:<?php echo ($_GET['comp'] == "client")? "visible": "none"; ?>;">
-			<?php include("client.php"); ?>
+			<?php if ($_GET['comp'] == "client") include("client.php"); ?>
 		</div>	
 		<div id="parties" class="onglet" style="width: 350px;display:<?php echo ($_GET['comp'] == "client")? "none": "visible"; ?>;">
 			<h2><a href="#" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" style="text-decoration:none;">&gt; Parties en cours</a></h2>
