@@ -83,7 +83,7 @@ function cacherTout(){
 	document.getElementById("regles").style.display = "none";	
 }
 function changerAffichage(quoi,comment){
-	if (document.getElementById(quoi).style.display == "none") {
+	if (document.getElementById(quoi).style.display == "none" && (comment?comment != "none":true)) {
 		document.getElementById(quoi).style.display = (comment?comment:"block");
 		if (document.getElementById('menu'+quoi))
 			document.getElementById('menu'+quoi).style.color = "#FFF";
@@ -167,25 +167,26 @@ function metsLesIA(jusqua,niveau,debut){
 }
 </script>
 </head>
-<body onload="bodyOnLoad();<? echo ($_GET["comp"]=="client") ?"main();" : "chargerPartiesEnCours();" ?>">
+<body onload="bodyOnLoad();chargerPartiesEnCours();<? echo ($_GET["comp"]=="client") ?"changerAffichage('parties','none');main();" : "chargerPartiesEnCours();" ?>">
 <div id="site"> 
-	<div id="header"> 
-		<div id="bigtitle">
+	<div id="header" <? echo ($_GET["comp"]=="client") ?"style=\"height:50px;\"" : "" ?>> 
+		<div id="bigtitle" <? echo ($_GET["comp"]=="client") ?"style=\"display:none;\"" : "" ?>>
 			<h1><a href="index.php" style="text-decoration:none;"><?php echo $game_name; ?></a></h1>
 			<small>Jeu développé par <a href="http://radon222.free.fr" style="text-decoration:none;">C&eacute;dric</a>, <a href="http://meak.free.fr" style="text-decoration:none;">Mika&euml;l</a> et <a href="http://www.erwinmayer.com" style="text-decoration:none;">Erwin Mayer</a></small>
 		</div>
-		<div id="menu"> 
+		<div id="menu" <? echo ($_GET["comp"]=="client") ?"style=\"top:10px;\"" : "" ?>> 
 			<ul> 
-			<li><a id="menuparties" href="#" onclick="changerAffichage('parties');return false;" <?php echo ($_GET['comp'] <> "client")? "style='color: #FFF;'":""; ?> >&or; Parties en cours</a></li>
+			<li><a id="menuparties" href="#" onclick="chargerPartiesEnCours();changerAffichage('parties');return false;" <?php echo ($_GET['comp'] <> "client")? "style='color: #FFF;'":""; ?> >&or; Parties en cours</a></li>
 			<li><a id="menucreation" href="#" onclick="changerAffichage('creation');return false;" >&or; Cr&eacute;ation d'une partie</a></li> 
 			<li><a id="menucampagnes" href="#" onclick="changerAffichage('campagnes');return false;" >&or; Campagnes</a></li> 
 			<li><a id="menuregles" href="#" onclick="changerAffichage('regles');return false;" >&or; R&egrave;gles</a></li> 
+			<!--li><a id="menuclient" href="index.php?comp=client" >&or; Acc&egrave;s &agrave; un jeu</a></li--> 
 			<li><a id="menumerci" href="#" onclick="changerAffichage('merci');return false;" >&or; Remerciements</a></li> 
 			</ul> 
 		</div> 
 	</div> 
 	
-	<div id="content">
+	<div id="content" <? echo ($_GET["comp"]=="client") ?"style=\"top:50px;\"" : "" ?>>
 		<div id="client" style="display:<?php echo ($_GET['comp'] == "client")? "visible": "none"; ?>;">
 			<?php if ($_GET['comp'] == "client") include("client.php"); ?>
 		</div>	
