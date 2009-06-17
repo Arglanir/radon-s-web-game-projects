@@ -305,6 +305,7 @@ function purifieEtAffiche(profondeur){with(this){//fonction récursive pour purif
 
 function faireJouerSuivant(){with(this){//fait jouer les joueurs sur internet
 	document.title = "AOP2 - "+html_entity_decode(this.joueurs[this.joueurEnCours][0])+(this.joueurEnCours==tableauArguments["j"]?" !":"");
+	document.getElementById("grossecaseagauche").innerHTML = "<img src='images/status.php?c="+this.joueurs[this.joueurEnCours][1]+"&s=0' />";statutDuJoueurEnCours=0;
 	if (demarree==0){
 		document.getElementById("comm").innerHTML = "Attente du d&eacute;marrage de la partie...";
 		return;
@@ -324,6 +325,8 @@ function faireJouerSuivant(){with(this){//fait jouer les joueurs sur internet
 			setTimeout("unJeu.faireJouerSuivant()",tempsDAttenteAvantRelance);//pas encore joué
 		}else {
 			document.getElementById("comm").innerHTML ="Traitement de l'action du joueur "+unJeu.joueurEnCours;
+			document.getElementById("grossecaseagauche").innerHTML = "<img src='images/status.php?c="+unJeu.joueurs[unJeu.joueurEnCours][1]+"&s=1' />";statutDuJoueurEnCours=1;
+
 			document.getElementById("comm").innerHTML += "<br />a="+tabReponse["a"]+" x="+tabReponse["x"]+" y="+tabReponse["y"]+" k="+tabReponse["k"]+" n="+tabReponse["n"]+" <br />";
 
 			if (tabReponse["a"]=="n")
@@ -423,6 +426,7 @@ function existeGagnant(){with(this){//renvoie le numéro du joueur gagnant ! fals
 }}
 
 var popupfinaffichee = false;
+var statutDuJoueurEnCours = 0;//0 : il cherche, 1 il a joué, ça traite
 
 function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la fenêtre, jouable 0non/1oui/2chat
 	//argument : 0 non jouable, 1 jouable, 2 chateau, 254 non jouable joueur externe 255 non jouable gagnant
@@ -451,7 +455,8 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 	var statistiques = this.lesJoueurs2string();
 	//Mikaël veut que le bord de la table soit de la couleur du joueur ayant le client... Ne marche que sous Chrome !
 	var colorTable = (tableauArguments["j"]=="observateur"?"FFFFFF":statistiques[tableauArguments["j"]][0]);
-	var chaineHTML = "<table><tr><td style=\"border:solid #"+versRRGGBB(colorTable)+";\">";
+	var debutChaineHTML = "<center><table><tr>";
+	var chaineHTML = "<td style=\"border:solid #"+versRRGGBB(colorTable)+";\">";
 	chaineHTML += (tableauArguments["type"]=="texte"?"<table cellpadding=\"0\" cellspacing=\"0\" >":"");
 	for(var y=0;y<this.tailleY;y++){
 		chaineHTML += (tableauArguments["type"]=="texte"?"<tr>":"");
@@ -560,59 +565,63 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		chaineHTML += (tableauArguments["type"]=="texte"?"</tr>\n":"<br />\n");
 	}
 	chaineHTML += (tableauArguments["type"]=="texte"?"</table>":"");
-	chaineHTML += "</td><td>";
+	chaineHTML += "</td>";
 	
+	var tableauStatistiquesChaine = "";// /!\ pas de <td commençant>
 	//Statistiques présentées sur un tableau
-	chaineHTML += "<table border=1>";
-	chaineHTML += "<tr>";
-	chaineHTML += "<td border=0>&nbsp;</td>";
-	chaineHTML += "<td>Cellules</td>";
-	chaineHTML += "<td>Contr&ocirc;le</td>";
-	chaineHTML += "<td>Explosables</td>";
-	chaineHTML += "<td>Menaces</td>";
-	chaineHTML += "</tr>";
+	tableauStatistiquesChaine += "<table border=1>";
+	tableauStatistiquesChaine += "<tr>";
+	tableauStatistiquesChaine += "<td border=0>&nbsp;</td>";
+	tableauStatistiquesChaine += "<td>Cellules</td>";
+	tableauStatistiquesChaine += "<td>Contr&ocirc;le</td>";
+	tableauStatistiquesChaine += "<td>Explosables</td>";
+	tableauStatistiquesChaine += "<td>Menaces</td>";
+	tableauStatistiquesChaine += "</tr>";
 	for (var n = 1; n<=this.nbJoueurs;n++){
-		chaineHTML += "<tr><td style=\"background-color:#"+versRRGGBB(statistiques[n][0])+"\">";
+		tableauStatistiquesChaine += "<tr><td style=\"background-color:#"+versRRGGBB(statistiques[n][0])+"\">";
 		//chaineHTML += "<p>";
-		chaineHTML += (this.joueurEnCours == n?"&gt;":"");
+		tableauStatistiquesChaine += (this.joueurEnCours == n?"&gt;":"");
 		//chaineHTML += "<span style=\"background-color:"+statistiques[n][0]+"\">";
-		chaineHTML += (tableauArguments["j"] == n?"<b>":"");		
-		chaineHTML += statistiques[n][1]+"";//nom
+		tableauStatistiquesChaine += (tableauArguments["j"] == n?"<b>":"");		
+		tableauStatistiquesChaine += statistiques[n][1]+"";//nom
 		//if(n != tableauArguments["j"]) {
 		//	chaineHTML += "</span>";
 		//}
 		if (statistiques[n][2]>0)//joueur spécial
-			chaineHTML += (statistiques[n][2]==1?" (IA)":" (NET)");
-		chaineHTML += (tableauArguments["j"] == n?" (moi)</b>":"");
+			tableauStatistiquesChaine += (statistiques[n][2]==1?" (IA)":" (NET)");
+		tableauStatistiquesChaine += (tableauArguments["j"] == n?" (moi)</b>":"");
 		
-		chaineHTML += "</td><td style=\"text-align:center;\">";
+		tableauStatistiquesChaine += "</td><td style=\"text-align:center;\">";
 		//chaineHTML += (this.joueurEnCours == n?"</u>":"");
-		chaineHTML += " <span title='Nombre de cellules'>"+statistiques[n][3]+"</span> ";
-		chaineHTML += "</td><td style=\"text-align:center;\">";
-		chaineHTML += "<span title='Cases contr&ocirc;l&eacute;es'>"+statistiques[n][4]+"</span> ";
-		chaineHTML += "</td><td style=\"text-align:center;\">";
-		chaineHTML += "<span title='Cases pr&ecirc;tes à exploser'>"+statistiques[n][5]+"</span> ";
-		chaineHTML += "</td><td style=\"text-align:center;\">";
-		chaineHTML += "<span title='Cases menac&eacute;es'>"+statistiques[n][6]+"</span>";
+		tableauStatistiquesChaine += " <span title='Nombre de cellules'>"+statistiques[n][3]+"</span> ";
+		tableauStatistiquesChaine += "</td><td style=\"text-align:center;\">";
+		tableauStatistiquesChaine += "<span title='Cases contr&ocirc;l&eacute;es'>"+statistiques[n][4]+"</span> ";
+		tableauStatistiquesChaine += "</td><td style=\"text-align:center;\">";
+		tableauStatistiquesChaine += "<span title='Cases pr&ecirc;tes à exploser'>"+statistiques[n][5]+"</span> ";
+		tableauStatistiquesChaine += "</td><td style=\"text-align:center;\">";
+		tableauStatistiquesChaine += "<span title='Cases menac&eacute;es'>"+statistiques[n][6]+"</span>";
 		//if(n == tableauArguments["j"]) {
 		//	chaineHTML += "</span>";
 		//}
 		//chaineHTML += "</p>";
-		chaineHTML += "</td><tr>";
+		tableauStatistiquesChaine += "</td><tr>";
 	}
-	chaineHTML += "</td></tr></table><br />";
+	tableauStatistiquesChaine += "</td></tr></table>";
 	
 	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==1)
-		chaineHTML += "<input type='button' class='btn' value='D&eacute;marrer' onclick='demarree=1;this.style.display=\"none\";unJeu.faireJouerSuivant();' />";
+		tableauStatistiquesChaine += "<input type='button' class='btn' value='D&eacute;marrer' onclick='demarree=1;this.style.display=\"none\";unJeu.faireJouerSuivant();' />";
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==0 && this.joueurs[this.joueurEnCours][3]==0)
-		chaineHTML += "<input type='button' class='btn' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
+		tableauStatistiquesChaine += "<input type='button' class='btn' value='Pour d&eacute;marrer, jouez !' onclick='this.style.display=\"none\";' />";
 
 	if (quiLanceLIA == tableauArguments["j"] && demarree==1 && this.joueurs[this.joueurEnCours][3]==1)
-		chaineHTML += "<input type='button' class='btn' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
-	chaineHTML += "<input type='button' class='btn' value='Recharger le jeu' onclick='tableauArguments.synchroserveur=true;getJeuXML();tableauArguments.synchroserveur=false;' title='Si tu penses que le jeu est coincé dans ton client' />";
+		tableauStatistiquesChaine += "<input type='button' class='btn' value='Lancer une IA' onclick='lancerIA();' title=\"Si tu penses que l'IA n'a pas été lancée\" />";
+	tableauStatistiquesChaine += "<input type='button' class='btn' value='Recharger le jeu' onclick='tableauArguments.synchroserveur=true;getJeuXML();tableauArguments.synchroserveur=false;' title='Si tu penses que le jeu est coincé dans ton client' />";
 	
-	chaineHTML += "</td></tr></table><br />";
+	chaineHTML = debutChaineHTML + "<td id='grossecaseagauche'><img src='images/status.php?c="+this.joueurs[this.joueurEnCours][1]+"&s="+statutDuJoueurEnCours+"' /></td>"+//tableauStatistiquesChaine+
+				chaineHTML+"<td>"+tableauStatistiquesChaine+"</td></tr></table></center><br />";
+
+	//chaineHTML += "</td></tr></table><br />";
 	switch (typeJouable){
 		case 1:
 			if (this.options[0]) {
@@ -654,7 +663,6 @@ function affiche(typeJouable){with(this){//fonction qui affiche le jeu dans la f
 		document.getElementById("jeu"+zonePouvantCharger).innerHTML = chaineHTML;
 	}
 	
-
 }}
 
 var nbImagesChargeesZone = new Array(0,0,0);
