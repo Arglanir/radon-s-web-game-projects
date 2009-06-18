@@ -1,16 +1,7 @@
 #summary Wish-list
 
+The game is so awesome that no updates are requested for the moment.
+
 = Introduction =
 
 Here are some points that could be developped in AOP2.
-
-= Details =
-== Graphisms ==
-
-  * Pictures ... will greatly enhance the game.
-
-== Playability ==
-
-  * Mikaël : Increase the speed of table checking, so that if we see the other player play, we cannot get this dialog box telling us to wait (Mikaël)
-
-  * A pause button instead of dialog boxes when we click on a case ?
