@@ -1,0 +1,181 @@
+<partie nombredejoueurs="3" demarree="1" notour="1" gagnant="0" joueurencours="1">
+<joueurs>
+<joueur nom="Joueur1" numero="1" couleur="4040FF" estia="non" niveau="0" estnet="oui" mdp="0">
+<derniereaction type="n" x="8" y="5" notour="0"/>
+</joueur>
+<joueur nom="Nid des Unicellulaires" numero="2" couleur="FF0000" estia="oui" niveau="0" estnet="non" mdp="fd4f3e05ea95246c2efd4509222a62ea">
+<derniereaction type="n" x="5" y="6" notour="0"/>
+</joueur>
+<joueur nom="Gardiens des Unicellulaires" numero="3" couleur="FF0000" estia="oui" niveau="0" estnet="non" mdp="fd4f3e05ea95246c2efd4509222a62ea">
+<derniereaction type="n" x="7" y="9" notour="0"/>
+</joueur>
+</joueurs>
+<options>
+<option type="chateaux_actifs" valeur="1"/>
+<option type="profondeur_jeu" valeur="100"/>
+<option type="type_bords" valeur="1"/>
+<option type="ajout_diagonale" valeur="1"/>
+<option type="explosion_joueur" valeur="0"/>
+<option type="augmentation_matiere" valeur="1"/>
+</options>
+<tableaudejeu taillex="12" tailley="11">
+<ligne y="0">
+<case x="0" y="0" decor="3" joueur="0" cellules="0" max="0" chateau="0"/>
+<case x="1" y="0" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="2" y="0" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="3" y="0" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="4" y="0" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="5" y="0" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="6" y="0" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="7" y="0" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="8" y="0" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="9" y="0" decor="0" joueur="1" cellules="2" max="3" chateau="0"/>
+<case x="10" y="0" decor="0" joueur="1" cellules="11" max="3" chateau="1"/>
+<case x="11" y="0" decor="0" joueur="1" cellules="1" max="2" chateau="0"/>
+</ligne>
+<ligne y="1">
+<case x="0" y="1" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="1" y="1" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="2" y="1" decor="0" joueur="1" cellules="3" max="4" chateau="0"/>
+<case x="3" y="1" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="4" y="1" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="5" y="1" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="6" y="1" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="7" y="1" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="8" y="1" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="9" y="1" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="1" decor="0" joueur="1" cellules="2" max="4" chateau="0"/>
+<case x="11" y="1" decor="0" joueur="1" cellules="2" max="3" chateau="0"/>
+</ligne>
+<ligne y="2">
+<case x="0" y="2" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="1" y="2" decor="2" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="2" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="3" y="2" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="4" y="2" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="5" y="2" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="6" y="2" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="7" y="2" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="8" y="2" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="9" y="2" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="2" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="11" y="2" decor="0" joueur="1" cellules="1" max="3" chateau="0"/>
+</ligne>
+<ligne y="3">
+<case x="0" y="3" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="3" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="3" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="3" y="3" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="4" y="3" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="5" y="3" decor="3" joueur="0" cellules="0" max="1" chateau="0"/>
+<case x="6" y="3" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="7" y="3" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="8" y="3" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="9" y="3" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="3" decor="2" joueur="1" cellules="2" max="4" chateau="0"/>
+<case x="11" y="3" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+</ligne>
+<ligne y="4">
+<case x="0" y="4" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="4" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="4" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="3" y="4" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="4" y="4" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="5" y="4" decor="0" joueur="2" cellules="11" max="2" chateau="1"/>
+<case x="6" y="4" decor="2" joueur="2" cellules="2" max="2" chateau="0"/>
+<case x="7" y="4" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="8" y="4" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="9" y="4" decor="0" joueur="1" cellules="1" max="4" chateau="0"/>
+<case x="10" y="4" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="11" y="4" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+</ligne>
+<ligne y="5">
+<case x="0" y="5" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="5" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="5" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="3" y="5" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="4" y="5" decor="0" joueur="2" cellules="11" max="1" chateau="1"/>
+<case x="5" y="5" decor="0" joueur="2" cellules="14" max="4" chateau="1"/>
+<case x="6" y="5" decor="0" joueur="2" cellules="1" max="3" chateau="0"/>
+<case x="7" y="5" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="8" y="5" decor="0" joueur="1" cellules="1" max="3" chateau="0"/>
+<case x="9" y="5" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="5" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="11" y="5" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+</ligne>
+<ligne y="6">
+<case x="0" y="6" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="6" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="6" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="3" y="6" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="4" y="6" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="5" y="6" decor="2" joueur="2" cellules="2" max="2" chateau="0"/>
+<case x="6" y="6" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="7" y="6" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="8" y="6" decor="0" joueur="2" cellules="3" max="3" chateau="0"/>
+<case x="9" y="6" decor="0" joueur="3" cellules="2" max="4" chateau="0"/>
+<case x="10" y="6" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="11" y="6" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+</ligne>
+<ligne y="7">
+<case x="0" y="7" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="7" decor="0" joueur="1" cellules="3" max="4" chateau="0"/>
+<case x="2" y="7" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="3" y="7" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="4" y="7" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="5" y="7" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="6" y="7" decor="0" joueur="3" cellules="10" max="2" chateau="1"/>
+<case x="7" y="7" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="8" y="7" decor="0" joueur="2" cellules="8" max="4" chateau="1"/>
+<case x="9" y="7" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="7" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="11" y="7" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+</ligne>
+<ligne y="8">
+<case x="0" y="8" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="8" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="8" decor="2" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="3" y="8" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="4" y="8" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="5" y="8" decor="3" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="6" y="8" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="7" y="8" decor="0" joueur="3" cellules="2" max="3" chateau="0"/>
+<case x="8" y="8" decor="0" joueur="3" cellules="2" max="4" chateau="0"/>
+<case x="9" y="8" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="8" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="11" y="8" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+</ligne>
+<ligne y="9">
+<case x="0" y="9" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="1" y="9" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="2" y="9" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="3" y="9" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="4" y="9" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="5" y="9" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="6" y="9" decor="0" joueur="3" cellules="2" max="3" chateau="0"/>
+<case x="7" y="9" decor="0" joueur="2" cellules="8" max="4" chateau="1"/>
+<case x="8" y="9" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="9" y="9" decor="0" joueur="0" cellules="0" max="4" chateau="0"/>
+<case x="10" y="9" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="11" y="9" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+</ligne>
+<ligne y="10">
+<case x="0" y="10" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="1" y="10" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="2" y="10" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="3" y="10" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="4" y="10" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="5" y="10" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="6" y="10" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="7" y="10" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="8" y="10" decor="0" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="9" y="10" decor="0" joueur="0" cellules="0" max="2" chateau="0"/>
+<case x="10" y="10" decor="3" joueur="0" cellules="0" max="3" chateau="0"/>
+<case x="11" y="10" decor="0" joueur="0" cellules="0" max="1" chateau="0"/>
+</ligne>
+</tableaudejeu>
+<commentaire>
+<histoire h="Tu arrives &amp;aacute; faire les membranes pour&amp;lt;br/&amp;gt;prot&amp;eacute;ger tes cellules des attaques&amp;lt;br/&amp;gt;ext&amp;eacute;rieures. Pour l&amp;#39;instant elles ne&amp;lt;br/&amp;gt;sont pas tr&amp;egrave;s stables donc fais attention.&amp;lt;br/&amp;gt;Tu as d&amp;eacute;couverts le nid rouge...Enl&amp;egrave;ve-&amp;lt;br/&amp;gt;toi tout risque d&amp;#39;attaques ult&amp;eacute;rieures !"/>
+<parametrescampagne c="v" m="0003" titre="D&amp;eacute;but de la vie 3" infosucces="Bravo ! Tu ne seras plus emb&amp;ecirc;t&amp;eacute; par ces cellules rouge !" suivante="0004" deco="cellule"/>
+</commentaire>
+</partie>
