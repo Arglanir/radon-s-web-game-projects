@@ -406,7 +406,7 @@ function fermePopupReseau(){
 		<div id="campagnes" class="onglet" style="width: 400px;display:none;">
 			<h2><a href="#" onclick="changerAffichage('campagnes');return false;" style="text-decoration:none;">&gt; Campagnes</a></h2>
 			<form name="camp" action="creajeucampagne.php" target="framecreation">
-				Nom : <input type="text" name="joueur" /> | <?php echo addSelectOption(
+				Nom : <input type="text" name="joueur" /> <!--| <?php echo addSelectOption(
 array("text" => "Couleur",
 	"idname" => "couleur",
 	"options" => $GLOBALS["color_array"],
@@ -415,12 +415,14 @@ array("text" => "Couleur",
 	"default_index" => 0,
 	"saut_ligne" => false,
 	"color" => True
-),false); ?><br />
+),false); ?>--><br /><input type="hidden" name="couleur" value="0000FF" />
 				<input type="hidden" name="m"/><input type="hidden" name="c"/><input type="hidden" name="n" value="0"/>
 				<!--input type="hidden" name="noredirection"/-->
 				<!-- ajouter les campagnes ici -->
-				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne 9" title="Lancer la campagne" type="button" class="btn" />
-				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=2;document.camp.m.value='0001';document.camp.submit();" value="Campagne 2" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=9;document.camp.m.value='0001';document.camp.submit();" value="Campagne de test" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value='v';document.camp.m.value='0001';document.camp.submit();" value="Campagne de la vie (AOP1)" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value='e';document.camp.m.value='0001';document.camp.submit();" value="Campagne d'exploration" title="Lancer la campagne" type="button" class="btn" />
+				<input onclick="document.getElementById('framecreation').style.display='block';document.camp.c.value=2;document.camp.m.value='0001';document.camp.submit();" value="Campagne de Mika&euml;l" title="Lancer la campagne" type="button" class="btn" />
 			</form>
 		</div>
 		

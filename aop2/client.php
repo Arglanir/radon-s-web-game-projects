@@ -1,4 +1,4 @@
-<?
+<?php
 /***
 Age of paramecia 2
 jeu créé par Cédric Mayer
@@ -24,22 +24,22 @@ jouer
 ********* Structure des données
 tableauArguments : tableau des arguments de la page
 */
-$mettreLeCadreHTML = ($_GET["comp"]=="client");
+$mettreLeCadreHTML = !($_GET["comp"]=="client");
 
-if (mettreLeCadreHTML){
+if ($mettreLeCadreHTML){
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <!--
-
+<?php echo $mettreLeCadreHTML; ?>
 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="Content-language" content="fr" />
 <title>AOP2</title>
-<? } else { ?>
+<?php } else { ?>
 <div id="divDuClientDeJeu">
-<? } ?>
+<?php } ?>
 <script type="text/javascript" src="clientclasses.js" ></script>
 <script type="text/javascript">
 /*** lecture des arguments de la page ***/
@@ -134,9 +134,10 @@ this.tableauCasesUtilisees = new Array();
 	//alert(Xpartie.getElementsByTagName("histoire").item(0));
 this.histoire = (Xpartie.getElementsByTagName("histoire").length>0?
 		(Xpartie.getElementsByTagName("histoire").item(0).firstChild?
-			Xpartie.getElementsByTagName("histoire").item(0).firstChild.nodeValue:false):false);
+			Xpartie.getElementsByTagName("histoire").item(0).firstChild.nodeValue:
+			Xpartie.getElementsByTagName("histoire").item(0).getAttribute("h")):false);
 this.params = false;
-	if (Xpartie.getElementsByTagName("parametrescampagne").length>0)//il y a des paramètres de campagne !
+	if (Xpartie.getElementsByTagName("parametrescampagne").length>0){//il y a des paramètres de campagne !
 		if (Xpartie.getElementsByTagName("parametrescampagne").item(0).getAttribute("titre")){//ou pas
 			this.params = Xpartie.getElementsByTagName("parametrescampagne").item(0);
 			if (this.params.getAttribute("deco")){
@@ -149,6 +150,7 @@ this.params = false;
 													"<a href='#' onclick='document.getElementById(\"popupcampagne\").style.display = \"none\";'>Commencer le jeu</a>";
 			if (tableauArguments["j"] != "observateur" && typeof tableauArguments["synchroserveur"] == undefined)
 				document.getElementById("popupcampagne").style.display = "block";
+	}
 	}
 	
 //méthodes
@@ -1184,14 +1186,14 @@ function mettreOnlineOffline(){
 }
 
 </script>
-<?
-if (mettreLeCadreHTML){
+<?php
+if ($mettreLeCadreHTML){
 ?>
 </head>
 <body onload="main()">
-<? } else { ?>
+<?php } else { ?>
 
-<?
+<?php
 }
 ?>
 <div id="infocampagne" style="display:none;"></div>
@@ -1253,16 +1255,16 @@ function debug(chaine){
 
 </div>
 <div id="bas"><!--small>&copy; C&eacute;dric & Mika&euml;l Mayer 2009 | <a href="index.php" style="text-decoration:none;">Retour &agrave; l'accueil</a></small--></div>
-<?
-if (mettreLeCadreHTML){
+<?php
+if ($mettreLeCadreHTML){
 ?>
 </body>
 </html>
-<? } else { ?>
+<?php } else { ?>
 <script type="text/javascript">
 //main(); -> déplacé dans l'index
 </script>
 </div>
-<?
+<?php
 }
 ?>

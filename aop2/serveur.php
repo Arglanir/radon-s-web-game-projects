@@ -25,18 +25,18 @@ X			s supprimer la partie
 			si a=n ou c, k=0 => ne pas traiter la requete
 			si a=nvp k=nouveau mot de passe
 	renvoie une chaîne xml
-		si a=autrejoueur (paramètres en POST)
+		si a=autrejoueur (ajout de joueur) (paramètres en POST)
 			Petit texte pour dire si ça a marché et quel est le lien vers la partie
 		si a=nvp et k=nouveau mot de passe
 			<reponse><action type=\"changement de mot de passe\" traitee="oui"/"non" nouveaumotdepasse="lenouveau" /></reponse>
 		si a=s
 			<reponse><action type=\"suppression de partie\" traitee="oui"/"non" partiesupprimee="numero" /></reponse>
-		si a=n ou a=c
+		si a=n ou a=c (k=traiter la requète ?)
 			requête possible ?, traitée ?
 			<reponse><action autorisee="oui"/"non" traitee="oui"/"non"/></reponse>
 		si a=g
 			toute la grille à jour suivant la DTD
-		si a=m
+		si a=m    (k=n° joueur ou 0)
 			derniers paramètres acceptés de : a de k, x de k et y de k et le no du tour
 			<reponse><a valeur="n"/"c" /><x valeur=x /><y valeur=y /><n valeur=noTour /><k valeur=k /></reponse>
 			ou no du joueur en cours et le no du tour
